@@ -17,13 +17,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //
 // There are a couple of tweeks to the Teensy Audio Library
 // First, to use WAVEFORM_BANDLIMIT_SAWTOOTH with the AudioSynthWaveformModulated
-// you need at least
-// Merge pull request #360 from MarkTillotson/band_limited_waveforms 
-// which PaulStroffregen committed on 5 Feb 2021, at the time of this comment was NOT in 
-// the stable release of the Teensy Audio library.
-// Second, I had to modify C:\Arduino\hardware\teensy\avr\libraries\Audio\filter_variable.cpp
-// uncommented line 42 to #define IMPROVE_HIGH_FREQUENCY_ACCURACY
-// changed constant on line 131
+// you need at least Teensyduino 1.54
+// Next, I had to modify C:\Arduino\hardware\teensy\avr\libraries\Audio\filter_variable.cpp
+//  uncommented line 42 to #define IMPROVE_HIGH_FREQUENCY_ACCURACY
+//  changed constant on line 131
 //		//if (fmult > 5378279) fmult = 5378279;
 //		if (fmult > 4205728) fmult = 4205728; // Tims hack max fmult slightly > 1.0
 //		//if (fmult > 4194303) fmult = 4194303; // Tims hack max fmult = 1.0
@@ -57,6 +54,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+//-------- paste below here Auto generated code from Audio System Design Tooll --------
 #include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
@@ -81,7 +79,7 @@ AudioEffectMultiply      mult_lfoDepthFilter3; //xy=302.5,1187.9999389648438
 AudioSynthWaveformDc     dc_breathNoiseFilter3; //xy=304.5,1151.199951171875
 AudioEffectMultiply      sq_swpflt3; //xy=315.4000549316406,1036.7997436523438
 AudioSynthWaveformDc     dc_breathLfoFilter1; //xy=396.20001220703125,635
-AudioSynthWaveformSine   sine_lfoFilter1; //xy=410.20001220703125,609
+AudioSynthWaveformSine   sine_lfoFilter1; //xy=407.20001220703125,609
 AudioMixer4              mix_breathTimeNoise; //xy=439.79998779296875,972.1999816894531
 AudioFilterStateVariable filterPreNoise; //xy=453.20001220703125,909.199951171875
 AudioSynthWaveformDc     dc_sweepDepthOsc1; //xy=460.1999969482422,61
@@ -162,18 +160,18 @@ AudioEffectGranular      granular1;      //xy=1441.1999969482422,1696.1998748779
 AudioMixer4              mix_ntcFilter1; //xy=1456.199951171875,628
 AudioEffectFlange        flange1;        //xy=1512.1999969482422,1653.1998748779297
 AudioFilterStateVariable filter4;        //xy=1546.1999053955078,1104.9999389648438
-AudioFilterStateVariable filterPreMixHP; //xy=1597.1998901367188,1518.1997680664062
 AudioMixer4              mix_oscLevels;  //xy=1608.199951171875,210
 AudioFilterStateVariable filter2;        //xy=1616.199951171875,905.9999389648438
+AudioFilterStateVariable filterPreMixLP; //xy=1618.699951171875,1485.4500122070312
+AudioInputI2S            i2s2;           //xy=1640.199951171875,1610.1997680664062
 AudioMixer4              mix_ntcFilter4; //xy=1708.199951171875,1092.9999389648438
-AudioFilterStateVariable filterPreMixLP; //xy=1762.699951171875,1497.4498901367188
-AudioInputI2S            i2s2;           //xy=1772.199951171875,1600.19970703125
+AudioMixer4              mix_lineIn; //xy=1790.199951171875,1562.5999145507812
 AudioMixer4              mix_ntcFilter2; //xy=1806.199951171875,890.9999389648438
 AudioFilterFIR           fir_formant;    //xy=1858.199951171875,954.9999694824219
 AudioMixer4              mix_Amp;        //xy=1878.199951171875,1103.9999389648438
-AudioMixer4              mix_lineIn; //xy=1922.199951171875,1552.599853515625
-AudioFilterStateVariable filter5; //xy=2036.699951171875,1111.449951171875
-AudioOutputI2S           i2s1;           //xy=2088.199951171875,1552.9998779296875
+AudioFilterStateVariable filterPreMixHP; //xy=1956.199951171875,1535.2000122070312
+AudioFilterStateVariable filter5; //xy=2036.699951171875,1113.4498901367188
+AudioOutputI2S           i2s1;           //xy=2143.199951171875,1555.9999389648438
 AudioConnection          patchCord1(dc_timeNoise, 0, sq_timeNoise, 0);
 AudioConnection          patchCord2(dc_timeNoise, 0, sq_timeNoise, 1);
 AudioConnection          patchCord3(dc_breathLfoFilter3, 0, mult_lfoDepthFilter3, 1);
@@ -282,34 +280,34 @@ AudioConnection          patchCord105(mix_fcModFilter4_sweep, 0, filter4, 1);
 AudioConnection          patchCord106(mult_thCurveOsc2, 0, mix_oscLevels, 1);
 AudioConnection          patchCord107(mix_fcModFilter2_sweep, 0, filter2, 1);
 AudioConnection          patchCord108(mult_thCurveOsc1, 0, mix_oscLevels, 0);
-AudioConnection          patchCord109(mix_reverb, 0, filterPreMixHP, 0);
+AudioConnection          patchCord109(mix_reverb, 0, filterPreMixLP, 0);
 AudioConnection          patchCord110(mix_ntcFilter1, 0, filter2, 0);
 AudioConnection          patchCord111(mix_ntcFilter1, 0, mix_ntcFilter2, 0);
 AudioConnection          patchCord112(filter4, 0, mix_ntcFilter4, 1);
 AudioConnection          patchCord113(filter4, 1, mix_ntcFilter4, 2);
 AudioConnection          patchCord114(filter4, 2, mix_ntcFilter4, 3);
-AudioConnection          patchCord115(filterPreMixHP, 2, filterPreMixLP, 0);
-AudioConnection          patchCord116(mix_oscLevels, 0, filter1, 0);
-AudioConnection          patchCord117(mix_oscLevels, 0, mix_ntcFilter1, 0);
-AudioConnection          patchCord118(filter2, 0, mix_ntcFilter2, 1);
-AudioConnection          patchCord119(filter2, 1, mix_ntcFilter2, 2);
-AudioConnection          patchCord120(filter2, 2, mix_ntcFilter2, 3);
-AudioConnection          patchCord121(mix_ntcFilter4, 0, mix_Amp, 1);
-AudioConnection          patchCord122(filterPreMixLP, 0, mix_lineIn, 0);
-AudioConnection          patchCord123(filterPreMixLP, 0, mix_lineIn, 1);
-AudioConnection          patchCord124(i2s2, 0, mix_lineIn, 2);
-AudioConnection          patchCord125(i2s2, 1, mix_lineIn, 3);
+AudioConnection          patchCord115(mix_oscLevels, 0, filter1, 0);
+AudioConnection          patchCord116(mix_oscLevels, 0, mix_ntcFilter1, 0);
+AudioConnection          patchCord117(filter2, 0, mix_ntcFilter2, 1);
+AudioConnection          patchCord118(filter2, 1, mix_ntcFilter2, 2);
+AudioConnection          patchCord119(filter2, 2, mix_ntcFilter2, 3);
+AudioConnection          patchCord120(filterPreMixLP, 0, mix_lineIn, 0);
+AudioConnection          patchCord121(filterPreMixLP, 1, mix_lineIn, 1);
+AudioConnection          patchCord122(i2s2, 0, mix_lineIn, 2);
+AudioConnection          patchCord123(i2s2, 1, mix_lineIn, 3);
+AudioConnection          patchCord124(mix_ntcFilter4, 0, mix_Amp, 1);
+AudioConnection          patchCord125(mix_lineIn, 0, filterPreMixHP, 0);
 AudioConnection          patchCord126(mix_ntcFilter2, fir_formant);
 AudioConnection          patchCord127(fir_formant, 0, mix_Amp, 0);
 AudioConnection          patchCord128(mix_Amp, 0, filter5, 0);
-AudioConnection          patchCord129(mix_lineIn, 0, i2s1, 0);
-AudioConnection          patchCord130(mix_lineIn, 0, i2s1, 1);
+AudioConnection          patchCord129(filterPreMixHP, 2, i2s1, 0);
+AudioConnection          patchCord130(filterPreMixHP, 2, i2s1, 1);
 AudioConnection          patchCord131(filter5, 2, mix_delayFeedback, 0);
 AudioConnection          patchCord132(filter5, 2, mix_delayLevel, 0);
 AudioControlSGTL5000     sgtl5000_1;     //xy=250.1999969482422,172
 // GUItool: end automatically generated code
 
-
+//-------- paste above here Auto generated code from Audio System Design Tooll --------
 
 //-------------- i2c busses for Teensy 4.1 --------------------------
     // i2c busses are Wire, Wire1 and Wire2 for
@@ -351,6 +349,7 @@ const uint32_t UITimeoutInterval = 7000;  // milliseconds
 typedef enum {SPLASH_SCREEN, VOL_ADJ, PATCH_SEL, MENU} uism_t;
 uism_t UISM = SPLASH_SCREEN;
 typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING} menusm_t;
+// TODO: typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT } menusm_t;
 menusm_t MENUSM = MENU_EXIT;
 
 
@@ -375,11 +374,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 18"};
-char str_buf1[64] ={"version: 18"};
-char str_oledbuf[64] ={"Windy 1, ver: 18"};
+char str_buf[64] ={"version: .18"};
+char str_buf1[64] ={"version: .18"};
+char str_oledbuf[64] ={"Windy 1, ver: .18"};
 bool PRINT_VALUES_FLAG = true;
-char version_str[] = {"Windy 1, ver: 18"};
+char version_str[] = {"Windy 1, ver: .18"};
 
 
 // globals for loop control
@@ -480,6 +479,7 @@ float octaveControlFilter3 = 7.0;
 float octaveControlFilter4 = 7.0;
 float octaveControlFilter5 = 0.0;
 float offsetNoteKeyfollow = 86.0;  // 84 = C6, 72 = C5, 60 = C4
+float minPreNoiseNoteNumbr = 60.0;  // 84 = C6, 72 = C5, 60 = C4  4000s noise stops changing below about C4
 const uint32_t updatedAudioSystemInterval = 1;  // milliseconds
 float freqOscFilterOctaveOffset  = 0.0;    // use 3 to divide FreqOscFilterN by 2^3 to allow modulation to go from -1 to +3/7 
 //float fOFOFactor = pow(2,-freqOscFilterOctaveOffset); //TODO: fix this 
@@ -488,6 +488,7 @@ float fOFOFactor = 1.0;
 float fOFOHack = 0;
 float maxFilterFreq = 12000.0; 
 float minFilterFreq = 65.4; // min note number 36
+float minFilterPreNoiseFreq = 261.63; // middle C (C4)
 float maxDelayDamp = 3000.0; //TODO: find out correct value
 float maxDelayLevel = 0.15; //TODO: find out correct value
 float gammaDelayLevel = 3.0; //TODO: find out correct value
@@ -1137,14 +1138,16 @@ void loop()
     noteNumberFilter2 = dc_portatimef.read()*128 + SemiOsc2+FineOsc2;
     noteFreqOsc1 = 440.0 * pow(2, (noteNumberOsc1-69.0)/12 );  // 69 is note number for A4=440Hz
     noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2-69.0)/12 );  // 69 is note number for A4=440Hz
-    noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-18.0)/12 );  // always Oct below noteNumberOsc1  TODO: match 4000s
+    //noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-18.0)/12 );  // always Oct below noteNumberOsc1  TODO: match 4000s
+    noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-12.0)/12 );  // always Oct below noteNumberOsc1  TODO: match 4000s
     dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
     dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
     keyfollowFilter1 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter1/144.0); //72 is C5   
     keyfollowFilter2 = pow(2, (noteNumberFilter2-offsetNoteKeyfollow)*KeyFollowOscFilter2/144.0); //72 is C5 
     keyfollowFilter3 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowNoiseFilter3/144.0); //72 is C5
     keyfollowFilter4 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowNoiseFilter4/144.0); //72 is C5 
-    keyfollowFilterPreNoise = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowPreNoiseFilter/144.0); //72 is C5 
+    keyfollowFilterPreNoise = pow(2, ( (noteNumberFilter1 < minPreNoiseNoteNumbr ? minPreNoiseNoteNumbr : noteNumberFilter1)- offsetNoteKeyfollow )
+                                *KeyFollowPreNoiseFilter/144.0); //72 is C5 
     wfmod_sawOsc1.frequency(noteFreqOsc1);
     wfmod_triOsc1.frequency(noteFreqOsc1);
     wfmod_pulseOsc1.frequency(noteFreqOsc1);
@@ -1165,8 +1168,8 @@ void loop()
     clippedFreqFilter4 = (keyfollowFilter4*FreqNoiseFilter4*fOFOFactor < minFilterFreq)  
                         ? minFilterFreq : (keyfollowFilter4*FreqNoiseFilter4*fOFOFactor < maxFilterFreq) 
                         ? keyfollowFilter4*FreqNoiseFilter4*fOFOFactor : maxFilterFreq;  
-    clippedFreqFilterPreNoise = keyfollowFilterPreNoise*FreqPreNoiseFilter < minFilterFreq // TODO: add offset or factor relative to current note freq
-                        ? minFilterFreq : keyfollowFilterPreNoise*FreqPreNoiseFilter < maxFilterFreq
+    clippedFreqFilterPreNoise = keyfollowFilterPreNoise*FreqPreNoiseFilter < minFilterPreNoiseFreq // TODO: add offset or factor relative to current note freq
+                        ? minFilterPreNoiseFreq : keyfollowFilterPreNoise*FreqPreNoiseFilter < maxFilterFreq
                         ? keyfollowFilterPreNoise*FreqPreNoiseFilter : maxFilterFreq;
     filter1.frequency(clippedFreqFilter1);  
     filter1.resonance(QFactorOscFilter1);   // Q factor
@@ -1214,6 +1217,8 @@ void loop()
     }
     filterPreNoise.frequency(clippedFreqFilterPreNoise); 
     filter5.frequency(noteFreqFilter5); // HP filter post mix_Amp
+    filterPreMixHP.frequency(noteFreqFilter5);
+
 
     //-----------------------------------------------------------
     //  end of Update Realtime Audio System 
@@ -1906,7 +1911,7 @@ void updateUISM(void)
                 
             break;
         case  MENU: 
-            switch (MENUSM)
+            switch (MENUSM)   // TODO: add MENU_TRANS and MENU_OCT
             { 
                 case MENU_EXIT:
                     if(!submenu_active)
