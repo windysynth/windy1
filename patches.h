@@ -166,7 +166,6 @@
 #define CCEFFECTSREVERBDAMP 4
 
 
-
 typedef struct __attribute__((packed)) Patch{
     char patch_string[32]; 
     uint8_t nrpn_msb_osc1[NRPN_MSB_OSC1_LENGTH];

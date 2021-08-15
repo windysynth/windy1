@@ -44,11 +44,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //------------some define statements --------------------
 // #define FREQQ (440)
 
+#define PATCH_NUMBER_EEPROM_ADDR ( (int)0 )
+#define VOL_EEPROM_ADDR ( (int)4 )
+#define MIX_LINEIN_EEPROM_ADDR  ( (int)8 )
+#define FINE_TUNE_CENTS_EEPROM_ADDR ( (int)12 )
+#define TRANSPOSE_EEPROM_ADDR ( (int)16 )
+#define OCTAVE_EEPROM_ADDR ( (int)20 )
+
 //------------ includes -------------------------------
 #include <Bounce.h>
 #include <USBHost_t36.h>
 #include <MIDI.h>
 #include "patches.h"
+#include <EEPROM.h>
 //#define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
 #include <Adafruit_GFX.h>
@@ -348,8 +356,7 @@ bool submenu_active = false;
 const uint32_t UITimeoutInterval = 7000;  // milliseconds
 typedef enum {SPLASH_SCREEN, VOL_ADJ, PATCH_SEL, MENU} uism_t;
 uism_t UISM = SPLASH_SCREEN;
-typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING} menusm_t;
-// TODO: typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT } menusm_t;
+typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT} menusm_t;
 menusm_t MENUSM = MENU_EXIT;
 
 
@@ -374,11 +381,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: .18"};
-char str_buf1[64] ={"version: .18"};
-char str_oledbuf[64] ={"Windy 1, ver: .18"};
+char str_buf[64] ={"version: .21"};
+char str_buf1[64] ={"Version: .21"};
+char str_oledbuf[64] ={"Windy 1, ver: .21"};
 bool PRINT_VALUES_FLAG = true;
-char version_str[] = {"Windy 1, ver: .18"};
+char version_str[] = {"Windy 1, ver: .21"};
 
 
 // globals for loop control
@@ -432,14 +439,20 @@ float fMidiNoteNorm_diff = 0.0;
 float data2f = 0.0;
 float data1f = 0.0;
 int32_t vol = 75;
-int32_t eeprom_vol = 75;
+int eeprom_vol = 75;
 float volf = 1.5;
 int32_t mix_linein = 0;
-int32_t eeprom_mix_linein = 0;
+int eeprom_mix_linein = 0;
 float mix_lineinf = 0.0;
 int32_t FineTuneCents = 0;  	// 100 cents per halfstep, FineTune Control +/- 100
-int32_t eeprom_FineTuneCents = 0;
+int eeprom_FineTuneCents = 0;
 float FineTuneCentsf = 0.0;  	
+int32_t Transpose = 0;  	// semitones +/- 12 
+int eeprom_Transpose = 0;
+float Transposef = 0.0;  	
+int32_t Octave = 0;  	// octaves  +/- 2 
+int eeprom_Octave = 0;
+float Octavef = 0.0;  	
 
 // synth variable limits and references
 float maxPwmLfoFreq = 10.0;         // 4000s is 10 Hz at 100%
@@ -697,96 +710,96 @@ filterMode_t modeFilter3_old = THRU;
 filterMode_t modeFilter4_old = THRU;
 
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(patchNextButton, INPUT_PULLUP);
-  pinMode(knobButtonPin, INPUT_PULLUP);
-  //Serial1.begin(1000000);
-  Serial8.begin(1000000);
-  Serial.begin(1000000);
-  configureSD();
-  sgtl5000_1.enable();
-  sgtl5000_1.inputSelect(AUDIO_INPUT_LINEIN);
-  sgtl5000_1.volume(0.80);
-  AudioMemory(540);  //TODO: how much AudioMemory do I need? (delay 2.9ms per block for 1270/2.9 = 438
- // sgtl5000_1.audioPostProcessorEnable();
- // //sgtl5000_1.surroundSoundEnable();
-// //sgtl5000_1.surroundSound(7, 3);
-//  sgtl5000_1.adcHighPassFilterDisable();
-//  sgtl5000_1.eqSelect(3);//5-band eq
-//  sgtl5000_1.eqBands(eq_1, eq_2, eq_3, eq_4, eq_5);
-sgtl5000_1.lineOutLevel(13);  //3.16V p-p
-sgtl5000_1.lineInLevel(0);    // 3.12V p-p
-  AudioNoInterrupts();
-  dc_pwOsc1.amplitude(PwOsc1); // default 50% dutycycle
-  sine_lfoOsc1.amplitude(PwmDepthOsc1);
-  sine_lfoOsc1.frequency(PwmFreqOsc1);
-  dc_pwOsc2.amplitude(PwOsc2); // default 50% dutycycle
-  sine_lfoOsc2.amplitude(PwmDepthOsc2);
-  sine_lfoOsc2.frequency(PwmFreqOsc2);
-  mix_pwOsc1.gain(0,1.0);  // use dc_pwOsc1.ammplitude to adjust
-  mix_pwOsc1.gain(1,maxPwmDepthOsc);  // 
-  mix_pwOsc2.gain(0,1.0);  // use dc_pwOsc1.ammplitude to adjust
-  mix_pwOsc2.gain(1,maxPwmDepthOsc);  //
-  
-  mix_pitchModOsc1.gain(0, 1.0);  // use dc_sweepDepthOsc1 amplitude 
-  mix_pitchModOsc1.gain(1, limitBreathSweepOsc1);  // use dc_breathSweepOsc1 amplitude  
-  mix_pitchModOsc1.gain(2, 1.0);  // use dc_beatOsc1 amplitude 
-  mix_pitchModOsc2.gain(0, 1.0);  // use dc_sweepDepthOsc1 amplitude 
-  mix_pitchModOsc2.gain(1, limitBreathSweepOsc2);  // use dc_breathSweepOsc1 amplitude
-  mix_pitchModOsc2.gain(2, 1.0);  // use dc_beatOsc1 amplitude
-  dc_beatOsc1.amplitude(0.0); // TODO calculate beat number
-  dc_beatOsc2.amplitude(0.0); // TODO calculate beat number
+    // put your setup code here, to run once:
+    pinMode(patchNextButton, INPUT_PULLUP);
+    pinMode(knobButtonPin, INPUT_PULLUP);
+    //Serial1.begin(1000000);
+    Serial8.begin(1000000);
+    Serial.begin(1000000);
+    configureSD();
+    sgtl5000_1.enable();
+    sgtl5000_1.inputSelect(AUDIO_INPUT_LINEIN);
+    sgtl5000_1.volume(0.80);
+    AudioMemory(540);  //TODO: how much AudioMemory do I need? (delay 2.9ms per block for 1270/2.9 = 438
+    // sgtl5000_1.audioPostProcessorEnable();
+    // //sgtl5000_1.surroundSoundEnable();
+    // //sgtl5000_1.surroundSound(7, 3);
+    //  sgtl5000_1.adcHighPassFilterDisable();
+    //  sgtl5000_1.eqSelect(3);//5-band eq
+    //  sgtl5000_1.eqBands(eq_1, eq_2, eq_3, eq_4, eq_5);
+    sgtl5000_1.lineOutLevel(13);  //3.16V p-p
+    sgtl5000_1.lineInLevel(0);    // 3.12V p-p
+    AudioNoInterrupts();
+    dc_pwOsc1.amplitude(PwOsc1); // default 50% dutycycle
+    sine_lfoOsc1.amplitude(PwmDepthOsc1);
+    sine_lfoOsc1.frequency(PwmFreqOsc1);
+    dc_pwOsc2.amplitude(PwOsc2); // default 50% dutycycle
+    sine_lfoOsc2.amplitude(PwmDepthOsc2);
+    sine_lfoOsc2.frequency(PwmFreqOsc2);
+    mix_pwOsc1.gain(0,1.0);  // use dc_pwOsc1.ammplitude to adjust
+    mix_pwOsc1.gain(1,maxPwmDepthOsc);  // 
+    mix_pwOsc2.gain(0,1.0);  // use dc_pwOsc1.ammplitude to adjust
+    mix_pwOsc2.gain(1,maxPwmDepthOsc);  //
 
-  wfmod_sawOsc1.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
-  wfmod_sawOsc1.amplitude(SawOsc1);
-  wfmod_sawOsc1.frequency(noteFreqOsc1);
-  wfmod_sawOsc1.frequencyModulation(octaveControlOsc1);  // max freq mod +/- 4.0 octaves
-  wfmod_triOsc1.begin(WAVEFORM_TRIANGLE_VARIABLE);
-  wfmod_triOsc1.amplitude(TriOsc1);
-  wfmod_triOsc1.frequency(noteFreqOsc1);
-  wfmod_triOsc1.frequencyModulation(octaveControlOsc1);  // max freq mod +/- 4.0 octaves
-  wfmod_pulseOsc1.begin(WAVEFORM_BANDLIMIT_PULSE);
-  wfmod_pulseOsc1.amplitude(PulseOsc1);
-  wfmod_pulseOsc1.frequency(noteFreqOsc1);
-  wfmod_pulseOsc1.frequencyModulation(octaveControlOsc1);  // max freq mod +/- 4.0 octaves
-  wfmod_sawOsc2.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
-  wfmod_sawOsc2.amplitude(SawOsc2);
-  wfmod_sawOsc2.frequency(noteFreqOsc2);
-  wfmod_sawOsc2.frequencyModulation(octaveControlOsc2);  // max freq mod +/- 4.0 octaves
-  wfmod_triOsc2.begin(WAVEFORM_TRIANGLE_VARIABLE);
-  wfmod_triOsc2.amplitude(TriOsc2);
-  wfmod_triOsc2.frequency(noteFreqOsc2);
-  wfmod_triOsc2.frequencyModulation(octaveControlOsc2);  // max freq mod +/- 4.0 octaves
-  wfmod_pulseOsc2.begin(WAVEFORM_BANDLIMIT_PULSE);
-  wfmod_pulseOsc2.amplitude(PulseOsc2);
-  wfmod_pulseOsc2.frequency(noteFreqOsc2);
-  wfmod_pulseOsc2.frequencyModulation(octaveControlOsc2);  // max freq mod +/- 4.0 octaves
-  pink_Noise.amplitude(NoiseLevel);  //
-  filter1.frequency(FreqOscFilter1); // Freq slider
-  filter1.resonance(QFactorOscFilter1);   // Q factor
-  filter1.octaveControl(octaveControlFilter1); // sets range of control from mix_fcModFilter1  
-  filter2.frequency(FreqOscFilter2); // Freq slider
-  filter2.resonance(QFactorOscFilter2);   // Q factor
-  filter2.octaveControl(octaveControlFilter2); // sets range of control from mix_fcModFilter2 
-  filter3.frequency(FreqNoiseFilter3); // Freq slider
-  filter3.resonance(QFactorNoiseFilter3);   // Q factor
-  filter3.octaveControl(octaveControlFilter3); // sets range of control from mix_fcModFilter3 
-  filter4.frequency(FreqNoiseFilter4); // Freq slider
-  filter4.resonance(QFactorNoiseFilter4);   // Q factor
-  filter4.octaveControl(octaveControlFilter4); // sets range of control from mix_fcModFilter4 
-  filter5.frequency(noteFreqFilter5); // Freq slider
-  filter5.resonance(QFactorFilter5);   // Q factor
-  filter5.octaveControl(octaveControlFilter5); // sets range of control from mix_fcModFilter4 
-  filterPreNoise.frequency(clippedFreqFilterPreNoise);   // highpass pre-filter for noise signal 
-  filterPreNoise.resonance(0.707);
-  filterPostDelay.frequency(EffectsDelayDamp);
-  filterPostDelay.resonance(0.707);
-  filterPreMixHP.frequency(100);
-  filterPreMixHP.resonance(0.707);
-  filterPreMixLP.frequency(15000);  // LP filter
-  filterPreMixLP.resonance(0.707);
-  //ws_threshOsc1.shape(waveShape_threshOsc1, 3);
-  //ws_threshOsc2.shape(waveShape_threshOsc2, 3);
+    mix_pitchModOsc1.gain(0, 1.0);  // use dc_sweepDepthOsc1 amplitude 
+    mix_pitchModOsc1.gain(1, limitBreathSweepOsc1);  // use dc_breathSweepOsc1 amplitude  
+    mix_pitchModOsc1.gain(2, 1.0);  // use dc_beatOsc1 amplitude 
+    mix_pitchModOsc2.gain(0, 1.0);  // use dc_sweepDepthOsc1 amplitude 
+    mix_pitchModOsc2.gain(1, limitBreathSweepOsc2);  // use dc_breathSweepOsc1 amplitude
+    mix_pitchModOsc2.gain(2, 1.0);  // use dc_beatOsc1 amplitude
+    dc_beatOsc1.amplitude(0.0); // TODO calculate beat number
+    dc_beatOsc2.amplitude(0.0); // TODO calculate beat number
+
+    wfmod_sawOsc1.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
+    wfmod_sawOsc1.amplitude(SawOsc1);
+    wfmod_sawOsc1.frequency(noteFreqOsc1);
+    wfmod_sawOsc1.frequencyModulation(octaveControlOsc1);  // max freq mod +/- 4.0 octaves
+    wfmod_triOsc1.begin(WAVEFORM_TRIANGLE_VARIABLE);
+    wfmod_triOsc1.amplitude(TriOsc1);
+    wfmod_triOsc1.frequency(noteFreqOsc1);
+    wfmod_triOsc1.frequencyModulation(octaveControlOsc1);  // max freq mod +/- 4.0 octaves
+    wfmod_pulseOsc1.begin(WAVEFORM_BANDLIMIT_PULSE);
+    wfmod_pulseOsc1.amplitude(PulseOsc1);
+    wfmod_pulseOsc1.frequency(noteFreqOsc1);
+    wfmod_pulseOsc1.frequencyModulation(octaveControlOsc1);  // max freq mod +/- 4.0 octaves
+    wfmod_sawOsc2.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
+    wfmod_sawOsc2.amplitude(SawOsc2);
+    wfmod_sawOsc2.frequency(noteFreqOsc2);
+    wfmod_sawOsc2.frequencyModulation(octaveControlOsc2);  // max freq mod +/- 4.0 octaves
+    wfmod_triOsc2.begin(WAVEFORM_TRIANGLE_VARIABLE);
+    wfmod_triOsc2.amplitude(TriOsc2);
+    wfmod_triOsc2.frequency(noteFreqOsc2);
+    wfmod_triOsc2.frequencyModulation(octaveControlOsc2);  // max freq mod +/- 4.0 octaves
+    wfmod_pulseOsc2.begin(WAVEFORM_BANDLIMIT_PULSE);
+    wfmod_pulseOsc2.amplitude(PulseOsc2);
+    wfmod_pulseOsc2.frequency(noteFreqOsc2);
+    wfmod_pulseOsc2.frequencyModulation(octaveControlOsc2);  // max freq mod +/- 4.0 octaves
+    pink_Noise.amplitude(NoiseLevel);  //
+    filter1.frequency(FreqOscFilter1); // Freq slider
+    filter1.resonance(QFactorOscFilter1);   // Q factor
+    filter1.octaveControl(octaveControlFilter1); // sets range of control from mix_fcModFilter1  
+    filter2.frequency(FreqOscFilter2); // Freq slider
+    filter2.resonance(QFactorOscFilter2);   // Q factor
+    filter2.octaveControl(octaveControlFilter2); // sets range of control from mix_fcModFilter2 
+    filter3.frequency(FreqNoiseFilter3); // Freq slider
+    filter3.resonance(QFactorNoiseFilter3);   // Q factor
+    filter3.octaveControl(octaveControlFilter3); // sets range of control from mix_fcModFilter3 
+    filter4.frequency(FreqNoiseFilter4); // Freq slider
+    filter4.resonance(QFactorNoiseFilter4);   // Q factor
+    filter4.octaveControl(octaveControlFilter4); // sets range of control from mix_fcModFilter4 
+    filter5.frequency(noteFreqFilter5); // Freq slider
+    filter5.resonance(QFactorFilter5);   // Q factor
+    filter5.octaveControl(octaveControlFilter5); // sets range of control from mix_fcModFilter4 
+    filterPreNoise.frequency(clippedFreqFilterPreNoise);   // highpass pre-filter for noise signal 
+    filterPreNoise.resonance(0.707);
+    filterPostDelay.frequency(EffectsDelayDamp);
+    filterPostDelay.resonance(0.707);
+    filterPreMixHP.frequency(100);
+    filterPreMixHP.resonance(0.707);
+    filterPreMixLP.frequency(15000);  // LP filter
+    filterPreMixLP.resonance(0.707);
+    //ws_threshOsc1.shape(waveShape_threshOsc1, 3);
+    //ws_threshOsc2.shape(waveShape_threshOsc2, 3);
 
     dc_sweepDepthOsc1.amplitude(0.0);
     dc_sweepDepthOsc2.amplitude(0.0);
@@ -913,55 +926,83 @@ sgtl5000_1.lineInLevel(0);    // 3.12V p-p
     mix_delayLevel.gain(0,maxDelayLevel);
     mix_delayLevel.gain(1,maxDelayLevel*pow(EffectsDelayLevel, gammaDelayLevel));
 
-  Serial.println(str_buf);
- // Serial1.println(str_buf1);
-  Serial8.println(str_buf1);
-  delay(200);
+    Serial.println(str_buf);
+    // Serial1.println(str_buf1);
+    Serial8.println(str_buf1);
+    delay(200);
 
-  myUSBHost.begin();
+    myUSBHost.begin();
  
-  loadAllPatches();
-  loadPatchNumberEEPROM();
+    loadAllPatches();
+    EEPROM.get(PATCH_NUMBER_EEPROM_ADDR, eeprom_patchNumber);
     sprintf(str_buf1, "read eeprom_patchNumber (%03d)", eeprom_patchNumber );     
     Serial8.println(str_buf1);
-  if(eeprom_patchNumber < 0 || eeprom_patchNumber >= NUMBER_OF_PATCHES)
-  {
-      sprintf(str_buf1, "loadPatchNumberEEPROM (%03d) not within 0 to NUMBER_OF_PATCHES-1. overwrite with 000.", eeprom_patchNumber ); 
-      Serial8.println(str_buf1);
-      eeprom_patchNumber = 0;
-      savePatchNumberEEPROM();
-  }
-
+    if(eeprom_patchNumber < 0 || eeprom_patchNumber >= NUMBER_OF_PATCHES)
+    {
+        sprintf(str_buf1, "loadPatchNumberEEPROM (%03d) not within 0 to NUMBER_OF_PATCHES-1. overwrite with 000.", eeprom_patchNumber ); 
+        Serial8.println(str_buf1);
+        eeprom_patchNumber = 0;
+        EEPROM.put(PATCH_NUMBER_EEPROM_ADDR, eeprom_patchNumber);  // address 0
+    }
     
-    loadFineTuneCentsEEPROM();
+    EEPROM.get(FINE_TUNE_CENTS_EEPROM_ADDR, eeprom_FineTuneCents);
     sprintf(str_buf1, "read eeprom_FineTuneCents (%03ld)", eeprom_FineTuneCents );     
     Serial8.println(str_buf1);
     if(eeprom_FineTuneCents < -100 || eeprom_FineTuneCents > 100)
     {
+        sprintf(str_buf1, "eeprom_FineTuneCents (%03d) out of range.", eeprom_FineTuneCents );     
+        Serial8.println(str_buf1);
         eeprom_FineTuneCents = 0;
-        saveFineTuneCentsEEPROM();
+        EEPROM.put(FINE_TUNE_CENTS_EEPROM_ADDR,eeprom_FineTuneCents);
     }
     FineTuneCents = eeprom_FineTuneCents; 
     FineTuneCentsf =  ((float)FineTuneCents)/100.0f;
 
-    loadMixLineinEEPROM();
+    EEPROM.get(TRANSPOSE_EEPROM_ADDR, eeprom_Transpose);
+    sprintf(str_buf1, "read eeprom_Transpose (%03ld)", eeprom_Transpose );     
+    Serial8.println(str_buf1);
+    if(eeprom_Transpose < -12 || eeprom_Transpose > 12)
+    {
+        sprintf(str_buf1, "eeprom_Transpose (%03d) out of range.", eeprom_Transpose );     
+        Serial8.println(str_buf1);
+        eeprom_Transpose = 0;
+        EEPROM.put(TRANSPOSE_EEPROM_ADDR,eeprom_Transpose);
+    }
+    Transpose = eeprom_Transpose; 
+    Transposef =  ((float)Transpose);
+
+    EEPROM.get(OCTAVE_EEPROM_ADDR, eeprom_Octave);
+    sprintf(str_buf1, "read eeprom_Octave (%03ld)", eeprom_Octave );     
+    Serial8.println(str_buf1);
+    if(eeprom_Octave < -2 || eeprom_Octave > 2)
+    {
+        sprintf(str_buf1, "eeprom_Octave (%03d) out of range.", eeprom_Octave );     
+        Serial8.println(str_buf1);
+        eeprom_Octave = 0;
+        EEPROM.put(OCTAVE_EEPROM_ADDR,eeprom_Octave);
+    }
+    Octave = eeprom_Octave; 
+    Octavef =  ((float)Octave*12.0);
+
+
+    EEPROM.get(MIX_LINEIN_EEPROM_ADDR, eeprom_mix_linein);
     sprintf(str_buf1, "read eeprom_mix_linein (%03ld)", eeprom_mix_linein );     
     Serial8.println(str_buf1);
     if(eeprom_mix_linein <0 || eeprom_mix_linein > 100)
     {
         eeprom_mix_linein = 0;
-        saveMixLineinEEPROM();
+        EEPROM.put(MIX_LINEIN_EEPROM_ADDR,eeprom_mix_linein);
     }
     mix_linein = eeprom_mix_linein; 
     mix_lineinf =  ((float)mix_linein)/100.0f;
 
-    loadVolEEPROM();
+    EEPROM.get(VOL_EEPROM_ADDR, eeprom_vol);
     sprintf(str_buf1, "read eeprom_vol (%03ld)", eeprom_vol );     
     Serial8.println(str_buf1);
     if(eeprom_vol <0 || eeprom_vol > 100)
     {
         eeprom_vol = 0;
-        saveVolEEPROM();
+        EEPROM.put(VOL_EEPROM_ADDR, eeprom_vol);
     }
     vol = eeprom_vol;
     //volf = ((float)vol)/50.0f;
@@ -974,45 +1015,42 @@ sgtl5000_1.lineInLevel(0);    // 3.12V p-p
     mix_lineIn.gain(3, volf*extraLineInAmpFactor*mix_lineinf);
 
 
-  sprintf(str_buf1, "loadPatchNumberEEPROM (%03d) ", eeprom_patchNumber );     
-  Serial8.println(str_buf1);
-  sprintf(str_buf1, "current_patchNumber (%03d) ", current_patchNumber );     
-  Serial8.println(str_buf1);
-  if (patchLoaded[eeprom_patchNumber]){
-      current_patchNumber = eeprom_patchNumber;
-      sprintf(str_buf1, "current_patchNumber (%03d) ", current_patchNumber );     
-      Serial8.println(str_buf1);
-      setCurrentPatch(current_patchNumber);
-      patchToSynthVariables(&current_patch);
-  }
-  patchToSynthVariables(&current_patch);
-  AudioInterrupts();
-  
-  AudioProcessorUsageMaxReset();
-  AudioMemoryUsageMaxReset();
-  //readPot();
-  knob.write(0); // reset knob position to zero
+    sprintf(str_buf1, "loadPatchNumberEEPROM (%03d) ", eeprom_patchNumber );     
+    Serial8.println(str_buf1);
+    sprintf(str_buf1, "current_patchNumber (%03d) ", current_patchNumber );     
+    Serial8.println(str_buf1);
+    if (patchLoaded[eeprom_patchNumber]){
+        current_patchNumber = eeprom_patchNumber;
+        sprintf(str_buf1, "current_patchNumber (%03d) ", current_patchNumber );     
+        Serial8.println(str_buf1);
+        setCurrentPatch(current_patchNumber);
+        patchToSynthVariables(&current_patch);
+    }
+    patchToSynthVariables(&current_patch);
+    AudioInterrupts();
 
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial8.println("SSD1306 allocation failed");
-    //for(;;); // Don't proceed, loop forever
-  }
-  else
-  {
+    AudioProcessorUsageMaxReset();
+    AudioMemoryUsageMaxReset();
+    //readPot();
+    knob.write(0); // reset knob position to zero
 
-    display.setTextSize(1); // configuration of size of caracters caractères
-    display.setTextColor(WHITE);
-    display.clearDisplay(); // erase display
-    display.display(); // refresh display
-    display.setCursor(1,5);
-    display.println(str_oledbuf);
-    display.display();
-    resetUITimeout();
-  }
-
-
-}
+    // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+    if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+        Serial8.println("SSD1306 allocation failed");
+        //for(;;); // Don't proceed, loop forever
+    }
+    else
+    {
+        display.setTextSize(1); // configuration of size of caracters caractères
+        display.setTextColor(WHITE);
+        display.clearDisplay(); // erase display
+        display.display(); // refresh display
+        display.setCursor(1,5);
+        display.println(str_oledbuf);
+        display.display();
+        resetUITimeout();
+    }
+} // setup()
 
 void loop() 
 {
@@ -1126,14 +1164,14 @@ void loop()
     noteNumberOsc1 = BendStep ? round( noteNumberOsc1 + BendRange * dc_pitchbend.read() )
                                      : noteNumberOsc1 + BendRange * dc_pitchbend.read();
     noteNumberOsc1 = noteNumberOsc1 + OctOsc1*12.0
-                    + SemiOsc1+FineOsc1 + FineTuneCentsf;
+                    + SemiOsc1+FineOsc1 + FineTuneCentsf + Transposef + Octavef;
     //noteNumberFilter1 = dc_portatimef.read()*128 + OctOsc1*12.0 + SemiOsc1+FineOsc1;
     noteNumberFilter1 = dc_portatimef.read()*128 + SemiOsc1+FineOsc1;
     noteNumberOsc2 = porta_step ? round(dc_portatime.read()*128.0) : dc_portatime.read()*128;
     noteNumberOsc2 = BendStep ? round( noteNumberOsc2 + BendRange * dc_pitchbend.read() )
                                      : noteNumberOsc2 + BendRange * dc_pitchbend.read();
     noteNumberOsc2 = noteNumberOsc2 + OctOsc2*12.0
-                    + SemiOsc2+FineOsc2 + FineTuneCentsf;
+                    + SemiOsc2+FineOsc2 + FineTuneCentsf + Transposef + Octavef;
     //noteNumberFilter2 = dc_portatimef.read()*128 + OctOsc2*12.0 + SemiOsc2+FineOsc2;
     noteNumberFilter2 = dc_portatimef.read()*128 + SemiOsc2+FineOsc2;
     noteFreqOsc1 = 440.0 * pow(2, (noteNumberOsc1-69.0)/12 );  // 69 is note number for A4=440Hz
@@ -1279,7 +1317,8 @@ void loop()
     //------------------------------------------------------
     if( !updateEpromFlag && ((current_patchNumber != eeprom_patchNumber)
                             ||(eeprom_mix_linein != mix_linein)||(eeprom_FineTuneCents != FineTuneCents)
-                            ||(eeprom_vol != vol) ))
+                            ||(eeprom_vol != vol) || (eeprom_Transpose != Transpose) 
+                            || (eeprom_Octave != Octave) ))
     {
         updateEpromFlag = true;
         eepromCurrentMillis = millis();
@@ -1294,19 +1333,27 @@ void loop()
             eeprom_patchNumber = current_patchNumber ;
             sprintf(str_buf1, "Writing currentPatchNumber (%03d) to EEPROM", eeprom_patchNumber );     
             Serial8.println(str_buf1);
-            updatePatchNumberEEPROM();
+            EEPROM_update(PATCH_NUMBER_EEPROM_ADDR, eeprom_patchNumber);  
             eeprom_vol = vol;
             sprintf(str_buf1, "Writing vol (%03ld) to EEPROM", eeprom_vol );     
             Serial8.println(str_buf1);
-            updateVolEEPROM();
+            EEPROM_update(VOL_EEPROM_ADDR, eeprom_vol);  
             eeprom_mix_linein = mix_linein;
             sprintf(str_buf1, "Writing mix_linein (%03ld) to EEPROM", eeprom_mix_linein );     
             Serial8.println(str_buf1);
-            updateMixLineinEEPROM();
+            EEPROM_update(MIX_LINEIN_EEPROM_ADDR, eeprom_mix_linein);  
             eeprom_FineTuneCents = FineTuneCents;
             sprintf(str_buf1, "Writing FineTuneCents (%03ld) to EEPROM", eeprom_FineTuneCents );     
             Serial8.println(str_buf1);
-            updateFineTuneCentsEEPROM();
+            EEPROM_update(FINE_TUNE_CENTS_EEPROM_ADDR, eeprom_FineTuneCents);  
+            eeprom_Transpose = Transpose;
+            sprintf(str_buf1, "Writing Transpose (%03ld) to EEPROM", eeprom_Transpose );     
+            Serial8.println(str_buf1);
+            EEPROM_update(TRANSPOSE_EEPROM_ADDR, eeprom_Transpose);  
+            eeprom_Octave = Octave;
+            sprintf(str_buf1, "Writing Octave (%03ld) to EEPROM", eeprom_Octave );     
+            Serial8.println(str_buf1);
+            EEPROM_update(OCTAVE_EEPROM_ADDR, eeprom_Octave);  
             updateEpromFlag = false;
         }
     }
@@ -1911,7 +1958,7 @@ void updateUISM(void)
                 
             break;
         case  MENU: 
-            switch (MENUSM)   // TODO: add MENU_TRANS and MENU_OCT
+            switch (MENUSM)   
             { 
                 case MENU_EXIT:
                     if(!submenu_active)
@@ -1924,8 +1971,8 @@ void updateUISM(void)
                         }
                         else if(newKnob < 0) 
                         {
-                            MENUSM = MENU_TUNING;
-                            sprintf(str_oledbuf, "MENU: TUNING");
+                            MENUSM = MENU_OCT;
+                            sprintf(str_oledbuf, "MENU: OCT");
                             break; 
                         }
                         else
@@ -1996,8 +2043,8 @@ void updateUISM(void)
                     {
                         if (newKnob > 0)
                         {
-                            MENUSM = MENU_EXIT;
-                            sprintf(str_oledbuf, "MENU: EXIT");
+                            MENUSM = MENU_TRANS;
+                            sprintf(str_oledbuf, "MENU: TRANS");
                         }
                         else if(newKnob < 0) 
                         {
@@ -2037,6 +2084,104 @@ void updateUISM(void)
                         }
                         sprintf(str_oledbuf, "Cents: %03ld", FineTuneCents);
                         sprintf(str_buf1, "FineTuneCents: %03ld", FineTuneCents);
+                        Serial8.println(str_buf1);
+                    }
+                    break;
+                case MENU_TRANS:
+                    if(!submenu_active)
+                    {
+                        if (newKnob > 0)
+                        {
+                            MENUSM = MENU_OCT;
+                            sprintf(str_oledbuf, "MENU: OCT");
+                        }
+                        else if(newKnob < 0) 
+                        {
+                            MENUSM = MENU_TUNING;
+                            sprintf(str_oledbuf, "MENU: TUNING");
+                        }
+                        else
+                        {
+                            if(shortKnobButtonPress)
+                            {
+                                submenu_active = true;
+                                shortKnobButtonPress = false;
+                                sprintf(str_oledbuf, "Semi: %03ld", Transpose);
+                                break; 
+                            }
+                            MENUSM = MENU_TRANS;
+                            sprintf(str_oledbuf, "MENU: TRANS");
+                        }
+                    }
+                    else 
+                    {
+                        if(shortKnobButtonPress)
+                        {
+                            submenu_active = false;
+                            shortKnobButtonPress = false;
+                            MENUSM = MENU_EXIT;
+                            sprintf(str_oledbuf, "MENU: EXIT");
+                            break; 
+                        }
+                        if (newKnob)
+                        {
+                            Transpose = Transpose + newKnob;
+                            Transpose = Transpose < -12 ? -12 
+                                            : Transpose >= 12 ? 12 : Transpose;
+                            Transposef = ((float)Transpose);
+                            updateSynthVariablesFlag = true;
+                        }
+                        sprintf(str_oledbuf, "Semi: %03ld", Transpose);
+                        sprintf(str_buf1, "Transpose: %03ld", Transpose);
+                        Serial8.println(str_buf1);
+                    }
+                    break;
+                case MENU_OCT:
+                    if(!submenu_active)
+                    {
+                        if (newKnob > 0)
+                        {
+                            MENUSM = MENU_EXIT;
+                            sprintf(str_oledbuf, "MENU: EXIT");
+                        }
+                        else if(newKnob < 0) 
+                        {
+                            MENUSM = MENU_TRANS;
+                            sprintf(str_oledbuf, "MENU: TRANS");
+                        }
+                        else
+                        {
+                            if(shortKnobButtonPress)
+                            {
+                                submenu_active = true;
+                                shortKnobButtonPress = false;
+                                sprintf(str_oledbuf, "Oct: %03ld", Octave);
+                                break; 
+                            }
+                            MENUSM = MENU_OCT;
+                            sprintf(str_oledbuf, "MENU: OCT");
+                        }
+                    }
+                    else 
+                    {
+                        if(shortKnobButtonPress)
+                        {
+                            submenu_active = false;
+                            shortKnobButtonPress = false;
+                            MENUSM = MENU_EXIT;
+                            sprintf(str_oledbuf, "MENU: EXIT");
+                            break; 
+                        }
+                        if (newKnob)
+                        {
+                            Octave = Octave + newKnob;
+                            Octave = Octave < -2 ? -2 
+                                            : Octave >= 2 ? 2 : Octave;
+                            Octavef = ((float)Octave*12);
+                            updateSynthVariablesFlag = true;
+                        }
+                        sprintf(str_oledbuf, "Oct: %03ld", Octave);
+                        sprintf(str_buf1, "Octave: %03ld", Octave);
                         Serial8.println(str_buf1);
                     }
                     break;
@@ -2124,5 +2269,14 @@ void readKnobAndKnobButton(void)
     {
         resetUITimeout();
         updateUISM();  // updated User Interface State Machine
+    }
+}
+
+
+void EEPROM_update(int addr, int val){  
+   int temp_var;
+   EEPROM.get(addr, temp_var);
+   if( temp_var != val ){
+      EEPROM.put(addr, val);
     }
 }

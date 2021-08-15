@@ -10,7 +10,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ****************************************************************/
 
 #include "patches.h"
-#include <EEPROM.h>
 #include <SD.h>
 
     // 
@@ -513,53 +512,6 @@ void setCurrentPatch(int patchNumber)
       }
     }
 
-    void savePatchNumberEEPROM() {
-      EEPROM.put(0, eeprom_patchNumber);  // address 0
-    }
-    
-    void updatePatchNumberEEPROM() {
-      EEPROM.update(0, eeprom_patchNumber);  // address 0
-    }
-
-    void loadPatchNumberEEPROM() {
-      EEPROM.get(0, eeprom_patchNumber);
-    }
-
-    void saveVolEEPROM() {
-      EEPROM.put(4, eeprom_vol);  // address 1
-    }
-    
-    void updateVolEEPROM() {
-      EEPROM.update(4, eeprom_vol);  // address 1
-    }
-
-    void loadVolEEPROM() {
-      EEPROM.get(4, eeprom_vol);
-    }
-
-    void saveMixLineinEEPROM() {
-      EEPROM.put(8, eeprom_mix_linein);  // address 2
-    }
-    
-    void updateMixLineinEEPROM() {
-      EEPROM.update(8, eeprom_mix_linein);  // address 2
-    }
-
-    void loadMixLineinEEPROM() {
-      EEPROM.get(8, eeprom_mix_linein);
-    }
-
-    void saveFineTuneCentsEEPROM() {
-      EEPROM.put(12, eeprom_FineTuneCents);  // address 3
-    }
-    
-    void updateFineTuneCentsEEPROM() {
-      EEPROM.update(12, eeprom_FineTuneCents);  // address 3
-    }
-
-    void loadFineTuneCentsEEPROM() {
-      EEPROM.get(12, eeprom_FineTuneCents);
-    }
 
 
 
