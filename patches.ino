@@ -56,7 +56,7 @@ void patchToSynthVariables(patch_t *patch) {
     QFactorOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCQFACTOROSCFILTER1]/10.0;  	//72,2,5,127,"// 5=0.5, 127=12.7"
     KeyFollowOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCKEYFOLLOWOSCFILTER1]-64.0); //72,3,52,88,// -12 to +24 num semi tones
     BreathModOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCBREATHMODOSCFILTER1]*DIV127;  	//72,4,0,127,
-    LfoFreqOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCLFOFREQOSCFILTER1]*DIV127*maxLfoFreqFilter1;  	//72,5,0,127,
+    LfoFreqOscFilter1 = pow((float)patch->nrpn_msb_osc_filt1[CCLFOFREQOSCFILTER1]*DIV127,2.0)*maxLfoFreqFilter1;  	//72,5,0,127,
     LfoDepthOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCLFODEPTHOSCFILTER1]*DIV127;  	//72,6,0,127,
     LfoBreathOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCLFOBREATHOSCFILTER1]-64.0)/64.0;  	//72,7,0,127,
     LfoThreshOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCLFOTHRESHOSCFILTER1]*DIV127;  	//72,8,0,127,
@@ -69,7 +69,7 @@ void patchToSynthVariables(patch_t *patch) {
     QFactorOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCQFACTOROSCFILTER2]/10.0;  	//73,2,5,127,"// 5=0.5, 127=12.7"
     KeyFollowOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCKEYFOLLOWOSCFILTER2]-64.0);//73,3,52,88,// -12 to +24 num semi tones
     BreathModOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCBREATHMODOSCFILTER2]*DIV127;  	//73,4,0,127,
-    LfoFreqOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCLFOFREQOSCFILTER2]*maxLfoFreqFilter2;  	//73,5,0,127,
+    LfoFreqOscFilter2 = pow((float)patch->nrpn_msb_osc_filt2[CCLFOFREQOSCFILTER2]*DIV127,2.0)*maxLfoFreqFilter2;  	//73,5,0,127,
     LfoDepthOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCLFODEPTHOSCFILTER2]*DIV127;  	//73,6,0,127,
     LfoBreathOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCLFOBREATHOSCFILTER2]-64.0)/64.0;  	//73,7,0,127,
     LfoThreshOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCLFOTHRESHOSCFILTER2]*DIV127;  	//73,8,0,127,
@@ -82,7 +82,7 @@ void patchToSynthVariables(patch_t *patch) {
     QFactorNoiseFilter3 = (float)patch->nrpn_msb_noise_filt3[CCQFACTORNOISEFILTER3]/10.0;  	//74,2,5,127,"// 5=0.5, 127=12.7"
     KeyFollowNoiseFilter3 = ((float)patch->nrpn_msb_noise_filt3[CCKEYFOLLOWNOISEFILTER3]-64.0);//74,3,52,88,// -12 to +24 num semitones
     BreathModNoiseFilter3 = (float)patch->nrpn_msb_noise_filt3[CCBREATHMODNOISEFILTER3]*DIV127;  	//74,4,0,127,
-    LfoFreqNoiseFilter3 = (float)patch->nrpn_msb_noise_filt3[CCLFOFREQNOISEFILTER3]*maxLfoFreqFilter3;  	//74,5,0,127,
+    LfoFreqNoiseFilter3 = pow((float)patch->nrpn_msb_noise_filt3[CCLFOFREQNOISEFILTER3]*DIV127,2.0)*maxLfoFreqFilter3;  	//74,5,0,127,
     LfoDepthNoiseFilter3 = (float)patch->nrpn_msb_noise_filt3[CCLFODEPTHNOISEFILTER3]*DIV127;  	//74,6,0,127,
     LfoBreathNoiseFilter3 = ((float)patch->nrpn_msb_noise_filt3[CCLFOBREATHNOISEFILTER3]-64.0)/64.0;  	//74,7,0,127,
     LfoThreshNoiseFilter3 = (float)patch->nrpn_msb_noise_filt3[CCLFOTHRESHNOISEFILTER3]*DIV127;  	//74,8,0,127,
@@ -95,7 +95,7 @@ void patchToSynthVariables(patch_t *patch) {
     QFactorNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCQFACTORNOISEFILTER4]/10.0;  	//75,2,5,127,"// 5=0.5, 127=12.7"
     KeyFollowNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCKEYFOLLOWNOISEFILTER4]-64.0);//75,3,52,88,// -12 to +24 num semitones
     BreathModNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCBREATHMODNOISEFILTER4]*DIV127;  	//75,4,0,127,
-    LfoFreqNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCLFOFREQNOISEFILTER4]-64.0)/64.0;  	//75,5,0,127,
+    LfoFreqNoiseFilter4 = pow((float)patch->nrpn_msb_noise_filt4[CCLFOFREQNOISEFILTER4]*DIV127,2.0)*maxLfoFreqFilter4;  	//75,5,0,127,
     LfoDepthNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCLFODEPTHNOISEFILTER4]*DIV127;  	//75,6,0,127,
     LfoBreathNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCLFOBREATHNOISEFILTER4]-64.0)/64.0;  	//75,7,0,127,
     LfoThreshNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCLFOTHRESHNOISEFILTER4]*DIV127;  	//75,8,0,127,

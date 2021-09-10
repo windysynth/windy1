@@ -381,11 +381,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: .21"};
-char str_buf1[64] ={"Version: .21"};
-char str_oledbuf[64] ={"Windy 1, ver: .21"};
+char str_buf[64] ={"version: .22"};
+char str_buf1[64] ={"Version: .22"};
+char str_oledbuf[64] ={"Windy 1, ver: .22"};
 bool PRINT_VALUES_FLAG = true;
-char version_str[] = {"Windy 1, ver: .21"};
+char version_str[] = {"Windy 1, ver: .22"};
 
 
 // globals for loop control
@@ -464,10 +464,10 @@ float sweepTimeOscFilterGamma = 4.0;       // TODO: adjust this to match 4000s
 float maxSweepTimeNoiseFilter = 1000.0;
 float sweepTimeNoiseFilterGamma = 4.0;       // TODO: adjust this to match 4000s
 float maxSweepDepthFilter = 1.0;   // TODO: set this to match 4000s
-float maxLfoFreqFilter1 = 50.0;
-float maxLfoFreqFilter2 = 50.0;
-float maxLfoFreqFilter3 = 50.0;
-float maxLfoFreqFilter4 = 50.0;
+float maxLfoFreqFilter1 = 100.0;
+float maxLfoFreqFilter2 = 100.0;
+float maxLfoFreqFilter3 = 100.0;
+float maxLfoFreqFilter4 = 100.0;
 float maxLfoDepthOscFilter1 = 0.15;  // 4000s goes up and down about 2 octaves (so 0.28 should be right, but seems too much)
 float maxLfoDepthOscFilter2 = 0.15;  // 4000s goes up and down about 2 octaves 
 float maxLfoDepthNoiseFilter3 = 0.28;  // 4000s goes up and down about 2 octaves 
@@ -511,8 +511,8 @@ float TimeNoiseGamma = 4.0;
 float maxNoiseLevel = 1.0; //0.23;  
 float minGamma = 0.1;
 float maxGamma = 2.0;
-float maxReverbLevel = 0.20;
-float maxDenseEarly = 0.5; 
+float maxReverbLevel = 0.2;
+float maxDenseEarly = 0.5;
 bool  porta_step = false;    // round to nearest note for portamento = glissando  // Not really in EWI 4k, but I like it :)
 float octaveControlOsc1 = 1.0;
 float octaveControlOsc2 = 1.0;
@@ -1125,9 +1125,24 @@ void loop()
         sine_lfoOsc2.amplitude(PwmDepthOsc2);
         sine_lfoOsc2.frequency(PwmFreqOsc2);
         sine_lfoFilter1.frequency(LfoFreqOscFilter1);    
-        sine_lfoFilter2.frequency(LfoFreqOscFilter2);    
+        if (LinkOscFilters) 
+        {
+            sine_lfoFilter2.frequency(LfoFreqOscFilter1);    
+        }
+        else
+        {
+            sine_lfoFilter2.frequency(LfoFreqOscFilter2);    
+        }
+        if (LinkNoiseFilters) 
+        {
+            sine_lfoFilter4.frequency(LfoFreqNoiseFilter3);    
+        }
+        else
+        {
+            sine_lfoFilter4.frequency(LfoFreqNoiseFilter4);    
+        }
+        
         sine_lfoFilter3.frequency(LfoFreqNoiseFilter3);    
-        sine_lfoFilter4.frequency(LfoFreqNoiseFilter4);    
         wfmod_sawOsc1.amplitude(SawOsc1);
         wfmod_triOsc1.amplitude(TriOsc1);
         wfmod_pulseOsc1.amplitude(PulseOsc1);
@@ -1428,11 +1443,13 @@ float lfoThresh(float x, float th, float depth, float breath)
 {
     if(breath < 0.0)
     {
-        return (x < th) ? limit( depth*breath*(x/th - 1.0),1.0,0.0) : 0.0;
+        //return (x < th) ? limit( depth*breath*(x/th - 1.0),1.0,0.0) : 0.0;
+        return (x < th) ? limit( depth+breath*(x/th - 1.0),1.0,0.0) : 0.0;
     }
     else
     {
-        return (x > th) ? limit( depth*breath*(x-th)/(1.0-th),1.0,0.0) : 0.0;
+        //return (x > th) ? limit( depth*breath*(x-th)/(1.0-th),1.0,0.0) : 0.0;
+        return (x > th) ? limit( depth+breath*(x-th)/(1.0-th),1.0,0.0) : 0.0;
     }
 }
 
@@ -1789,48 +1806,78 @@ void processMIDI(void)
                     dc_sweepDepthFilterSign1.amplitude(1.0);
                     dc_sweepDepthFilter1.amplitude(SweepDepthOscFilter1);
                     dc_sweepDepthFilter1.amplitude(0,SweepTimeOscFilter1);
+                    if(LinkOscFilters)
+                    {
+                        dc_sweepDepthFilterSign2.amplitude(1.0);
+                        dc_sweepDepthFilter2.amplitude(SweepDepthOscFilter1);
+                        dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter1);
+                    }
                 }
                 else if(SweepDepthOscFilter1 < 0.0)
                 {
                     dc_sweepDepthFilterSign1.amplitude(-1.0);
                     dc_sweepDepthFilter1.amplitude(SweepDepthOscFilter1);
                     dc_sweepDepthFilter1.amplitude(0,SweepTimeOscFilter1);
+                    if(LinkOscFilters)
+                    {
+                        dc_sweepDepthFilterSign2.amplitude(-1.0);
+                        dc_sweepDepthFilter2.amplitude(SweepDepthOscFilter1);
+                        dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter1);
+                    }
                 }
-                if(SweepDepthOscFilter2 >0.0)
+                if(~LinkOscFilters)
                 {
-                    dc_sweepDepthFilterSign2.amplitude(1.0);
-                    dc_sweepDepthFilter2.amplitude(SweepDepthOscFilter2);
-                    dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter2);
-                }
-                else if(SweepDepthOscFilter2 < 0.0)
-                {
-                    dc_sweepDepthFilterSign2.amplitude(-1.0);
-                    dc_sweepDepthFilter2.amplitude(SweepDepthOscFilter2);
-                    dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter2);
+                    if(SweepDepthOscFilter2 >0.0)
+                    {
+                        dc_sweepDepthFilterSign2.amplitude(1.0);
+                        dc_sweepDepthFilter2.amplitude(SweepDepthOscFilter2);
+                        dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter2);
+                    }
+                    else if(SweepDepthOscFilter2 < 0.0)
+                    {
+                        dc_sweepDepthFilterSign2.amplitude(-1.0);
+                        dc_sweepDepthFilter2.amplitude(SweepDepthOscFilter2);
+                        dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter2);
+                    }
                 }
                 if(SweepDepthNoiseFilter3 >0.0)
                 {
                     dc_sweepDepthFilterSign3.amplitude(1.0);
                     dc_sweepDepthFilter3.amplitude(SweepDepthNoiseFilter3);
                     dc_sweepDepthFilter3.amplitude(0,SweepTimeNoiseFilter3);
+                    if(LinkNoiseFilters)
+                    {
+                        dc_sweepDepthFilterSign4.amplitude(1.0);
+                        dc_sweepDepthFilter4.amplitude(SweepDepthNoiseFilter3);
+                        dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter3);
+                    }
                 }
                 else if(SweepDepthNoiseFilter3 < 0.0)
                 {
                     dc_sweepDepthFilterSign3.amplitude(-1.0);
                     dc_sweepDepthFilter3.amplitude(SweepDepthNoiseFilter3);
                     dc_sweepDepthFilter3.amplitude(0,SweepTimeNoiseFilter3);
+                    if(LinkNoiseFilters)
+                    {
+                        dc_sweepDepthFilterSign4.amplitude(-1.0);
+                        dc_sweepDepthFilter4.amplitude(SweepDepthNoiseFilter3);
+                        dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter3);
+                    }
                 }
-                if(SweepDepthNoiseFilter4 > 0.0)
+                if(~LinkNoiseFilters)
                 {
-                    dc_sweepDepthFilterSign4.amplitude(1.0);
-                    dc_sweepDepthFilter4.amplitude(SweepDepthNoiseFilter4);
-                    dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter4);
-                }
-                else if(SweepDepthNoiseFilter4 < 0.0)
-                {
-                    dc_sweepDepthFilterSign4.amplitude(-1.0);
-                    dc_sweepDepthFilter4.amplitude(SweepDepthNoiseFilter4);
-                    dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter4);
+                    if(SweepDepthNoiseFilter4 > 0.0)
+                    {
+                        dc_sweepDepthFilterSign4.amplitude(1.0);
+                        dc_sweepDepthFilter4.amplitude(SweepDepthNoiseFilter4);
+                        dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter4);
+                    }
+                    else if(SweepDepthNoiseFilter4 < 0.0)
+                    {
+                        dc_sweepDepthFilterSign4.amplitude(-1.0);
+                        dc_sweepDepthFilter4.amplitude(SweepDepthNoiseFilter4);
+                        dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter4);
+                    }
                 }
             }
             currentMidiNote = data1;
