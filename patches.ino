@@ -107,7 +107,7 @@ void patchToSynthVariables(patch_t *patch) {
     //NoiseBreathCurve = 1.0 - ((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE])-64.0)/64.0;  	//80,1,0,127,
     NoiseBreathCurve = gen_noise_gamma(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV128);  	//80,1,0,127,
    // NoiseBreathCurve = (float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE])*DIV128;  	//80,1,0,127,
-    NoiseLevel = (float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127*maxNoiseLevel;  	//80,2,0,127,
+    NoiseLevel = pow((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,.65)*maxNoiseLevel;  	//80,2,0,127,
     BendRange = (float)patch->nrpn_msb_common1[CCBENDRANGE];  	//81,0,0,12,// num semitones
     BendStep = (bool)patch->nrpn_msb_common1[CCBENDSTEP];  	//81,1,0,1,//0=off 1=on
     VibratoPitch = (float)patch->nrpn_msb_common1[CCVIBRATOPITCH]*DIV127;  	//81,2,0,127,  (this isn't necessary since bite sensor pb and plate pb are the same).
