@@ -23,7 +23,7 @@ void patchToSynthVariables(patch_t *patch) {
     PulseOsc1 = (float)patch->nrpn_msb_osc1[CCPULSEOSC1]*DIV127;  	//64,7,0,127,
     PwOsc1 = (float)patch->nrpn_msb_osc1[CCPWOSC1]*DIV127+PwOffsetOsc1;  	//64,8,0,127,  GUI 0 = 50%
     PwmFreqOsc1 = (float)patch->nrpn_msb_osc1[CCPWMFREQOSC1]*DIV127*maxPwmLfoFreq;  	//64,9,0,127,
-    PwmDepthOsc1 = (float)patch->nrpn_msb_osc1[CCPWMDEPTHOSC1]*DIV127;  	//64,10,0,127,
+    PwmDepthOsc1 = (float)patch->nrpn_msb_osc1[CCPWMDEPTHOSC1]*DIV127;  	//64,10,0,127,  
     SweepDepthOsc1 = ((float)patch->nrpn_msb_osc1[CCSWEEPDEPTHOSC1]-64.0)/64.0;  	//64,11,0,127,
     SweepTimeOsc1 = pow( (float)patch->nrpn_msb_osc1[CCSWEEPTIMEOSC1]*DIV127, sweepTimeOscGamma)*maxSweepTimeOsc;  	//64,12,0,127,
     BreathDepthOsc1 = ((float)patch->nrpn_msb_osc1[CCBREATHDEPTHOSC1]-64.0)/64.0;  	//64,13,0,127,

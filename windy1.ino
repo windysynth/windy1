@@ -70,116 +70,120 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <SerialFlash.h>
 
 // GUItool: begin automatically generated code
-AudioSynthWaveformDc     dc_timeNoise;   //xy=86.5,979.9999389648438
-AudioSynthWaveformDc     dc_breathLfoFilter3; //xy=90.5,1191.9999389648438
-AudioSynthWaveformSine   sine_lfoFilter3; //xy=105.5,1158.9999389648438
-AudioSynthWaveformDc     dc_portatimef; //xy=111.19999694824219,138.1999969482422
-AudioSynthWaveformDc     dc_portatime;   //xy=116.19999694824219,105
-AudioSynthWaveformDc     dc_pitchbend;   //xy=120.19999694824219,72
-AudioSynthWaveformDc     dc_sweepDepthFilter3; //xy=117.2000732421875,1039.9998168945312
-AudioSynthWaveformDc     dc_breathNoise; //xy=249.20001220703125,942.1999816894531
-AudioEffectMultiply      sq_timeNoise; //xy=249.20001220703125,977.7999877929688
-AudioSynthWaveformDc     dc_sweepDepthFilterSign3; //xy=266.8500061035156,1075.4498901367188
-AudioSynthNoiseWhite     pink_Noise;         //xy=271.20001220703125,892.199951171875
-AudioMixer4              mix_dcStub;     //xy=286.1999969482422,115
-AudioSynthWaveformDc     dc_modOffsetNoiseFilter3; //xy=297.29998779296875,1226.199951171875
-AudioEffectMultiply      mult_lfoDepthFilter3; //xy=302.5,1187.9999389648438
-AudioSynthWaveformDc     dc_breathNoiseFilter3; //xy=304.5,1151.199951171875
-AudioEffectMultiply      sq_swpflt3; //xy=315.4000549316406,1036.7997436523438
-AudioSynthWaveformDc     dc_breathLfoFilter1; //xy=396.20001220703125,635
-AudioSynthWaveformSine   sine_lfoFilter1; //xy=407.20001220703125,609
-AudioMixer4              mix_breathTimeNoise; //xy=439.79998779296875,972.1999816894531
-AudioFilterStateVariable filterPreNoise; //xy=453.20001220703125,909.199951171875
-AudioSynthWaveformDc     dc_sweepDepthOsc1; //xy=460.1999969482422,61
-AudioSynthWaveformDc     dc_breathSweepOsc1; //xy=460.1999969482422,92
-AudioSynthWaveformDc     dc_sweepDepthFilter1; //xy=475.20001220703125,509.0000305175781
-AudioSynthWaveformDc     dc_breathSweepOsc2; //xy=478.1999969482422,308
-AudioSynthWaveformDc     dc_sweepDepthOsc2; //xy=481.1999969482422,276
-AudioSynthWaveformDc     dc_beatOsc1;    //xy=488.1999969482422,124
-AudioSynthWaveformDc     dc_beatOsc2;    //xy=508.1999969482422,340
-AudioEffectMultiply      mlt_DepthFilterSign3; //xy=513.8499755859375,1041.4498901367188
-AudioMixer4              mix_fcModFilter3; //xy=517.4999084472656,1176
-AudioSynthWaveformSine   sine_lfoOsc1;   //xy=540.1999969482422,199
-AudioSynthWaveformDc     dc_pwOsc1;      //xy=542.1999969482422,162
-AudioSynthWaveformSine   sine_lfoOsc2;   //xy=543.2000122070312,413.0000305175781
-AudioSynthWaveformDc     dc_pwOsc2;      //xy=558.1999969482422,375
-AudioSynthWaveformDc     dc_modOffsetOscFilter1; //xy=592,664.2000122070312
-AudioEffectMultiply      mult_lfoDepthFilter1; //xy=600.2000122070312,631
-AudioSynthWaveformDc     dc_sweepDepthFilterSign1; //xy=601.0499877929688,543.8499755859375
-AudioSynthWaveformDc     dc_breathOscFilter1;      //xy=603.2000122070312,599
-AudioEffectMultiply      multiply2;      //xy=631.2000122070312,969.9999389648438
-AudioEffectMultiply      sq_swpflt1; //xy=662.4000244140625,507.8000183105469
-AudioMixer4              mix_pitchModOsc1; //xy=682.1999969482422,105
-AudioMixer4              mix_pwOsc1;     //xy=699.1999969482422,186
-AudioMixer4              mix_pitchModOsc2; //xy=699.1999969482422,308
-AudioMixer4              mix_delayFeedback; //xy=695.199951171875,1569.99951171875
-AudioSynthWaveformDc     dc_breathLfoFilter4; //xy=699.2000122070312,1277.9999389648438
-AudioSynthWaveformSine   sine_lfoFilter4; //xy=706.2000122070312,1240.9999389648438
-AudioMixer4              mix_pwOsc2;     //xy=715.1999969482422,399
-AudioSynthWaveformDc     dc_sweepDepthFilter4; //xy=734.199951171875,1123
-AudioMixer4              mix_fcModFilter3_sweep; //xy=734.5999755859375,1064.199951171875
-AudioMixer4              mix_levelNoise; //xy=789.2000122070312,988.9999389648438
-AudioMixer4              mix_fcModFilter1; //xy=843.2000122070312,642
-AudioEffectMultiply      mlt_DepthFilterSign1; //xy=853.0499877929688,543.8499755859375
-AudioSynthWaveformDc     dc_sweepDepthFilterSign4; //xy=868.8499755859375,1161.449951171875
-AudioFilterStateVariable filterPostDelay; //xy=870.2000732421875,1696.1997680664062
-AudioSynthWaveformModulated wfmod_triOsc1;  //xy=887.1999969482422,129
-AudioSynthWaveformModulated wfmod_sawOsc1;  //xy=893.1999969482422,97
-AudioSynthWaveformModulated wfmod_pulseOsc1; //xy=893.1999969482422,160
-AudioSynthWaveformDc     dc_breathLfoFilter2; //xy=890.199951171875,937.9999389648438
-AudioEffectDelay         dly_delayEffects; //xy=889.199951171875,1568.9996337890625
-AudioSynthWaveformSine   sine_lfoFilter2; //xy=893.199951171875,902.9999389648438
-AudioSynthWaveformModulated wfmod_triOsc2;  //xy=902.1999969482422,313
-AudioEffectMultiply      mult_lfoDepthFilter4; //xy=902.199951171875,1258.9999389648438
-AudioSynthWaveformDc     dc_sweepDepthFilter2; //xy=904.199951171875,812.9999389648438
-AudioSynthWaveformModulated wfmod_sawOsc2;  //xy=907.1999969482422,282
-AudioSynthWaveformDc     dc_breathNoiseFilter4; //xy=907.199951171875,1224.199951171875
-AudioSynthWaveformDc     dc_modOffsetNoiseFilter4; //xy=910,1325.199951171875
-AudioSynthWaveformModulated wfmod_pulseOsc2; //xy=915.1999969482422,345
-AudioEffectMultiply      sq_swpflt4; //xy=917.4000244140625,1125.7999267578125
-AudioFilterStateVariable filter3;        //xy=942.2000122070312,1073.9999389648438
-AudioSynthWaveformDc     dc_breathThreshOsc2; //xy=1032.2000122070312,240.1999969482422
-AudioSynthWaveformDc     dc_breathThreshOsc1;            //xy=1038.2000122070312,46.19999694824219
-AudioSynthWaveformDc     dc_sweepDepthFilterSign2; //xy=1048.050048828125,844.8499145507812
-AudioMixer4              mix_osc1;       //xy=1083.1999969482422,134
-AudioSynthWaveformDc     dc_modOffsetOscFilter2; //xy=1088,1010.199951171875
-AudioMixer4              mix_fcModFilter1_sweep; //xy=1091.2000732421875,638
-AudioEffectMultiply      mult_lfoDepthFilter2; //xy=1094.199951171875,947.9999389648438
-AudioEffectMultiply      sq_swpflt2; //xy=1097.4000244140625,811.7999267578125
-AudioSynthWaveformDc     dc_breathOscFilter2; //xy=1098.199951171875,912.199951171875
-AudioMixer4              mix_osc2;       //xy=1106.1999969482422,312
-AudioMixer4              mix_ntcFilter3; //xy=1107.199951171875,1072.9999389648438
-AudioMixer4              mix_delayLevel; //xy=1110.199951171875,1498.999755859375
-AudioEffectMultiply      mlt_DepthFilterSign4; //xy=1111.8499755859375,1131.449951171875
-AudioMixer4              mix_fcModFilter4; //xy=1162.199951171875,1280.9999389648438
-AudioEffectChorus        chor_chorusEffects; //xy=1217.1999816894531,1702.999755859375
-AudioMixer4              mix_xfade;      //xy=1252.1999969482422,98
-AudioEffectReverb        rvb_reverb;        //xy=1248.199951171875,1648.1997680664062
-AudioEffectFreeverb      freeverb1;      //xy=1261.199951171875,1544.1998291015625
-AudioFilterStateVariable filter1;        //xy=1300.199951171875,634
-AudioEffectMultiply      mlt_DepthFilterSign2; //xy=1310.050048828125,826.8499145507812
-AudioMixer4              mix_fcModFilter2; //xy=1320.199951171875,983.9999389648438
-AudioMixer4              mix_fcModFilter4_sweep; //xy=1366.1999053955078,1135.7999267578125
-AudioEffectMultiply      mult_thCurveOsc2; //xy=1387.1999969482422,274
-AudioMixer4              mix_fcModFilter2_sweep; //xy=1413.4000244140625,914.9999389648438
-AudioEffectMultiply      mult_thCurveOsc1; //xy=1421.1999969482422,153
-AudioMixer4              mix_reverb; //xy=1416.5999755859375,1550.1998901367188
-AudioEffectGranular      granular1;      //xy=1441.1999969482422,1696.1998748779297
-AudioMixer4              mix_ntcFilter1; //xy=1456.199951171875,628
-AudioEffectFlange        flange1;        //xy=1512.1999969482422,1653.1998748779297
-AudioFilterStateVariable filter4;        //xy=1546.1999053955078,1104.9999389648438
-AudioMixer4              mix_oscLevels;  //xy=1608.199951171875,210
-AudioFilterStateVariable filter2;        //xy=1616.199951171875,905.9999389648438
-AudioFilterStateVariable filterPreMixLP; //xy=1618.699951171875,1485.4500122070312
-AudioInputI2S            i2s2;           //xy=1640.199951171875,1610.1997680664062
-AudioMixer4              mix_ntcFilter4; //xy=1708.199951171875,1092.9999389648438
-AudioMixer4              mix_lineIn; //xy=1790.199951171875,1562.5999145507812
-AudioMixer4              mix_ntcFilter2; //xy=1806.199951171875,890.9999389648438
-AudioFilterFIR           fir_formant;    //xy=1858.199951171875,954.9999694824219
-AudioMixer4              mix_Amp;        //xy=1878.199951171875,1103.9999389648438
-AudioFilterStateVariable filterPreMixHP; //xy=1956.199951171875,1535.2000122070312
-AudioFilterStateVariable filter5; //xy=2036.699951171875,1113.4498901367188
-AudioOutputI2S           i2s1;           //xy=2143.199951171875,1555.9999389648438
+AudioSynthWaveformDc     dc_timeNoise;   //xy=249.78338623046875,1085
+AudioSynthWaveformDc     dc_breathLfoFilter3; //xy=253.78338623046875,1297
+AudioSynthWaveformSine   sine_lfoFilter3; //xy=268.78338623046875,1264
+AudioSynthWaveformDc     dc_portatimef;  //xy=274.78338623046875,244
+AudioSynthWaveformDc     dc_portatime;   //xy=279.78338623046875,211
+AudioSynthWaveformDc     dc_pitchbend;   //xy=283.78338623046875,178
+AudioSynthWaveformDc     dc_sweepDepthFilter3; //xy=280.78338623046875,1145
+AudioSynthWaveformDc     dc_breathNoise; //xy=412.78338623046875,1048
+AudioEffectMultiply      sq_timeNoise;   //xy=412.78338623046875,1083
+AudioSynthWaveformDc     dc_sweepDepthFilterSign3; //xy=429.78338623046875,1181
+AudioSynthNoiseWhite     pink_Noise;     //xy=434.78338623046875,998
+AudioSynthWaveformSine   sine_lfoOsc1;   //xy=448.78338623046875,328
+AudioMixer4              mix_dcStub;     //xy=449.78338623046875,221
+AudioSynthWaveformDc     dc_pwOsc1;      //xy=450.78338623046875,291
+AudioSynthWaveformDc     dc_modOffsetNoiseFilter3; //xy=460.78338623046875,1332
+AudioEffectMultiply      mult_lfoDepthFilter3; //xy=465.78338623046875,1293
+AudioSynthWaveformDc     dc_breathNoiseFilter3; //xy=467.78338623046875,1257
+AudioSynthWaveformSine   sine_lfoOsc2;   //xy=480.78338623046875,513
+AudioEffectMultiply      sq_swpflt3;     //xy=478.78338623046875,1142
+AudioSynthWaveformDc     dc_pwOsc2;      //xy=495.78338623046875,475
+AudioSynthWaveformDc     dc_breathLfoFilter1; //xy=559.7833862304688,741
+AudioSynthWaveformSine   sine_lfoFilter1; //xy=570.7833862304688,715
+AudioMixer4              mix_breathTimeNoise; //xy=602.7833862304688,1078
+AudioSynthWaveformDc     dc_wfoldOsc1;            //xy=613,343
+AudioMixer4              mix_pwOsc1;     //xy=614.7833862304688,291
+AudioFilterStateVariable filterPreNoise; //xy=616.7833862304688,1015
+AudioSynthWaveformDc     dc_sweepDepthOsc1; //xy=623.7833862304688,167
+AudioSynthWaveformDc     dc_breathSweepOsc1; //xy=623.7833862304688,198
+AudioSynthWaveformDc     dc_sweepDepthFilter1; //xy=638.7833862304688,615
+AudioSynthWaveformDc     dc_breathSweepOsc2; //xy=641.7833862304688,414
+AudioSynthWaveformDc     dc_sweepDepthOsc2; //xy=644.7833862304688,382
+AudioSynthWaveformDc     dc_wfoldOsc2; //xy=647,555
+AudioSynthWaveformDc     dc_beatOsc1;    //xy=651.7833862304688,230
+AudioMixer4              mix_pwOsc2;     //xy=652.7833862304688,499
+AudioSynthWaveformDc     dc_beatOsc2;    //xy=671.7833862304688,446
+AudioEffectMultiply      mlt_DepthFilterSign3; //xy=676.7833862304688,1147
+AudioMixer4              mix_fcModFilter3; //xy=680.7833862304688,1282
+AudioSynthWaveformDc     dc_modOffsetOscFilter1; //xy=755.7833862304688,770
+AudioEffectMultiply      mult_lfoDepthFilter1; //xy=763.7833862304688,737
+AudioSynthWaveformDc     dc_sweepDepthFilterSign1; //xy=764.7833862304688,649
+AudioSynthWaveformDc     dc_breathOscFilter1; //xy=766.7833862304688,705
+AudioEffectMultiply      multiply2;      //xy=794.7833862304688,1075
+AudioEffectWaveFolder    wavefolder_pwOsc1;    //xy=813,307
+AudioEffectMultiply      sq_swpflt1;     //xy=825.7833862304688,613
+AudioMixer4              mix_pitchModOsc1; //xy=845.7833862304688,211
+AudioMixer4              mix_pitchModOsc2; //xy=862.7833862304688,414
+AudioMixer4              mix_delayFeedback; //xy=858.7833862304688,1675
+AudioSynthWaveformDc     dc_breathLfoFilter4; //xy=862.7833862304688,1383
+AudioSynthWaveformSine   sine_lfoFilter4; //xy=869.7833862304688,1346
+AudioEffectWaveFolder    wavefolder_pwOsc2; //xy=880,485
+AudioMixer4              mix_fcModFilter3_sweep; //xy=897.7833862304688,1170
+AudioSynthWaveformDc     dc_sweepDepthFilter4; //xy=897.7833862304688,1229
+AudioMixer4              mix_levelNoise; //xy=952.7833862304688,1094
+AudioMixer4              mix_fcModFilter1; //xy=1006.7833862304688,748
+AudioEffectMultiply      mlt_DepthFilterSign1; //xy=1016.7833862304688,649
+AudioSynthWaveformDc     dc_sweepDepthFilterSign4; //xy=1031.7833862304688,1267
+AudioFilterStateVariable filterPostDelay; //xy=1033.7833862304688,1802
+AudioSynthWaveformDc     dc_sweepDepthFilter2; //xy=1044.7833251953125,913
+AudioSynthWaveformModulated wfmod_triOsc1;  //xy=1050.7833862304688,235
+AudioSynthWaveformModulated wfmod_sawOsc1;  //xy=1056.7833862304688,203
+AudioSynthWaveformModulated wfmod_pulseOsc1; //xy=1056.7833862304688,266
+AudioSynthWaveformDc     dc_breathLfoFilter2; //xy=1053.7833862304688,1043
+AudioEffectDelay         dly_delayEffects; //xy=1052.7833862304688,1674
+AudioSynthWaveformSine   sine_lfoFilter2; //xy=1056.7833862304688,1008
+AudioSynthWaveformModulated wfmod_triOsc2;  //xy=1065.7833862304688,419
+AudioEffectMultiply      mult_lfoDepthFilter4; //xy=1065.7833862304688,1364
+AudioSynthWaveformModulated wfmod_sawOsc2;  //xy=1070.7833862304688,388
+AudioSynthWaveformDc     dc_breathNoiseFilter4; //xy=1070.7833862304688,1330
+AudioSynthWaveformDc     dc_modOffsetNoiseFilter4; //xy=1073.7833862304688,1431
+AudioSynthWaveformModulated wfmod_pulseOsc2; //xy=1078.7833862304688,451
+AudioEffectMultiply      sq_swpflt4;     //xy=1080.7833862304688,1231
+AudioFilterStateVariable filter3;        //xy=1105.7833862304688,1179
+AudioSynthWaveformDc     dc_breathThreshOsc2; //xy=1195.7833862304688,346
+AudioSynthWaveformDc     dc_breathThreshOsc1; //xy=1201.7833862304688,152
+AudioSynthWaveformDc     dc_sweepDepthFilterSign2; //xy=1211.7833862304688,950
+AudioMixer4              mix_osc1;       //xy=1246.7833862304688,240
+AudioSynthWaveformDc     dc_modOffsetOscFilter2; //xy=1251.7833862304688,1116
+AudioMixer4              mix_fcModFilter1_sweep; //xy=1254.7833862304688,744
+AudioEffectMultiply      mult_lfoDepthFilter2; //xy=1257.7833862304688,1053
+AudioEffectMultiply      sq_swpflt2;     //xy=1260.7833862304688,917
+AudioSynthWaveformDc     dc_breathOscFilter2; //xy=1261.7833862304688,1018
+AudioMixer4              mix_osc2;       //xy=1269.7833862304688,418
+AudioMixer4              mix_ntcFilter3; //xy=1270.7833862304688,1178
+AudioEffectMultiply      mlt_DepthFilterSign4; //xy=1274.7833862304688,1237
+AudioMixer4              mix_delayLevel; //xy=1273.7833862304688,1604
+AudioMixer4              mix_fcModFilter4; //xy=1325.7833862304688,1386
+AudioEffectChorus        chor_chorusEffects; //xy=1380.7833862304688,1808
+AudioMixer4              mix_xfade;      //xy=1415.7833862304688,204
+AudioEffectReverb        rvb_reverb;     //xy=1411.7833862304688,1754
+AudioEffectFreeverb      freeverb1;      //xy=1424.7833862304688,1650
+AudioFilterStateVariable filter1;        //xy=1463.7833862304688,740
+AudioEffectMultiply      mlt_DepthFilterSign2; //xy=1473.7833862304688,932
+AudioMixer4              mix_fcModFilter2; //xy=1483.7833862304688,1089
+AudioMixer4              mix_fcModFilter4_sweep; //xy=1529.7833862304688,1241
+AudioEffectMultiply      mult_thCurveOsc2; //xy=1550.7833862304688,380
+AudioMixer4              mix_fcModFilter2_sweep; //xy=1576.7833862304688,1020
+AudioEffectMultiply      mult_thCurveOsc1; //xy=1584.7833862304688,259
+AudioMixer4              mix_reverb;     //xy=1579.7833862304688,1656
+AudioEffectGranular      granular1;      //xy=1604.7833862304688,1802
+AudioMixer4              mix_ntcFilter1; //xy=1619.7833862304688,734
+AudioEffectFlange        flange1;        //xy=1675.7833862304688,1759
+AudioFilterStateVariable filter4;        //xy=1709.7833862304688,1210
+AudioMixer4              mix_oscLevels;  //xy=1771.7833862304688,316
+AudioFilterStateVariable filter2;        //xy=1779.7833862304688,1011
+AudioFilterStateVariable filterPreMixLP; //xy=1781.7833862304688,1591
+AudioInputI2S            i2s2;           //xy=1803.7833862304688,1716
+AudioMixer4              mix_ntcFilter4; //xy=1871.7833862304688,1198
+AudioMixer4              mix_lineIn;     //xy=1953.7833862304688,1668
+AudioMixer4              mix_ntcFilter2; //xy=1969.7833862304688,996
+AudioFilterFIR           fir_formant;    //xy=2021.7833862304688,1060
+AudioMixer4              mix_Amp;        //xy=2041.7833862304688,1209
+AudioFilterStateVariable filterPreMixHP; //xy=2119.7833862304688,1641
+AudioFilterStateVariable filter5;        //xy=2199.7833862304688,1219
+AudioOutputI2S           i2s1;           //xy=2306.7833862304688,1661
 AudioConnection          patchCord1(dc_timeNoise, 0, sq_timeNoise, 0);
 AudioConnection          patchCord2(dc_timeNoise, 0, sq_timeNoise, 1);
 AudioConnection          patchCord3(dc_breathLfoFilter3, 0, mult_lfoDepthFilter3, 1);
@@ -193,126 +197,130 @@ AudioConnection          patchCord10(dc_breathNoise, 0, mix_breathTimeNoise, 0);
 AudioConnection          patchCord11(sq_timeNoise, 0, mix_breathTimeNoise, 1);
 AudioConnection          patchCord12(dc_sweepDepthFilterSign3, 0, mlt_DepthFilterSign3, 1);
 AudioConnection          patchCord13(pink_Noise, 0, filterPreNoise, 0);
-AudioConnection          patchCord14(dc_modOffsetNoiseFilter3, 0, mix_fcModFilter3, 3);
-AudioConnection          patchCord15(mult_lfoDepthFilter3, 0, mix_fcModFilter3, 1);
-AudioConnection          patchCord16(dc_breathNoiseFilter3, 0, mix_fcModFilter3, 0);
-AudioConnection          patchCord17(sq_swpflt3, 0, mlt_DepthFilterSign3, 0);
-AudioConnection          patchCord18(dc_breathLfoFilter1, 0, mult_lfoDepthFilter1, 1);
-AudioConnection          patchCord19(sine_lfoFilter1, 0, mult_lfoDepthFilter1, 0);
-AudioConnection          patchCord20(mix_breathTimeNoise, 0, multiply2, 1);
-AudioConnection          patchCord21(filterPreNoise, 2, multiply2, 0);
-AudioConnection          patchCord22(dc_sweepDepthOsc1, 0, mix_pitchModOsc1, 0);
-AudioConnection          patchCord23(dc_breathSweepOsc1, 0, mix_pitchModOsc1, 1);
-AudioConnection          patchCord24(dc_sweepDepthFilter1, 0, sq_swpflt1, 0);
-AudioConnection          patchCord25(dc_sweepDepthFilter1, 0, sq_swpflt1, 1);
-AudioConnection          patchCord26(dc_breathSweepOsc2, 0, mix_pitchModOsc2, 1);
-AudioConnection          patchCord27(dc_sweepDepthOsc2, 0, mix_pitchModOsc2, 0);
-AudioConnection          patchCord28(dc_beatOsc1, 0, mix_pitchModOsc1, 2);
-AudioConnection          patchCord29(dc_beatOsc2, 0, mix_pitchModOsc2, 2);
-AudioConnection          patchCord30(mlt_DepthFilterSign3, 0, mix_fcModFilter3_sweep, 0);
-AudioConnection          patchCord31(mix_fcModFilter3, 0, mix_fcModFilter3_sweep, 1);
-AudioConnection          patchCord32(sine_lfoOsc1, 0, mix_pwOsc1, 1);
-AudioConnection          patchCord33(dc_pwOsc1, 0, mix_pwOsc1, 0);
-AudioConnection          patchCord34(sine_lfoOsc2, 0, mix_pwOsc2, 1);
-AudioConnection          patchCord35(dc_pwOsc2, 0, mix_pwOsc2, 0);
-AudioConnection          patchCord36(dc_modOffsetOscFilter1, 0, mix_fcModFilter1, 3);
-AudioConnection          patchCord37(mult_lfoDepthFilter1, 0, mix_fcModFilter1, 1);
-AudioConnection          patchCord38(dc_sweepDepthFilterSign1, 0, mlt_DepthFilterSign1, 1);
-AudioConnection          patchCord39(dc_breathOscFilter1, 0, mix_fcModFilter1, 0);
-AudioConnection          patchCord40(multiply2, 0, mix_levelNoise, 0);
-AudioConnection          patchCord41(sq_swpflt1, 0, mlt_DepthFilterSign1, 0);
-AudioConnection          patchCord42(mix_pitchModOsc1, 0, wfmod_sawOsc1, 0);
-AudioConnection          patchCord43(mix_pitchModOsc1, 0, wfmod_triOsc1, 0);
-AudioConnection          patchCord44(mix_pitchModOsc1, 0, wfmod_pulseOsc1, 0);
-AudioConnection          patchCord45(mix_pwOsc1, 0, wfmod_pulseOsc1, 1);
-AudioConnection          patchCord46(mix_pitchModOsc2, 0, wfmod_sawOsc2, 0);
-AudioConnection          patchCord47(mix_pitchModOsc2, 0, wfmod_triOsc2, 0);
-AudioConnection          patchCord48(mix_pitchModOsc2, 0, wfmod_pulseOsc2, 0);
-AudioConnection          patchCord49(mix_delayFeedback, dly_delayEffects);
-AudioConnection          patchCord50(dc_breathLfoFilter4, 0, mult_lfoDepthFilter4, 1);
-AudioConnection          patchCord51(sine_lfoFilter4, 0, mult_lfoDepthFilter4, 0);
-AudioConnection          patchCord52(mix_pwOsc2, 0, wfmod_pulseOsc2, 1);
-AudioConnection          patchCord53(dc_sweepDepthFilter4, 0, sq_swpflt4, 0);
-AudioConnection          patchCord54(dc_sweepDepthFilter4, 0, sq_swpflt4, 1);
-AudioConnection          patchCord55(mix_fcModFilter3_sweep, 0, filter3, 1);
-AudioConnection          patchCord56(mix_levelNoise, 0, filter3, 0);
-AudioConnection          patchCord57(mix_levelNoise, 0, mix_ntcFilter3, 0);
-AudioConnection          patchCord58(mix_fcModFilter1, 0, mix_fcModFilter1_sweep, 1);
-AudioConnection          patchCord59(mlt_DepthFilterSign1, 0, mix_fcModFilter1_sweep, 0);
-AudioConnection          patchCord60(dc_sweepDepthFilterSign4, 0, mlt_DepthFilterSign4, 1);
-AudioConnection          patchCord61(filterPostDelay, 0, mix_delayLevel, 1);
-AudioConnection          patchCord62(filterPostDelay, 0, mix_delayFeedback, 1);
-AudioConnection          patchCord63(wfmod_triOsc1, 0, mix_osc1, 1);
-AudioConnection          patchCord64(wfmod_sawOsc1, 0, mix_osc1, 0);
-AudioConnection          patchCord65(wfmod_pulseOsc1, 0, mix_osc1, 2);
-AudioConnection          patchCord66(dc_breathLfoFilter2, 0, mult_lfoDepthFilter2, 1);
-AudioConnection          patchCord67(dly_delayEffects, 7, filterPostDelay, 0);
-AudioConnection          patchCord68(sine_lfoFilter2, 0, mult_lfoDepthFilter2, 0);
-AudioConnection          patchCord69(wfmod_triOsc2, 0, mix_osc2, 1);
-AudioConnection          patchCord70(mult_lfoDepthFilter4, 0, mix_fcModFilter4, 1);
-AudioConnection          patchCord71(dc_sweepDepthFilter2, 0, sq_swpflt2, 0);
-AudioConnection          patchCord72(dc_sweepDepthFilter2, 0, sq_swpflt2, 1);
-AudioConnection          patchCord73(wfmod_sawOsc2, 0, mix_osc2, 0);
-AudioConnection          patchCord74(dc_breathNoiseFilter4, 0, mix_fcModFilter4, 0);
-AudioConnection          patchCord75(dc_modOffsetNoiseFilter4, 0, mix_fcModFilter4, 3);
-AudioConnection          patchCord76(wfmod_pulseOsc2, 0, mix_osc2, 2);
-AudioConnection          patchCord77(sq_swpflt4, 0, mlt_DepthFilterSign4, 0);
-AudioConnection          patchCord78(filter3, 0, mix_ntcFilter3, 1);
-AudioConnection          patchCord79(filter3, 1, mix_ntcFilter3, 2);
-AudioConnection          patchCord80(filter3, 2, mix_ntcFilter3, 3);
-AudioConnection          patchCord81(dc_breathThreshOsc2, 0, mult_thCurveOsc2, 0);
-AudioConnection          patchCord82(dc_breathThreshOsc2, 0, mix_xfade, 1);
-AudioConnection          patchCord83(dc_breathThreshOsc1, 0, mix_xfade, 0);
-AudioConnection          patchCord84(dc_sweepDepthFilterSign2, 0, mlt_DepthFilterSign2, 1);
-AudioConnection          patchCord85(mix_osc1, 0, mult_thCurveOsc1, 1);
-AudioConnection          patchCord86(dc_modOffsetOscFilter2, 0, mix_fcModFilter2, 3);
-AudioConnection          patchCord87(mix_fcModFilter1_sweep, 0, filter1, 1);
-AudioConnection          patchCord88(mult_lfoDepthFilter2, 0, mix_fcModFilter2, 1);
-AudioConnection          patchCord89(sq_swpflt2, 0, mlt_DepthFilterSign2, 0);
-AudioConnection          patchCord90(dc_breathOscFilter2, 0, mix_fcModFilter2, 0);
-AudioConnection          patchCord91(mix_osc2, 0, mult_thCurveOsc2, 1);
-AudioConnection          patchCord92(mix_ntcFilter3, 0, filter4, 0);
-AudioConnection          patchCord93(mix_ntcFilter3, 0, mix_ntcFilter4, 0);
-AudioConnection          patchCord94(mix_delayLevel, freeverb1);
-AudioConnection          patchCord95(mix_delayLevel, 0, mix_reverb, 0);
-AudioConnection          patchCord96(mlt_DepthFilterSign4, 0, mix_fcModFilter4_sweep, 0);
-AudioConnection          patchCord97(mix_fcModFilter4, 0, mix_fcModFilter4_sweep, 1);
-AudioConnection          patchCord98(mix_xfade, 0, mult_thCurveOsc1, 0);
-AudioConnection          patchCord99(freeverb1, 0, mix_reverb, 1);
-AudioConnection          patchCord100(filter1, 0, mix_ntcFilter1, 1);
-AudioConnection          patchCord101(filter1, 1, mix_ntcFilter1, 2);
-AudioConnection          patchCord102(filter1, 2, mix_ntcFilter1, 3);
-AudioConnection          patchCord103(mlt_DepthFilterSign2, 0, mix_fcModFilter2_sweep, 0);
-AudioConnection          patchCord104(mix_fcModFilter2, 0, mix_fcModFilter2_sweep, 1);
-AudioConnection          patchCord105(mix_fcModFilter4_sweep, 0, filter4, 1);
-AudioConnection          patchCord106(mult_thCurveOsc2, 0, mix_oscLevels, 1);
-AudioConnection          patchCord107(mix_fcModFilter2_sweep, 0, filter2, 1);
-AudioConnection          patchCord108(mult_thCurveOsc1, 0, mix_oscLevels, 0);
-AudioConnection          patchCord109(mix_reverb, 0, filterPreMixLP, 0);
-AudioConnection          patchCord110(mix_ntcFilter1, 0, filter2, 0);
-AudioConnection          patchCord111(mix_ntcFilter1, 0, mix_ntcFilter2, 0);
-AudioConnection          patchCord112(filter4, 0, mix_ntcFilter4, 1);
-AudioConnection          patchCord113(filter4, 1, mix_ntcFilter4, 2);
-AudioConnection          patchCord114(filter4, 2, mix_ntcFilter4, 3);
-AudioConnection          patchCord115(mix_oscLevels, 0, filter1, 0);
-AudioConnection          patchCord116(mix_oscLevels, 0, mix_ntcFilter1, 0);
-AudioConnection          patchCord117(filter2, 0, mix_ntcFilter2, 1);
-AudioConnection          patchCord118(filter2, 1, mix_ntcFilter2, 2);
-AudioConnection          patchCord119(filter2, 2, mix_ntcFilter2, 3);
-AudioConnection          patchCord120(filterPreMixLP, 0, mix_lineIn, 0);
-AudioConnection          patchCord121(filterPreMixLP, 1, mix_lineIn, 1);
-AudioConnection          patchCord122(i2s2, 0, mix_lineIn, 2);
-AudioConnection          patchCord123(i2s2, 1, mix_lineIn, 3);
-AudioConnection          patchCord124(mix_ntcFilter4, 0, mix_Amp, 1);
-AudioConnection          patchCord125(mix_lineIn, 0, filterPreMixHP, 0);
-AudioConnection          patchCord126(mix_ntcFilter2, fir_formant);
-AudioConnection          patchCord127(fir_formant, 0, mix_Amp, 0);
-AudioConnection          patchCord128(mix_Amp, 0, filter5, 0);
-AudioConnection          patchCord129(filterPreMixHP, 2, i2s1, 0);
-AudioConnection          patchCord130(filterPreMixHP, 2, i2s1, 1);
-AudioConnection          patchCord131(filter5, 2, mix_delayFeedback, 0);
-AudioConnection          patchCord132(filter5, 2, mix_delayLevel, 0);
-AudioControlSGTL5000     sgtl5000_1;     //xy=250.1999969482422,172
+AudioConnection          patchCord14(sine_lfoOsc1, 0, mix_pwOsc1, 1);
+AudioConnection          patchCord15(dc_pwOsc1, 0, mix_pwOsc1, 0);
+AudioConnection          patchCord16(dc_modOffsetNoiseFilter3, 0, mix_fcModFilter3, 3);
+AudioConnection          patchCord17(mult_lfoDepthFilter3, 0, mix_fcModFilter3, 1);
+AudioConnection          patchCord18(dc_breathNoiseFilter3, 0, mix_fcModFilter3, 0);
+AudioConnection          patchCord19(sine_lfoOsc2, 0, mix_pwOsc2, 1);
+AudioConnection          patchCord20(sq_swpflt3, 0, mlt_DepthFilterSign3, 0);
+AudioConnection          patchCord21(dc_pwOsc2, 0, mix_pwOsc2, 0);
+AudioConnection          patchCord22(dc_breathLfoFilter1, 0, mult_lfoDepthFilter1, 1);
+AudioConnection          patchCord23(sine_lfoFilter1, 0, mult_lfoDepthFilter1, 0);
+AudioConnection          patchCord24(mix_breathTimeNoise, 0, multiply2, 1);
+AudioConnection          patchCord25(dc_wfoldOsc1, 0, wavefolder_pwOsc1, 1);
+AudioConnection          patchCord26(mix_pwOsc1, 0, wavefolder_pwOsc1, 0);
+AudioConnection          patchCord27(filterPreNoise, 2, multiply2, 0);
+AudioConnection          patchCord28(dc_sweepDepthOsc1, 0, mix_pitchModOsc1, 0);
+AudioConnection          patchCord29(dc_breathSweepOsc1, 0, mix_pitchModOsc1, 1);
+AudioConnection          patchCord30(dc_sweepDepthFilter1, 0, sq_swpflt1, 0);
+AudioConnection          patchCord31(dc_sweepDepthFilter1, 0, sq_swpflt1, 1);
+AudioConnection          patchCord32(dc_breathSweepOsc2, 0, mix_pitchModOsc2, 1);
+AudioConnection          patchCord33(dc_sweepDepthOsc2, 0, mix_pitchModOsc2, 0);
+AudioConnection          patchCord34(dc_wfoldOsc2, 0, wavefolder_pwOsc2, 1);
+AudioConnection          patchCord35(dc_beatOsc1, 0, mix_pitchModOsc1, 2);
+AudioConnection          patchCord36(mix_pwOsc2, 0, wavefolder_pwOsc2, 0);
+AudioConnection          patchCord37(dc_beatOsc2, 0, mix_pitchModOsc2, 2);
+AudioConnection          patchCord38(mlt_DepthFilterSign3, 0, mix_fcModFilter3_sweep, 0);
+AudioConnection          patchCord39(mix_fcModFilter3, 0, mix_fcModFilter3_sweep, 1);
+AudioConnection          patchCord40(dc_modOffsetOscFilter1, 0, mix_fcModFilter1, 3);
+AudioConnection          patchCord41(mult_lfoDepthFilter1, 0, mix_fcModFilter1, 1);
+AudioConnection          patchCord42(dc_sweepDepthFilterSign1, 0, mlt_DepthFilterSign1, 1);
+AudioConnection          patchCord43(dc_breathOscFilter1, 0, mix_fcModFilter1, 0);
+AudioConnection          patchCord44(multiply2, 0, mix_levelNoise, 0);
+AudioConnection          patchCord45(wavefolder_pwOsc1, 0, wfmod_pulseOsc1, 1);
+AudioConnection          patchCord46(sq_swpflt1, 0, mlt_DepthFilterSign1, 0);
+AudioConnection          patchCord47(mix_pitchModOsc1, 0, wfmod_sawOsc1, 0);
+AudioConnection          patchCord48(mix_pitchModOsc1, 0, wfmod_triOsc1, 0);
+AudioConnection          patchCord49(mix_pitchModOsc1, 0, wfmod_pulseOsc1, 0);
+AudioConnection          patchCord50(mix_pitchModOsc2, 0, wfmod_sawOsc2, 0);
+AudioConnection          patchCord51(mix_pitchModOsc2, 0, wfmod_triOsc2, 0);
+AudioConnection          patchCord52(mix_pitchModOsc2, 0, wfmod_pulseOsc2, 0);
+AudioConnection          patchCord53(mix_delayFeedback, dly_delayEffects);
+AudioConnection          patchCord54(dc_breathLfoFilter4, 0, mult_lfoDepthFilter4, 1);
+AudioConnection          patchCord55(sine_lfoFilter4, 0, mult_lfoDepthFilter4, 0);
+AudioConnection          patchCord56(wavefolder_pwOsc2, 0, wfmod_pulseOsc2, 1);
+AudioConnection          patchCord57(mix_fcModFilter3_sweep, 0, filter3, 1);
+AudioConnection          patchCord58(dc_sweepDepthFilter4, 0, sq_swpflt4, 0);
+AudioConnection          patchCord59(dc_sweepDepthFilter4, 0, sq_swpflt4, 1);
+AudioConnection          patchCord60(mix_levelNoise, 0, filter3, 0);
+AudioConnection          patchCord61(mix_levelNoise, 0, mix_ntcFilter3, 0);
+AudioConnection          patchCord62(mix_fcModFilter1, 0, mix_fcModFilter1_sweep, 1);
+AudioConnection          patchCord63(mlt_DepthFilterSign1, 0, mix_fcModFilter1_sweep, 0);
+AudioConnection          patchCord64(dc_sweepDepthFilterSign4, 0, mlt_DepthFilterSign4, 1);
+AudioConnection          patchCord65(filterPostDelay, 0, mix_delayLevel, 1);
+AudioConnection          patchCord66(filterPostDelay, 0, mix_delayFeedback, 1);
+AudioConnection          patchCord67(dc_sweepDepthFilter2, 0, sq_swpflt2, 0);
+AudioConnection          patchCord68(dc_sweepDepthFilter2, 0, sq_swpflt2, 1);
+AudioConnection          patchCord69(wfmod_triOsc1, 0, mix_osc1, 1);
+AudioConnection          patchCord70(wfmod_sawOsc1, 0, mix_osc1, 0);
+AudioConnection          patchCord71(wfmod_pulseOsc1, 0, mix_osc1, 2);
+AudioConnection          patchCord72(dc_breathLfoFilter2, 0, mult_lfoDepthFilter2, 1);
+AudioConnection          patchCord73(dly_delayEffects, 7, filterPostDelay, 0);
+AudioConnection          patchCord74(sine_lfoFilter2, 0, mult_lfoDepthFilter2, 0);
+AudioConnection          patchCord75(wfmod_triOsc2, 0, mix_osc2, 1);
+AudioConnection          patchCord76(mult_lfoDepthFilter4, 0, mix_fcModFilter4, 1);
+AudioConnection          patchCord77(wfmod_sawOsc2, 0, mix_osc2, 0);
+AudioConnection          patchCord78(dc_breathNoiseFilter4, 0, mix_fcModFilter4, 0);
+AudioConnection          patchCord79(dc_modOffsetNoiseFilter4, 0, mix_fcModFilter4, 3);
+AudioConnection          patchCord80(wfmod_pulseOsc2, 0, mix_osc2, 2);
+AudioConnection          patchCord81(sq_swpflt4, 0, mlt_DepthFilterSign4, 0);
+AudioConnection          patchCord82(filter3, 0, mix_ntcFilter3, 1);
+AudioConnection          patchCord83(filter3, 1, mix_ntcFilter3, 2);
+AudioConnection          patchCord84(filter3, 2, mix_ntcFilter3, 3);
+AudioConnection          patchCord85(dc_breathThreshOsc2, 0, mult_thCurveOsc2, 0);
+AudioConnection          patchCord86(dc_breathThreshOsc2, 0, mix_xfade, 1);
+AudioConnection          patchCord87(dc_breathThreshOsc1, 0, mix_xfade, 0);
+AudioConnection          patchCord88(dc_sweepDepthFilterSign2, 0, mlt_DepthFilterSign2, 1);
+AudioConnection          patchCord89(mix_osc1, 0, mult_thCurveOsc1, 1);
+AudioConnection          patchCord90(dc_modOffsetOscFilter2, 0, mix_fcModFilter2, 3);
+AudioConnection          patchCord91(mix_fcModFilter1_sweep, 0, filter1, 1);
+AudioConnection          patchCord92(mult_lfoDepthFilter2, 0, mix_fcModFilter2, 1);
+AudioConnection          patchCord93(sq_swpflt2, 0, mlt_DepthFilterSign2, 0);
+AudioConnection          patchCord94(dc_breathOscFilter2, 0, mix_fcModFilter2, 0);
+AudioConnection          patchCord95(mix_osc2, 0, mult_thCurveOsc2, 1);
+AudioConnection          patchCord96(mix_ntcFilter3, 0, filter4, 0);
+AudioConnection          patchCord97(mix_ntcFilter3, 0, mix_ntcFilter4, 0);
+AudioConnection          patchCord98(mlt_DepthFilterSign4, 0, mix_fcModFilter4_sweep, 0);
+AudioConnection          patchCord99(mix_delayLevel, freeverb1);
+AudioConnection          patchCord100(mix_delayLevel, 0, mix_reverb, 0);
+AudioConnection          patchCord101(mix_fcModFilter4, 0, mix_fcModFilter4_sweep, 1);
+AudioConnection          patchCord102(mix_xfade, 0, mult_thCurveOsc1, 0);
+AudioConnection          patchCord103(freeverb1, 0, mix_reverb, 1);
+AudioConnection          patchCord104(filter1, 0, mix_ntcFilter1, 1);
+AudioConnection          patchCord105(filter1, 1, mix_ntcFilter1, 2);
+AudioConnection          patchCord106(filter1, 2, mix_ntcFilter1, 3);
+AudioConnection          patchCord107(mlt_DepthFilterSign2, 0, mix_fcModFilter2_sweep, 0);
+AudioConnection          patchCord108(mix_fcModFilter2, 0, mix_fcModFilter2_sweep, 1);
+AudioConnection          patchCord109(mix_fcModFilter4_sweep, 0, filter4, 1);
+AudioConnection          patchCord110(mult_thCurveOsc2, 0, mix_oscLevels, 1);
+AudioConnection          patchCord111(mix_fcModFilter2_sweep, 0, filter2, 1);
+AudioConnection          patchCord112(mult_thCurveOsc1, 0, mix_oscLevels, 0);
+AudioConnection          patchCord113(mix_reverb, 0, filterPreMixLP, 0);
+AudioConnection          patchCord114(mix_ntcFilter1, 0, filter2, 0);
+AudioConnection          patchCord115(mix_ntcFilter1, 0, mix_ntcFilter2, 0);
+AudioConnection          patchCord116(filter4, 0, mix_ntcFilter4, 1);
+AudioConnection          patchCord117(filter4, 1, mix_ntcFilter4, 2);
+AudioConnection          patchCord118(filter4, 2, mix_ntcFilter4, 3);
+AudioConnection          patchCord119(mix_oscLevels, 0, filter1, 0);
+AudioConnection          patchCord120(mix_oscLevels, 0, mix_ntcFilter1, 0);
+AudioConnection          patchCord121(filter2, 0, mix_ntcFilter2, 1);
+AudioConnection          patchCord122(filter2, 1, mix_ntcFilter2, 2);
+AudioConnection          patchCord123(filter2, 2, mix_ntcFilter2, 3);
+AudioConnection          patchCord124(filterPreMixLP, 0, mix_lineIn, 0);
+AudioConnection          patchCord125(filterPreMixLP, 1, mix_lineIn, 1);
+AudioConnection          patchCord126(i2s2, 0, mix_lineIn, 2);
+AudioConnection          patchCord127(i2s2, 1, mix_lineIn, 3);
+AudioConnection          patchCord128(mix_ntcFilter4, 0, mix_Amp, 1);
+AudioConnection          patchCord129(mix_lineIn, 0, filterPreMixHP, 0);
+AudioConnection          patchCord130(mix_ntcFilter2, fir_formant);
+AudioConnection          patchCord131(fir_formant, 0, mix_Amp, 0);
+AudioConnection          patchCord132(mix_Amp, 0, filter5, 0);
+AudioConnection          patchCord133(filterPreMixHP, 2, i2s1, 0);
+AudioConnection          patchCord134(filterPreMixHP, 2, i2s1, 1);
+AudioConnection          patchCord135(filter5, 2, mix_delayFeedback, 0);
+AudioConnection          patchCord136(filter5, 2, mix_delayLevel, 0);
+AudioControlSGTL5000     sgtl5000_1;     //xy=256.78338623046875,288
 // GUItool: end automatically generated code
 
 //-------- paste above here Auto generated code from Audio System Design Tooll --------
@@ -456,7 +464,7 @@ float Octavef = 0.0;
 
 // synth variable limits and references
 float maxPwmLfoFreq = 10.0;         // 4000s is 10 Hz at 100%
-float maxPwmDepthOsc = 0.60;        // 4000s is +/- 30% at 100% depth
+float maxPwmDepthOsc = 0.50;        // 4000s is +/- 25% at 100% depth
 float maxSweepTimeOsc = 1500.0;       // TODO: set this to match 4000s
 float sweepTimeOscGamma = 4.0;       // TODO: adjust this to match 4000s
 float maxSweepTimeOscFilter = 2000.0; // 255.0;
@@ -499,7 +507,7 @@ float freqOscFilterOctaveOffset  = 0.0;    // use 3 to divide FreqOscFilterN by 
 float fOFOFactor = 1.0; 
 //float fOFOHack = freqOscFilterOctaveOffset/octaveControlFilter1;
 float fOFOHack = 0;
-float maxFilterFreq = 12000.0; 
+float maxFilterFreq = 20000; //12000.0; 
 float minFilterFreq = 65.4; // min note number 36
 float minFilterPreNoiseFreq = 261.63; // middle C (C4)
 float maxDelayDamp = 3000.0; //TODO: find out correct value
@@ -734,12 +742,18 @@ void setup() {
     sine_lfoOsc1.amplitude(PwmDepthOsc1);
     sine_lfoOsc1.frequency(PwmFreqOsc1);
     dc_pwOsc2.amplitude(PwOsc2); // default 50% dutycycle
+    dc_wfoldOsc1.amplitude(0.0625*2.0); // this value is just to make wavefolder_pwOsc1 work properly
+    dc_wfoldOsc2.amplitude(0.0625*2.0); // this value is just to make wavefolder_pwOsc1 work properly
     sine_lfoOsc2.amplitude(PwmDepthOsc2);
     sine_lfoOsc2.frequency(PwmFreqOsc2);
-    mix_pwOsc1.gain(0,1.0);  // use dc_pwOsc1.ammplitude to adjust
-    mix_pwOsc1.gain(1,maxPwmDepthOsc);  // 
-    mix_pwOsc2.gain(0,1.0);  // use dc_pwOsc1.ammplitude to adjust
-    mix_pwOsc2.gain(1,maxPwmDepthOsc);  //
+    //mix_pwOsc1.gain(0,1.0);  // use dc_pwOsc1.ammplitude to adjust
+    //mix_pwOsc1.gain(1,maxPwmDepthOsc);  // 
+    //mix_pwOsc2.gain(0,1.0);  // use dc_pwOsc1.ammplitude to adjust
+    //mix_pwOsc2.gain(1,maxPwmDepthOsc);  //
+    mix_pwOsc1.gain(0,1.0*0.5);  // use dc_pwOsc1.ammplitude to adjust.  *0.5 then *2.0 in wavefolder
+    mix_pwOsc1.gain(1,maxPwmDepthOsc*0.5);  // 
+    mix_pwOsc2.gain(0,1.0*0.5);  // use dc_pwOsc1.ammplitude to adjust
+    mix_pwOsc2.gain(1,maxPwmDepthOsc*0.5);  //
 
     mix_pitchModOsc1.gain(0, 1.0);  // use dc_sweepDepthOsc1 amplitude 
     mix_pitchModOsc1.gain(1, limitBreathSweepOsc1);  // use dc_breathSweepOsc1 amplitude  
