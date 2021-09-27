@@ -121,11 +121,13 @@ void patchToSynthVariables(patch_t *patch) {
     VibratoAmp = (float)patch->nrpn_msb_common2[CCVIBRATOAMP]*DIV127;  	    //88,0,0,127, (bite tremelo amount)
     AmpLevel = (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127;  	    //88,1,0,127,
     OctButtonLevel = (float)patch->nrpn_msb_common2[CCOCTBUTTONLEVEL]*DIV127;  	    //88,2,0,127,
-    EffectsChorusDelay1 = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY1];  //112,0,0,127, (0 to 127 ms)
-    EffectsChorusMod1 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD1]-64.0)/64.0;  	//112,1,0,127, (-50% to +50%)
+    // flange cuts delay in half, so mult by 2.0 here 
+    EffectsChorusDelay1 = 2.0*44.1*(float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY1];  //112,0,0,127, (0 to 127 ms)*44.1s/ms
+    // 7.0ms*44.1s/ms for range of ChorusMod1 and 2
+    EffectsChorusMod1 = (2.0*44.1)*((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD1]-64.0)/64.0; //112,1,0,127, (-50% to +50%)
     EffectsChorusWet1 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSWET1]-64.0)/64.0;  	//112,2,0,127, neg vals are phase inverted
-    EffectsChorusDelay2 = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2];  //112,3,0,127,
-    EffectsChorusMod2 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD2]-64.0)/64.0;  	//112,4,0,127,
+    EffectsChorusDelay2 = 2.0*44.1*(float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2];  //112,3,0,127,
+    EffectsChorusMod2 = (2.0*44.1)*((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD2]-64.0)/64.0;  	//112,4,0,127,
     EffectsChorusWet2 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSWET2]-64.0)/64.0;  	//112,5,0,127,
     EffectsChorusFeedback = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK]-64.0)/64.0;//112,6,0,127,
     EffectsChorusLfoFreq = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ]/10.0; //112,7,0,127,
