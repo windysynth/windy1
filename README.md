@@ -25,7 +25,7 @@ The Windy 1 mimics the synth inside an EWI 4000 (monophonic only).
         
 
 # Version
-ver 0.23
+ver 0.0.23
  
 # TODO
 * Add Formant Filters
