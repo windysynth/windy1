@@ -91,7 +91,8 @@ void processNrpnMessage()
 }
 
 
-void processUsbMIDI(void) {
+void processUsbMIDI(void) 
+{
   byte type, channel, data1, data2, cable;
     unsigned int sysexSize = 0;
     byte *pSysexData = NULL;
@@ -255,7 +256,8 @@ void processUsbMIDI(void) {
 }
 
 
-void printBytes(const byte *data, unsigned int size) {
+void printBytes(const byte *data, unsigned int size) 
+{
   while (size > 0) {
     byte b = *data++;
     if (b < 16) Serial8.print('0');

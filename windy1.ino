@@ -11,7 +11,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //
 // Windy1 is a teensy 4.1 project and is
 // a MIDI host synthesizer designed 
-// to work with an EWI5000 EWIUSB initially & EWISOLO in future
+// to work with an EWI5000 or EWIUSB initially and an EWISOLO in future
 // The patches are editable with the Vyzex EWI4000S editor software
 // and uses the Teensy Audio Library
 //
@@ -19,17 +19,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // First, to use WAVEFORM_BANDLIMIT_SAWTOOTH with the AudioSynthWaveformModulated
 // you need at least Teensyduino 1.54
 // Next, I had to modify C:\Arduino\hardware\teensy\avr\libraries\Audio\filter_variable.cpp
-//  uncommented line 42 to #define IMPROVE_HIGH_FREQUENCY_ACCURACY
-//  changed constant on line 131
-//		//if (fmult > 5378279) fmult = 5378279;
-//		if (fmult > 4205728) fmult = 4205728; // Tims hack max fmult slightly > 1.0
-//		//if (fmult > 4194303) fmult = 4194303; // Tims hack max fmult = 1.0
-//  This hack keeps the filters from producing really harsh white noise when
+// I've put my hacked version of the file in the repo here and renamed it "filter_variable_dot_cpp.txt"
+// so just rename this to "filter_variable.cpp" and put it wherever your ...\Audio folder is, replacing the original
+// This modified version does the following to AudioFilterStateVariable::update_variable(...) function
+// 1. uncommented line 42 to #define IMPROVE_HIGH_FREQUENCY_ACCURACY
+// 2. Reduced the fmult limit from 5378279 to 2965372 which is equivalent to 0.707
+// 3. Changed the oversampling of filter from 2x to 4x
+//  This allows the filter to be stable with a resonance ('q') down to 0.5, while
+//  still allowing the Cuttoff frequency (Fc) to go up to at least 20kHz.
+//  Without this hack, the filter can produce a really harsh white noise when
 //  the fmult gets too high because of the combnation of:
+//  resonance(), to low e.g 0.707
 //  frequency(),  e.g above 113
-//  resonance(),  e.g 0.707
 //  octaveControl(),  e.g 7.0
-//  Frequency Control input, e.g close to 1.0 
+//  Frequency Control input ("signal"), e.g close to 1.0 
 //  basically if F = Fc*2^(signal*octaves) > 14,744Hz you will get a full volume, random noise 
 //  out of the filter if you don't make this hack.
 //  https://forum.pjrc.com/threads/67358-AudioFilterStateVariable-unwanted-noise
@@ -401,11 +404,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: .22"};
-char str_buf1[64] ={"Version: .22"};
-char str_oledbuf[64] ={"Windy 1, ver: .22"};
+char str_buf[64] ={"version: .23"};
+char str_buf1[64] ={"Version: .23"};
+char str_oledbuf[64] ={"Windy 1, ver: .23"};
 bool PRINT_VALUES_FLAG = true;
-char version_str[] = {"Windy 1, ver: .22"};
+char version_str[] = {"Windy 1, ver: .23"};
 
 
 // globals for loop control
