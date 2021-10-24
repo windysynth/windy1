@@ -404,11 +404,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: .23"};
-char str_buf1[64] ={"Version: .23"};
-char str_oledbuf[64] ={"Windy 1, ver: .23"};
+char str_buf[64] ={"version: 0.0.23"};
+char str_buf1[64] ={"Version: 0.0.23"};
+char str_oledbuf[64] ={"Windy 1, ver: 0.0.23"};
 bool PRINT_VALUES_FLAG = true;
-char version_str[] = {"Windy 1, ver: .23"};
+char version_str[] = {"Windy 1, ver: 0.0.23"};
 
 
 // globals for loop control
