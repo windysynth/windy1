@@ -1,0 +1,37 @@
+oOReboOo, thanks for your kind words. 
+
+Here is a list of some links to tutorials for getting up and running with a Teesnsy 4.1 with audio shield and the Arduino build environment on a PC:
+
+Here is a general tutorial for getting started with a teensy board (it should work with a Teensy 4.1 as well).
+https://www.pjrc.com/teensy/tutorial.html
+
+you'll need at least these two boards...
+https://www.pjrc.com/store/teensy41.html  (you can buy this with or without pins already soldered in)
+https://www.pjrc.com/store/teensy3_audio.html  (be sure to get the TEENSY4_AUDIO not the TEENSY3_AUDIO) 
+and get the Host Cable
+https://www.pjrc.com/store/cable_usb_host_t36.html  
+
+you'll have to do some soldering to get the pins installed. You can buy some of the Header pins from pjrc.com or get them from Amazon or whatever, but they need to be 0.1 inch spacing.  (I'd also get one of those solderless bread board kits with the wires and such if you've never built something like this before).
+
+Teensy Audio Tutorial & Workshop (it uses a Teensy 3.0, but you can could use a Teensy 4.1, though you might have to wire it differently to the buttons and things).
+https://www.youtube.com/watch?v=wqt55OAabVs
+
+Then, just get familiar with getting those to boards working first.
+
+Then to get closer to my project you'll need...
+an oled display:
+Search Amazon for "OLED LCD Display Module SSD1306 IIC 128x32 LCD OLED Screen 3.3V~5V"
+and a rotary encoder knob:
+Search Amazon for "5Pins 360 Degree Rotary Encoder Code Switch Digital Potentiometer with Push Button"
+
+Then the code for the windy1 is here...
+https://github.com/windysynth/windy1
+There is a green button labeled "Code".  Click that to download the Zip file of all the code.
+Unzip it somewhere on your windows computer and open the windy1.ino file from within the ardruino application.
+
+(remember to follow the directions at the top of the windy1.ino file before building the project.)
+
+I hope this helps.
+
+I may at some point follow this video series up with a more detailed getting started video if I get the time.
+
