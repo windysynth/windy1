@@ -18,6 +18,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // There are a couple of tweeks to the Teensy Audio Library
 // First, to use WAVEFORM_BANDLIMIT_SAWTOOTH with the AudioSynthWaveformModulated
 // you need at least Teensyduino 1.54
+//    (remember to: Tools > Board: Teensy 4.1 and Tools > USB Type: Serial + MIDI)
 // Next, I had to modify C:\Arduino\hardware\teensy\avr\libraries\Audio\filter_variable.cpp
 // I've put my hacked version of the file in the repo here and renamed it "filter_variable_dot_cpp.txt"
 // so just rename this to "filter_variable.cpp" and put it wherever your ...\Audio folder is, replacing the original
@@ -404,11 +405,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.23"};
-char str_buf1[64] ={"Version: 0.0.23"};
-char str_oledbuf[64] ={"Windy 1, ver: 0.0.23"};
+char str_buf[64] ={"version: 0.0.25"};
+char str_buf1[64] ={"Version: 0.0.25"};
+char str_oledbuf[64] ={"Windy 1, ver: 0.0.25"};
 bool PRINT_VALUES_FLAG = true;
-char version_str[] = {"Windy 1, ver: 0.0.23"};
+char version_str[] = {"Windy 1, ver: 0.0.25"};
 
 
 // globals for loop control
@@ -1102,7 +1103,7 @@ void setup() {
     }
     else
     {
-        display.setTextSize(1); // configuration of size of caracters caractères
+        display.setTextSize(1); // configuration of size of characters 
         display.setTextColor(WHITE);
         display.clearDisplay(); // erase display
         display.display(); // refresh display
@@ -2030,7 +2031,7 @@ void updateUISM(void)
             }
             if (newKnob)
             {
-                vol = vol + newKnob;
+                vol = vol + newKnob*4;
                 vol = vol < 0 ? 0 : vol >= 100 ? 100 : vol;
                 //volf = ((float)vol)/50.0f;
                 volf = ((float)vol)/100.0f;
@@ -2358,10 +2359,12 @@ void resetUITimeout(void)
 
 void readKnobAndKnobButton(void)
 {
+    int32_t newKnob_temp = 0;
     //--------------------------
     // Read knob and knobButton 
     //--------------------------
-    newKnob = knob.read()/4; //don't need 4X counting mode, so integer div by 4
+    newKnob_temp = knob.read()/4; //don't need 4X counting mode, so integer div by 4
+    newKnob = newKnob_temp > 0 ? 1 : newKnob_temp < 0 ? -1 : 0; //don't need 4X counting mode, so integer div by 4
     knobButton.update();
     currentKnobButtonState = knobButton.read();
     if( !longKnobButtonPressPending && !currentKnobButtonState && (knobButton.duration() > longKnobButtonPressTime) )
