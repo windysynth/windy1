@@ -180,15 +180,17 @@ AudioMixer4              mix_ntcFilter1; //xy=1630.7777709960938,720.61087036132
 AudioEffectFreeverb      freeverb1;      //xy=1661.7777709960938,1691.6108703613281
 AudioFilterStateVariable filter4;        //xy=1720.7777709960938,1196.6108703613281
 AudioMixer4              mix_oscLevels;  //xy=1782.7777709960938,302.6108703613281
+AudioSynthWaveformDc     dc_filterPreMixLP;            //xy=1782.050048828125,1762.050048828125
 AudioFilterStateVariable filter2;        //xy=1790.7777709960938,997.6108703613281
 AudioMixer4              mix_reverb;     //xy=1815.7777709960938,1698.6108703613281
 AudioMixer4              mix_ntcFilter4; //xy=1882.7777709960938,1184.6108703613281
 AudioMixer4              mix_ntcFilter2; //xy=1980.7777709960938,982.6108703613281
-AudioFilterStateVariable filterPreMixLP; //xy=1985.7777709960938,1675.6108703613281
+AudioFilterStateVariable filterPreMixLP; //xy=1989.77783203125,1699.61083984375
+AudioSynthWaveformDc     dc_filterPreMixHP; //xy=1999.6500244140625,1765.550048828125
 AudioFilterFIR           fir_formant;    //xy=2032.7777709960938,1046.6108703613281
 AudioMixer4              mix_Amp;        //xy=2052.7777709960938,1195.6108703613281
 AudioInputI2S            i2s2;           //xy=2171.7777099609375,1780.61083984375
-AudioFilterStateVariable filterPreMixHP; //xy=2181.7777099609375,1672.61083984375
+AudioFilterStateVariable filterPreMixHP; //xy=2182.77783203125,1695.61083984375
 AudioFilterStateVariable filter5;        //xy=2210.7777709960938,1205.6108703613281
 AudioMixer4              mix_lineInL;     //xy=2365.7777099609375,1680.61083984375
 AudioMixer4              mix_lineInR; //xy=2382.1497802734375,1755.2166748046875
@@ -322,23 +324,25 @@ AudioConnection          patchCord126(filter4, 1, mix_ntcFilter4, 2);
 AudioConnection          patchCord127(filter4, 2, mix_ntcFilter4, 3);
 AudioConnection          patchCord128(mix_oscLevels, 0, filter1, 0);
 AudioConnection          patchCord129(mix_oscLevels, 0, mix_ntcFilter1, 0);
-AudioConnection          patchCord130(filter2, 0, mix_ntcFilter2, 1);
-AudioConnection          patchCord131(filter2, 1, mix_ntcFilter2, 2);
-AudioConnection          patchCord132(filter2, 2, mix_ntcFilter2, 3);
-AudioConnection          patchCord133(mix_reverb, 0, filterPreMixLP, 0);
-AudioConnection          patchCord134(mix_ntcFilter4, 0, mix_Amp, 1);
-AudioConnection          patchCord135(mix_ntcFilter2, fir_formant);
-AudioConnection          patchCord136(filterPreMixLP, 0, filterPreMixHP, 0);
-AudioConnection          patchCord137(fir_formant, 0, mix_Amp, 0);
-AudioConnection          patchCord138(mix_Amp, 0, filter5, 0);
-AudioConnection          patchCord139(i2s2, 0, mix_lineInL, 1);
-AudioConnection          patchCord140(i2s2, 1, mix_lineInR, 1);
-AudioConnection          patchCord141(filterPreMixHP, 2, mix_lineInL, 0);
-AudioConnection          patchCord142(filterPreMixHP, 2, mix_lineInR, 0);
-AudioConnection          patchCord143(filter5, 2, mix_chorus_fb, 0);
-AudioConnection          patchCord144(filter5, 2, mix_chorus_dry, 0);
-AudioConnection          patchCord145(mix_lineInL, 0, i2s1, 0);
-AudioConnection          patchCord146(mix_lineInR, 0, i2s1, 1);
+AudioConnection          patchCord130(dc_filterPreMixLP, 0, filterPreMixLP, 1);
+AudioConnection          patchCord131(filter2, 0, mix_ntcFilter2, 1);
+AudioConnection          patchCord132(filter2, 1, mix_ntcFilter2, 2);
+AudioConnection          patchCord133(filter2, 2, mix_ntcFilter2, 3);
+AudioConnection          patchCord134(mix_reverb, 0, filterPreMixLP, 0);
+AudioConnection          patchCord135(mix_ntcFilter4, 0, mix_Amp, 1);
+AudioConnection          patchCord136(mix_ntcFilter2, fir_formant);
+AudioConnection          patchCord137(filterPreMixLP, 0, filterPreMixHP, 0);
+AudioConnection          patchCord138(dc_filterPreMixHP, 0, filterPreMixHP, 1);
+AudioConnection          patchCord139(fir_formant, 0, mix_Amp, 0);
+AudioConnection          patchCord140(mix_Amp, 0, filter5, 0);
+AudioConnection          patchCord141(i2s2, 0, mix_lineInL, 1);
+AudioConnection          patchCord142(i2s2, 1, mix_lineInR, 1);
+AudioConnection          patchCord143(filterPreMixHP, 2, mix_lineInL, 0);
+AudioConnection          patchCord144(filterPreMixHP, 2, mix_lineInR, 0);
+AudioConnection          patchCord145(filter5, 2, mix_chorus_fb, 0);
+AudioConnection          patchCord146(filter5, 2, mix_chorus_dry, 0);
+AudioConnection          patchCord147(mix_lineInL, 0, i2s1, 0);
+AudioConnection          patchCord148(mix_lineInR, 0, i2s1, 1);
 AudioControlSGTL5000     sgtl5000_1;     //xy=267.77777099609375,274.6108703613281
 // GUItool: end automatically generated code
 
@@ -410,11 +414,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.28"};
-char str_buf1[64] ={"Version: 0.0.28"};
-char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.28"};
+char str_buf[64] ={"version: 0.0.29"};
+char str_buf1[64] ={"Version: 0.0.29"};
+char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.29"};
 bool PRINT_VALUES_FLAG = true;
-char version_str[] = {"Windy 1\n   ver:\n   0.0.28"};
+char version_str[] = {"Windy 1\n   ver:\n   0.0.29"};
 
 
 // globals for loop control
@@ -580,6 +584,8 @@ patch_t current_patch = {
 const uint32_t eepromUpdateInterval = 20000;  // milliseconds
 uint32_t eepromPreviousMillis = 0;
 uint32_t eepromCurrentMillis = 0;
+bool programChangeFlag = false; // new programChange is happening
+int programChangeData = 0; // value from midi_ho
 bool updateEpromFlag = false;
 int current_patchNumber = 0;
 int eeprom_patchNumber = 0;
@@ -840,8 +846,12 @@ void setup() {
     filterPostDelay.resonance(0.707);
     filterPreMixHP.frequency(100);
     filterPreMixHP.resonance(0.707);
-    filterPreMixLP.frequency(15000);  // LP filter
+    filterPreMixHP.octaveControl(1.0);
+    filterPreMixLP.frequency(19000);  // LP filter
     filterPreMixLP.resonance(0.707);
+    filterPreMixLP.octaveControl(1.0);
+    dc_filterPreMixLP.amplitude(0.0); // to force usage of update_variable insteadof update_fixed
+    dc_filterPreMixHP.amplitude(0.0); // to force usage of update_variable insteadof update_fixed
     //ws_threshOsc1.shape(waveShape_threshOsc1, 3);
     //ws_threshOsc2.shape(waveShape_threshOsc2, 3);
 
@@ -955,7 +965,7 @@ void setup() {
                 (int)EffectsChorusDelay1,(int)EffectsChorusMod1,EffectsChorusLfoFreq);
     flange2.begin(delayline_flange2,FLANGE_DELAY_LENGTH,
                 (int)EffectsChorusDelay2,(int)EffectsChorusMod2,EffectsChorusLfoFreq);
-    flange3.begin(delayline_flange2,FLANGE_DELAY_LENGTH,
+    flange3.begin(delayline_flange3,FLANGE_DELAY_LENGTH,
                 FLANGE_DELAY_PASSTHRU,0,0.0);
     mix_chorus_fb.gain(0,1.0);
     mix_chorus_fb.gain(1,EffectsChorusFeedback);
@@ -1378,8 +1388,8 @@ void loop()
     AudioInterrupts();
 
 
-  if(0)   // debug print
-  {
+    if(0)   // debug print
+    {
         if(millis() - previousUsageTime >= 5000) {
           Serial8.print("Proc = ");
           Serial8.print(AudioProcessorUsage());
@@ -1403,7 +1413,7 @@ void loop()
             printPatchValues();   
             PRINT_VALUES_FLAG = false;
             // sprintf(str_buf1, "clippedFreqFilterPreNoise: %5.3f ", clippedFreqFilterPreNoise );     
-            Serial8.println(str_buf1);
+            //Serial8.println(str_buf1);
         }
         //previousDebugPrintTime = millis();
         //sprintf(str_buf1, "foo: %5.3f", foo );      
@@ -1998,7 +2008,12 @@ void processMIDI(void)
             dc_pitchbend.amplitude((data1+data2*128.0-8192.0)*DIV8192, dc_pitchbend_ramp_rate);
             //dc_pitchbend_value = data1+data2*128.0-8192.0;
             break;
-
+        case midi_ho.ProgramChange: //0xC0
+            programChangeData = data1;
+            programChangeFlag = true; // used in UISM
+            //  sprintf(str_buf, "type: %d, data1: %d, channel: %d", type,data1, channel);
+            //  Serial8.println(str_buf);
+            break;
     } // switch (type)
 }
 
@@ -2055,6 +2070,10 @@ void updateUISM(void)
                 volf = (volf*volf)*2.0f;
                 updateSynthVariablesFlag = true;
             }
+            if (programChangeFlag)
+            {
+                UISM = PATCH_SEL;
+            }
             sprintf(str_oledbuf, "Vol: %03ld", vol);
             sprintf(str_buf1, "Vol: %03ld", vol);
             Serial8.println(str_buf1);
@@ -2101,6 +2120,28 @@ void updateUISM(void)
                     eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
                 }
                 sprintf(str_oledbuf, "Patch: %03d", current_patchNumber+1);
+            }
+            if (programChangeFlag)
+            {
+                current_patchNumber = programChangeData % NUMBER_OF_PATCHES;
+                programChangeFlag = false;
+                sprintf(str_oledbuf, "Patch: %03d", current_patchNumber+1);
+                // load the patch 
+                if (patchLoaded[current_patchNumber])
+                {
+                    setCurrentPatch(current_patchNumber);
+                    patchToSynthVariables(&current_patch);
+                } 
+                else 
+                {
+                    loadPatchSD(current_patchNumber);
+                }
+                Serial8.println(current_patch.patch_string);
+                if (updateEpromFlag)
+                {
+                    eepromCurrentMillis = millis();
+                    eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+                }
             }
                 
             break;
@@ -2416,7 +2457,7 @@ void readKnobAndKnobButton(void)
         }
     }
 
-    if( longKnobButtonPress || shortKnobButtonPress || newKnob != 0 )
+    if( programChangeFlag || longKnobButtonPress || shortKnobButtonPress || newKnob != 0 )
     {
         resetUITimeout();
         updateUISM();  // updated User Interface State Machine
