@@ -472,14 +472,47 @@ void setCurrentPatch(int patchNumber)
         dataFile.write((byte*)&loadedPatches[i], sizeof(loadedPatches[0]));
 //        Serial8.write((byte*)&loadedPatches[i], sizeof(loadedPatches[0]));
         dataFile.close();
+        Serial8.print("Written");
       }
     }
+
+    void saveCurrentPatchSD(int i) { // i is patch number to save it
+      char str_buf_sd[16];
+      // loadedPatches[i] = createPatch();
+      if (!patchLoaded[i]) {
+        sprintf(str_buf1,"Patch: %03d not loaded. can't upsate.", i);
+        Serial8.println(str_buf1);
+        return;   
+      } 
+      sprintf(str_buf_sd, "%03d.PAT", i );     
+      if (SD.exists(str_buf_sd)) {
+        SD.remove(str_buf_sd);
+      }
+      dataFile = SD.open(str_buf_sd, FILE_WRITE);
+      if(!dataFile) {
+        Serial8.println("Could not create file");
+        //TODO:  hook this up:  wavplayer.play("err.wav");
+      } else {
+        Serial8.print("size: ");
+        Serial8.print(sizeof(loadedPatches[0]));
+        Serial8.println();
+        dataFile.write((byte*)&current_patch, sizeof(loadedPatches[0]));
+//        Serial8.write((byte*)&current_patch, sizeof(loadedPatches[0]));
+        dataFile.close();
+        sprintf(str_buf1,"current_patch written into %03d.PAT", i);
+        Serial8.println(str_buf1);
+      }
+    }
+
 
     void loadPatchSD(int i) {
       char str_buf_sd[16];
       if(patchLoaded[i]) {
+        Serial8.println("patch alreadey loaded");
         setCurrentPatch(i);
+        Serial8.println("setCurrentPatch");
         patchToSynthVariables(&current_patch);
+        Serial8.println("patchToSynthVariables");
       } else {
         sprintf(str_buf_sd, "%03d.PAT", i );     
         dataFile = SD.open(str_buf_sd);
@@ -499,6 +532,7 @@ void setCurrentPatch(int patchNumber)
 
     void loadAllPatches() {
       char str_buf_sd[16];
+      int n_loaded = 0;
       for(int i=0;i < NUMBER_OF_PATCHES ;i++) {
         sprintf(str_buf_sd, "%03d.PAT", i );     
         if(SD.exists(str_buf_sd)) {
@@ -506,12 +540,15 @@ void setCurrentPatch(int patchNumber)
           dataFile.read(&loadedPatches[i], sizeof(loadedPatches[0]));
           dataFile.close();
           patchLoaded[i] = true;
+          n_loaded++;
         } else {
           patchLoaded[i] = false;
           sprintf(str_buf1,"Patch: %03d does not exist. Nothing to load.", i);
           Serial8.println(str_buf1);
         }
       }
+          sprintf(str_buf1,"loaded %03d patches.", n_loaded);
+          Serial8.println(str_buf1);
     }
 
 
