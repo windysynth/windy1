@@ -361,6 +361,7 @@ void processSysex(const uint8_t *pSysexData, unsigned int size)
                loadedPatches[patchNumber].nrpn_msb_reverb[i] = pSysexData[NRPN_MSB_REVERB_SYSPOS+3+i];
             patchLoaded[patchNumber] = true;
             savePatchSD(patchNumber);
+            savePresetToSDFlag = false;
         }
     }
     else if (pSysexData[0]==0xF0 && size == MIDI_PRESET_DUMP_REQ_LEN)

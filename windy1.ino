@@ -389,9 +389,11 @@ bool submenu_active = false;
 const uint32_t UITimeoutInterval = 7000;  // milliseconds
 typedef enum {SPLASH_SCREEN, VOL_ADJ, PATCH_SEL, MENU} uism_t;
 uism_t UISM = SPLASH_SCREEN;
-typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT} menusm_t;
+//typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT} menusm_t;
+typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT, MENU_RVB_PATCH, MENU_DLY_PATCH, MENU_CHRS_PATCH, MENU_WR_PATCH_FX } menusm_t;
 menusm_t MENUSM = MENU_EXIT;
 
+bool patchFxWriteFlag = false;
 
 //const uint32_t gatherSensorInterval = 50;  // milliseconds
 const uint32_t readKnobInterval = 50;  // milliseconds
@@ -414,11 +416,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.29"};
-char str_buf1[64] ={"Version: 0.0.29"};
-char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.29"};
-bool PRINT_VALUES_FLAG = true;
-char version_str[] = {"Windy 1\n   ver:\n   0.0.29"};
+char str_buf[64] ={"version: 0.0.31"};
+char str_buf1[64] ={"Version: 0.0.31"};
+char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.31"};
+bool PRINT_VALUES_FLAG = false;
+char version_str[] = {"Windy 1\n   ver:\n   0.0.31"};
 
 
 // globals for loop control
@@ -737,6 +739,8 @@ float EffectsReverbLevel = 0;  	//114,1,0,127,
 float EffectsReverbDenseEarly = 0;  	//114,2,0,127,
 float EffectsReverbTime = 0;  	//114,3,10,50,//1.0 to 5.0 sec
 float EffectsReverbDamp = 0;  	//114,4,54,74,//-10 to +10
+float EffectsChorusFBHeadroom = 0.8; // to reduce levels of chorus fb mixer to keep from clipping
+float EffectsChorusDryHeadroom = 0.8; // to reduce levels of chorus dry mixer to keep from clipping
 
 // Number of samples in each delay line
 // AUDIO_BLOCK_SAMPLES = 128
@@ -844,10 +848,10 @@ void setup() {
     filterPreNoise.resonance(0.707);
     filterPostDelay.frequency(EffectsDelayDamp);
     filterPostDelay.resonance(0.707);
-    filterPreMixHP.frequency(100);
-    filterPreMixHP.resonance(0.707);
+    filterPreMixHP.frequency(200);
+    filterPreMixHP.resonance(0.5);
     filterPreMixHP.octaveControl(1.0);
-    filterPreMixLP.frequency(19000);  // LP filter
+    filterPreMixLP.frequency(20500);  // LP filter
     filterPreMixLP.resonance(0.707);
     filterPreMixLP.octaveControl(1.0);
     dc_filterPreMixLP.amplitude(0.0); // to force usage of update_variable insteadof update_fixed
@@ -871,7 +875,6 @@ void setup() {
     sine_lfoFilter4.amplitude(maxLfoDepthNoiseFilter4);    
     sine_lfoFilter4.frequency(LfoFreqNoiseFilter4);    
 
-    // TODO: copy to wherever patch changes are made
     if (XFade)  
     {
         mix_xfade.gain(0, 1.0); 
@@ -967,21 +970,20 @@ void setup() {
                 (int)EffectsChorusDelay2,(int)EffectsChorusMod2,EffectsChorusLfoFreq);
     flange3.begin(delayline_flange3,FLANGE_DELAY_LENGTH,
                 FLANGE_DELAY_PASSTHRU,0,0.0);
-    mix_chorus_fb.gain(0,1.0);
-    mix_chorus_fb.gain(1,EffectsChorusFeedback);
-    //mix_chorus_fb.gain(1,0.0);
+    mix_chorus_fb.gain(0,1.0*EffectsChorusFBHeadroom);
+    mix_chorus_fb.gain(1,EffectsChorusFeedback*EffectsChorusFBHeadroom);
     mix_chorus_wet.gain(0,EffectsChorusWet1);
     mix_chorus_wet.gain(1,EffectsChorusWet2);
     mix_chorus_wet.gain(2,-0.5*(EffectsChorusWet1+EffectsChorusWet2)); // to cancel feed through of flange1
     if (ChorusOn)
     {
-        mix_chorus_dry.gain(0,EffectsChorusDryLevel);
-        mix_chorus_dry.gain(1,1.0);
+        mix_chorus_dry.gain(0,EffectsChorusDryLevel*EffectsChorusDryHeadroom);
+        mix_chorus_dry.gain(1,1.0*EffectsChorusDryHeadroom);
     }
     else
     {
-        mix_chorus_dry.gain(0,1.0);
-        mix_chorus_dry.gain(1,0.0);
+        mix_chorus_dry.gain(0,1.0*EffectsChorusDryHeadroom);
+        mix_chorus_dry.gain(1,0.0*EffectsChorusDryHeadroom);
     }
 
 
@@ -998,6 +1000,8 @@ void setup() {
 
     freeverb1.roomsize(EffectsReverbDenseEarly);
     freeverb1.damping(EffectsReverbDamp);
+    mix_reverb.gain(0, 1.0);
+    mix_reverb.gain(1, EffectsReverbLevel);
 //    rvb_reverb.reverbTime(EffectsReverbTime);
     mix_delayLevel.gain(0,maxDelayLevel);
     mix_delayLevel.gain(1,maxDelayLevel*pow(EffectsDelayLevel, gammaDelayLevel));
@@ -1100,16 +1104,22 @@ void setup() {
 
     sprintf(str_buf1, "loadPatchNumberEEPROM (%03d) ", eeprom_patchNumber );     
     Serial8.println(str_buf1);
-    sprintf(str_buf1, "current_patchNumber (%03d) ", current_patchNumber );     
-    Serial8.println(str_buf1);
-    if (patchLoaded[eeprom_patchNumber]){
+   // sprintf(str_buf1, "current_patchNumber (%03d) ", current_patchNumber );     
+   // Serial8.println(str_buf1);
+
+    //if (patchLoaded[eeprom_patchNumber]){
         current_patchNumber = eeprom_patchNumber;
+        loadPatchSD(current_patchNumber);
         sprintf(str_buf1, "current_patchNumber (%03d) ", current_patchNumber );     
         Serial8.println(str_buf1);
-        setCurrentPatch(current_patchNumber);
-        patchToSynthVariables(&current_patch);
-    }
-    patchToSynthVariables(&current_patch);
+        //setCurrentPatch(current_patchNumber);
+        //patchToSynthVariables(&current_patch);
+    //}
+
+    //patchToSynthVariables(&current_patch);
+    updateSynthVariablesFlag = true;
+    printPatchValues();   
+
     AudioInterrupts();
 
     AudioProcessorUsageMaxReset();
@@ -1237,21 +1247,20 @@ void loop()
         // TODO: wrap EffectsChorusDelay1 & 2 at 93ms (44.1*93 = 4101.3) (ewi 4k wraps like this)
         flange1.voices( (int)EffectsChorusDelay1,(int)EffectsChorusMod1,EffectsChorusLfoFreq);
         flange2.voices((int)EffectsChorusDelay2,(int)EffectsChorusMod2,EffectsChorusLfoFreq);
-        mix_chorus_fb.gain(0,1.0);
-        //mix_chorus_fb.gain(1,0.0);
-        mix_chorus_fb.gain(1,EffectsChorusFeedback);
+        mix_chorus_fb.gain(0,1.0*EffectsChorusFBHeadroom);
+        mix_chorus_fb.gain(1,EffectsChorusFeedback*EffectsChorusFBHeadroom);
         mix_chorus_wet.gain(0,EffectsChorusWet1);
         mix_chorus_wet.gain(1,EffectsChorusWet2);
         mix_chorus_wet.gain(2,-0.5*(EffectsChorusWet1+EffectsChorusWet2)); // to cancel feed through of flange1
         if (ChorusOn)
         {
-            mix_chorus_dry.gain(0,EffectsChorusDryLevel);
-            mix_chorus_dry.gain(1,1.0);
+            mix_chorus_dry.gain(0,EffectsChorusDryLevel*EffectsChorusDryHeadroom);
+            mix_chorus_dry.gain(1,1.0*EffectsChorusDryHeadroom);
         }
         else
         {
-            mix_chorus_dry.gain(0,1.0);
-            mix_chorus_dry.gain(1,0.0);
+            mix_chorus_dry.gain(0,1.0*EffectsChorusDryHeadroom);
+            mix_chorus_dry.gain(1,0.0*EffectsChorusDryHeadroom);
         }
 
         freeverb1.roomsize(EffectsReverbDenseEarly);
@@ -1276,6 +1285,7 @@ void loop()
         mix_delayFeedback.gain(1,pow(EffectsDelayFeedback, gammaDelayFeedback)); // finer adjustment at low end
         mix_delayLevel.gain(1,maxDelayLevel*pow(EffectsDelayLevel, gammaDelayLevel));       //finer adjustment at low end
         updateSynthVariablesFlag = false;
+        PRINT_VALUES_FLAG = true;
     }
 
     //-------------------------------------------------------
@@ -1553,7 +1563,8 @@ float lfoThresh(float x, float th, float depth, float breath)
     if(breath < 0.0)
     {
         //return (x < th) ? limit( depth*breath*(x/th - 1.0),1.0,0.0) : 0.0;
-        return (x < th) ? limit( depth+breath*(x/th - 1.0),1.0,0.0) : 0.0;
+        //return (x < th) ? limit( depth+breath*(x/th - 1.0),1.0,0.0) : 0.0;
+        return (x < th) ? limit( breath*(x/th - 1.0*depth),1.0,0.0) : 0.0;
     }
     else
     {
@@ -2031,6 +2042,8 @@ void readPot(void)
 }
 #endif
 
+// TODO: add overall reverb level, patch rvb level, patch delay level, patch chorus on, patch volume
+// EffectsReverbLevel,EffectsDelayLevel, ChorusOn
 void updateUISM(void)
 {
     switch (UISM)
@@ -2057,7 +2070,7 @@ void updateUISM(void)
                 longKnobButtonPress = false;
                 UISM = MENU;
                 MENUSM = MENU_EXIT;
-                sprintf(str_oledbuf, "MENU: EXIT");
+                sprintf(str_oledbuf, "MENU:\n EXIT");
                 resetUITimeout();
                 break; 
             }
@@ -2091,7 +2104,7 @@ void updateUISM(void)
                 longKnobButtonPress = false;
                 UISM = MENU;
                 MENUSM = MENU_EXIT;
-                sprintf(str_oledbuf, "MENU: EXIT");
+                sprintf(str_oledbuf, "MENU:\n EXIT");
                 resetUITimeout();
                 break; 
             }
@@ -2146,6 +2159,7 @@ void updateUISM(void)
                 
             break;
         case  MENU: 
+            // MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT,  MENU_RVB_PATCH, MENU_DLY_PATCH, MENU_CHRS_PATCH, MENU_WR_PATCH_FX
             switch (MENUSM)   
             { 
                 case MENU_EXIT:
@@ -2154,19 +2168,21 @@ void updateUISM(void)
                         if (newKnob > 0)
                         {
                             MENUSM = MENU_MIX;
-                            sprintf(str_oledbuf, "MENU: MIX");
+                            sprintf(str_oledbuf, "MENU:\n MIX");
                             break; 
                         }
                         else if(newKnob < 0) 
                         {
-                            MENUSM = MENU_OCT;
-                            sprintf(str_oledbuf, "MENU: OCT");
+                            //MENUSM = MENU_OCT;
+                            //sprintf(str_oledbuf, "MENU:\n OCT");
+                            MENUSM = MENU_WR_PATCH_FX;
+                            sprintf(str_oledbuf, "MENU:\n WR PTCH FX");
                             break; 
                         }
                         else
                         {
                             MENUSM = MENU_EXIT;
-                            sprintf(str_oledbuf, "MENU: EXIT");
+                            sprintf(str_oledbuf, "MENU:\n EXIT");
                         }
                     }
                     if(shortKnobButtonPress)
@@ -2183,12 +2199,12 @@ void updateUISM(void)
                         if (newKnob > 0)
                         {
                             MENUSM = MENU_TUNING;
-                            sprintf(str_oledbuf, "MENU: TUNING");
+                            sprintf(str_oledbuf, "MENU:\n TUNING");
                         }
                         else if(newKnob < 0) 
                         {
                             MENUSM = MENU_EXIT;
-                            sprintf(str_oledbuf, "MENU: EXIT");
+                            sprintf(str_oledbuf, "MENU:\n EXIT");
                         }
                         else
                         {
@@ -2200,7 +2216,7 @@ void updateUISM(void)
                                 break; 
                             }
                             MENUSM = MENU_MIX;
-                            sprintf(str_oledbuf, "MENU: MIX");
+                            sprintf(str_oledbuf, "MENU:\n MIX");
                         }
                     }
                     else
@@ -2210,7 +2226,7 @@ void updateUISM(void)
                             submenu_active = false;
                             shortKnobButtonPress = false;
                             MENUSM = MENU_EXIT;
-                            sprintf(str_oledbuf, "MENU: EXIT");
+                            sprintf(str_oledbuf, "MENU:\n EXIT");
                             break; 
                         }
                         if (newKnob)
@@ -2232,12 +2248,12 @@ void updateUISM(void)
                         if (newKnob > 0)
                         {
                             MENUSM = MENU_TRANS;
-                            sprintf(str_oledbuf, "MENU: TRANS");
+                            sprintf(str_oledbuf, "MENU:\n TRANS");
                         }
                         else if(newKnob < 0) 
                         {
                             MENUSM = MENU_MIX;
-                            sprintf(str_oledbuf, "MENU: MIX");
+                            sprintf(str_oledbuf, "MENU:\n MIX");
                         }
                         else
                         {
@@ -2249,7 +2265,7 @@ void updateUISM(void)
                                 break; 
                             }
                             MENUSM = MENU_TUNING;
-                            sprintf(str_oledbuf, "MENU: TUNING");
+                            sprintf(str_oledbuf, "MENU:\n TUNING");
                         }
                     }
                     else 
@@ -2259,7 +2275,7 @@ void updateUISM(void)
                             submenu_active = false;
                             shortKnobButtonPress = false;
                             MENUSM = MENU_EXIT;
-                            sprintf(str_oledbuf, "MENU: EXIT");
+                            sprintf(str_oledbuf, "MENU:\n EXIT");
                             break; 
                         }
                         if (newKnob)
@@ -2281,12 +2297,12 @@ void updateUISM(void)
                         if (newKnob > 0)
                         {
                             MENUSM = MENU_OCT;
-                            sprintf(str_oledbuf, "MENU: OCT");
+                            sprintf(str_oledbuf, "MENU:\n OCT");
                         }
                         else if(newKnob < 0) 
                         {
                             MENUSM = MENU_TUNING;
-                            sprintf(str_oledbuf, "MENU: TUNING");
+                            sprintf(str_oledbuf, "MENU:\n TUNING");
                         }
                         else
                         {
@@ -2298,7 +2314,7 @@ void updateUISM(void)
                                 break; 
                             }
                             MENUSM = MENU_TRANS;
-                            sprintf(str_oledbuf, "MENU: TRANS");
+                            sprintf(str_oledbuf, "MENU:\n TRANS");
                         }
                     }
                     else 
@@ -2308,7 +2324,7 @@ void updateUISM(void)
                             submenu_active = false;
                             shortKnobButtonPress = false;
                             MENUSM = MENU_EXIT;
-                            sprintf(str_oledbuf, "MENU: EXIT");
+                            sprintf(str_oledbuf, "MENU:\n EXIT");
                             break; 
                         }
                         if (newKnob)
@@ -2329,13 +2345,13 @@ void updateUISM(void)
                     {
                         if (newKnob > 0)
                         {
-                            MENUSM = MENU_EXIT;
-                            sprintf(str_oledbuf, "MENU: EXIT");
+                            MENUSM = MENU_RVB_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n RVB Patch");
                         }
                         else if(newKnob < 0) 
                         {
                             MENUSM = MENU_TRANS;
-                            sprintf(str_oledbuf, "MENU: TRANS");
+                            sprintf(str_oledbuf, "MENU:\n TRANS");
                         }
                         else
                         {
@@ -2347,7 +2363,7 @@ void updateUISM(void)
                                 break; 
                             }
                             MENUSM = MENU_OCT;
-                            sprintf(str_oledbuf, "MENU: OCT");
+                            sprintf(str_oledbuf, "MENU:\n OCT");
                         }
                     }
                     else 
@@ -2357,7 +2373,7 @@ void updateUISM(void)
                             submenu_active = false;
                             shortKnobButtonPress = false;
                             MENUSM = MENU_EXIT;
-                            sprintf(str_oledbuf, "MENU: EXIT");
+                            sprintf(str_oledbuf, "MENU:\n EXIT");
                             break; 
                         }
                         if (newKnob)
@@ -2373,6 +2389,231 @@ void updateUISM(void)
                         Serial8.println(str_buf1);
                     }
                     break;
+
+                case MENU_RVB_PATCH:
+                    if(!submenu_active)
+                    {
+                        if (newKnob > 0)
+                        {
+                            MENUSM = MENU_DLY_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n DLY Patch");
+                        }
+                        else if(newKnob < 0) 
+                        {
+                            MENUSM = MENU_OCT;
+                            sprintf(str_oledbuf, "MENU:\n OCT");
+                        }
+                        else
+                        {
+                            if(shortKnobButtonPress)
+                            {
+                                submenu_active = true;
+                                shortKnobButtonPress = false;
+                                uint8_t temp_rvb = (uint8_t)current_patch.nrpn_msb_reverb[CCEFFECTSREVERBLEVEL];
+                                sprintf(str_oledbuf, "RVB Patch: %03ld", temp_rvb);
+                                break; 
+                            }
+                            MENUSM = MENU_RVB_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n RVB Patch");
+                        }
+                    }
+                    else 
+                    {
+                        int16_t temp_rvb = (int16_t)current_patch.nrpn_msb_reverb[CCEFFECTSREVERBLEVEL];
+                        if(shortKnobButtonPress)
+                        {
+                            submenu_active = false;
+                            shortKnobButtonPress = false;
+                            //MENUSM = MENU_EXIT;
+                            //sprintf(str_oledbuf, "MENU:\n EXIT");
+                            MENUSM = MENU_RVB_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n RVB Patch");
+                            break; 
+                        }
+                        if (newKnob)
+                        { 
+                            temp_rvb = temp_rvb + newKnob;
+                            temp_rvb = temp_rvb < 0 ? 0 
+                                            : temp_rvb >= 127 ? 127 : temp_rvb;
+                            current_patch.nrpn_msb_reverb[CCEFFECTSREVERBLEVEL] = (uint8_t)temp_rvb;
+                            EffectsReverbLevel = ((float)temp_rvb*DIV127*maxReverbLevel);
+                            updateSynthVariablesFlag = true;
+                        }
+                        sprintf(str_oledbuf, "RVB Patch: %03ld", temp_rvb);
+                        sprintf(str_buf1, "RVB Patch: %03ld",temp_rvb);
+                        Serial8.println(str_buf1);
+                    }
+                    break;
+
+                case MENU_DLY_PATCH:
+                    if(!submenu_active)
+                    {
+                        if (newKnob > 0)
+                        {
+                            MENUSM = MENU_CHRS_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n CHRS Patch");
+                        }
+                        else if(newKnob < 0) 
+                        {
+                            MENUSM = MENU_RVB_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n RVB Patch");
+                        }
+                        else
+                        {
+                            if(shortKnobButtonPress)
+                            {
+                                submenu_active = true;
+                                shortKnobButtonPress = false;
+                                uint8_t temp_dly = (uint8_t)current_patch.nrpn_msb_delay[CCEFFECTSDELAYLEVEL];
+                                sprintf(str_oledbuf, "DLY Patch: %03ld", temp_dly);
+                                break; 
+                            }
+                            MENUSM = MENU_DLY_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n DLY Patch");
+                        }
+                    }
+                    else 
+                    {
+                        int16_t temp_dly = (int16_t)current_patch.nrpn_msb_delay[CCEFFECTSDELAYLEVEL];
+                        if(shortKnobButtonPress)
+                        {
+                            submenu_active = false;
+                            shortKnobButtonPress = false;
+                            //MENUSM = MENU_EXIT;
+                            //sprintf(str_oledbuf, "MENU:\n EXIT");
+                            MENUSM = MENU_DLY_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n DLY Patch");
+                            break; 
+                        }
+                        if (newKnob)
+                        { 
+                            temp_dly = temp_dly + newKnob;
+                            temp_dly = temp_dly < 0 ? 0 
+                                            : temp_dly >= 127 ? 127 : temp_dly;
+                            current_patch.nrpn_msb_delay[CCEFFECTSDELAYLEVEL] = (uint8_t)temp_dly;
+                            EffectsDelayLevel = ((float)temp_dly*DIV127);
+                            updateSynthVariablesFlag = true;
+                        }
+                        sprintf(str_oledbuf, "DLY Patch: %03ld", temp_dly);
+                        sprintf(str_buf1, "DLY Patch: %03ld",temp_dly);
+                        Serial8.println(str_buf1);
+                    }
+                    break;
+
+                case MENU_CHRS_PATCH:
+                    if(!submenu_active)
+                    {
+                        if (newKnob > 0)
+                        {
+                            MENUSM = MENU_WR_PATCH_FX;
+                            patchFxWriteFlag = false;
+                            sprintf(str_oledbuf, "MENU:\n  WR PTCH FX");
+                        }
+                        else if(newKnob < 0) 
+                        {
+                            MENUSM = MENU_DLY_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n DLY Patch");
+                        }
+                        else
+                        {
+                            if(shortKnobButtonPress)
+                            {
+                                submenu_active = true;
+                                shortKnobButtonPress = false;
+                                ChorusOn = (bool)current_patch.nrpn_msb_common1[CCCHORUSON];  	    
+                                sprintf(str_oledbuf, "Chorus:\n %s", ChorusOn ? "On" : "Off"); //
+                                break; 
+                            }
+                            MENUSM = MENU_CHRS_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n CHRS Patch");
+                        }
+                    }
+                    else 
+                    {
+                        if(shortKnobButtonPress)
+                        {
+                            submenu_active = false;
+                            shortKnobButtonPress = false;
+                            //MENUSM = MENU_EXIT;
+                            //sprintf(str_oledbuf, "MENU:\n EXIT");
+                            MENUSM = MENU_CHRS_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n CHRS Patch");
+                            break; 
+                        }
+                        if (newKnob)
+                        {
+                            ChorusOn = (bool)current_patch.nrpn_msb_common1[CCCHORUSON];  	    
+                            ChorusOn = ChorusOn ? false : true; // toggle On/Off
+                            updateSynthVariablesFlag = true;
+                            current_patch.nrpn_msb_common1[CCCHORUSON] = ChorusOn;
+                        }
+                        sprintf(str_oledbuf, "Chorus:\n %s", ChorusOn ? "On" : "Off");
+                        sprintf(str_buf1, "Chorus:\n %s", ChorusOn ? "On" : "Off");
+                        Serial8.println(str_buf1);
+                    }
+                    break;
+
+
+                case MENU_WR_PATCH_FX:
+                    if(!submenu_active)
+                    {
+                        if (newKnob > 0)
+                        {
+                            MENUSM = MENU_EXIT;
+                            sprintf(str_oledbuf, "MENU:\n EXIT");
+                        }
+                        else if(newKnob < 0) 
+                        {
+                            MENUSM = MENU_CHRS_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n CHRS Patch");
+                        }
+                        else
+                        {
+                            if(shortKnobButtonPress)
+                            {
+                                submenu_active = true;
+                                patchFxWriteFlag = false;
+                                shortKnobButtonPress = false;
+                                sprintf(str_oledbuf, "WR PTCH FX:\n Skip"); //
+                                break; 
+                            }
+                            MENUSM = MENU_WR_PATCH_FX;
+                            sprintf(str_oledbuf, "MENU:\n WR PTCH FX");
+                        }
+                    }
+                    else 
+                    {
+                        if(shortKnobButtonPress)
+                        {
+                            submenu_active = false;
+                            shortKnobButtonPress = false;
+                            MENUSM = MENU_EXIT;
+                           if(patchFxWriteFlag)
+                            {
+                                patchFxWriteFlag = false;
+                                sprintf(str_oledbuf, "\nWriting...");
+                                Serial8.println(str_buf1);
+                                saveCurrentPatchSD(current_patchNumber);
+                                sprintf(str_oledbuf, "MENU:\n EXIT");
+                            }
+                            else
+                            {
+                                sprintf(str_oledbuf, "MENU:\n EXIT");
+                            }
+                            break; 
+                        }
+                        if (newKnob)
+                        {
+                            patchFxWriteFlag = patchFxWriteFlag ? false : true; // toggle On/Off
+                        }
+                        sprintf(str_oledbuf, "WR PTCH FX:\n %s", patchFxWriteFlag ? "Write" : "Skip");
+                        sprintf(str_buf1, "WR PTCH FX:\n %s", patchFxWriteFlag ? "Write" : "Skip");
+                        Serial8.println(str_buf1);
+                    }
+                    break;
+
+
+
                 default:
                     break;
             }
