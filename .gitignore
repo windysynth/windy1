@@ -126,6 +126,11 @@
 # #####
 !*.syx
 !*.bnk
+######
+# arduino hex output files
+######
+!*.hex
+
 
 
 

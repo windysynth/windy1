@@ -21,11 +21,27 @@ The Windy 1 mimics the synth inside an EWI 4000 (monophonic only).
         OCT: Short Press to enter Oct
             Oct: Turn knob to set octave (range: +/- 2 octaves)
                         Short press to go back to MENU Mode
-    After 20 seconds of no activity the EEPROM is updated with any changes to the above settings
+        RVB Patch: Short Press to enter RVB Patch
+            RVB Patch: Turn knob to adjust amount of reverb for the currently selected patch
+                        Short press to go back up to Menu Mode
+        DLY Patch: Short Press to enter DLY Patch
+            DLY Patch: Turn knob to adjust amount of Delay for the currently selected patch
+                        Short press to go back up to Menu Mode
+        CHS Patch: Short Press to enter CHS Patch
+            CHS Patch: Turn knob to toggle Chorus on/off for the currently selected patch
+                        Short press to go back up to Menu Mode
+        WR PCH FX: Short Press to enter WR PCH FX
+             WR PCH FX: Turn knob to toggle between Skip and Write
+                        Short press if Skip selected: goes back up to Menu Mode and does NOT write Patch Effects
+                        Short press if Write selected: goes back up to Menu Mode and DOES write Patch Effects
+
+    After 20 seconds of no activity the EEPROM is updated with any changes to the following settings:
+        Volume, Patch, MIX, TUNING, TRANS, OCT
+    The Patch Effects settings (RVB Patch, DLY Patch and CHS Patch) are only written to non-volatile memory with the WR PCH FX command. 
         
 
 # Version
-ver 0.0.23
+ver 0.0.32
  
 # TODO
 * Add Formant Filters

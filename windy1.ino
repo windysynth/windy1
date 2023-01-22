@@ -416,11 +416,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.31"};
-char str_buf1[64] ={"Version: 0.0.31"};
-char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.31"};
+char str_buf[64] ={"version: 0.0.32"};
+char str_buf1[64] ={"Version: 0.0.32"};
+char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.32"};
 bool PRINT_VALUES_FLAG = false;
-char version_str[] = {"Windy 1\n   ver:\n   0.0.31"};
+char version_str[] = {"Windy 1\n   ver:\n   0.0.32"};
 
 
 // globals for loop control
@@ -2176,7 +2176,7 @@ void updateUISM(void)
                             //MENUSM = MENU_OCT;
                             //sprintf(str_oledbuf, "MENU:\n OCT");
                             MENUSM = MENU_WR_PATCH_FX;
-                            sprintf(str_oledbuf, "MENU:\n WR PTCH FX");
+                            sprintf(str_oledbuf, "MENU:\n WR PCH FX");
                             break; 
                         }
                         else
@@ -2451,7 +2451,7 @@ void updateUISM(void)
                         if (newKnob > 0)
                         {
                             MENUSM = MENU_CHRS_PATCH;
-                            sprintf(str_oledbuf, "MENU:\n CHRS Patch");
+                            sprintf(str_oledbuf, "MENU:\n CHS Patch");
                         }
                         else if(newKnob < 0) 
                         {
@@ -2507,7 +2507,7 @@ void updateUISM(void)
                         {
                             MENUSM = MENU_WR_PATCH_FX;
                             patchFxWriteFlag = false;
-                            sprintf(str_oledbuf, "MENU:\n  WR PTCH FX");
+                            sprintf(str_oledbuf, "MENU:\n WR PCH FX");
                         }
                         else if(newKnob < 0) 
                         {
@@ -2525,7 +2525,7 @@ void updateUISM(void)
                                 break; 
                             }
                             MENUSM = MENU_CHRS_PATCH;
-                            sprintf(str_oledbuf, "MENU:\n CHRS Patch");
+                            sprintf(str_oledbuf, "MENU:\n CHS Patch");
                         }
                     }
                     else 
@@ -2537,7 +2537,7 @@ void updateUISM(void)
                             //MENUSM = MENU_EXIT;
                             //sprintf(str_oledbuf, "MENU:\n EXIT");
                             MENUSM = MENU_CHRS_PATCH;
-                            sprintf(str_oledbuf, "MENU:\n CHRS Patch");
+                            sprintf(str_oledbuf, "MENU:\n CHS Patch");
                             break; 
                         }
                         if (newKnob)
@@ -2565,7 +2565,7 @@ void updateUISM(void)
                         else if(newKnob < 0) 
                         {
                             MENUSM = MENU_CHRS_PATCH;
-                            sprintf(str_oledbuf, "MENU:\n CHRS Patch");
+                            sprintf(str_oledbuf, "MENU:\n CHS Patch");
                         }
                         else
                         {
@@ -2574,11 +2574,11 @@ void updateUISM(void)
                                 submenu_active = true;
                                 patchFxWriteFlag = false;
                                 shortKnobButtonPress = false;
-                                sprintf(str_oledbuf, "WR PTCH FX:\n Skip"); //
+                                sprintf(str_oledbuf, "WR PCH FX:\n Skip"); //
                                 break; 
                             }
                             MENUSM = MENU_WR_PATCH_FX;
-                            sprintf(str_oledbuf, "MENU:\n WR PTCH FX");
+                            sprintf(str_oledbuf, "MENU:\n WR PCH FX");
                         }
                     }
                     else 
@@ -2606,8 +2606,8 @@ void updateUISM(void)
                         {
                             patchFxWriteFlag = patchFxWriteFlag ? false : true; // toggle On/Off
                         }
-                        sprintf(str_oledbuf, "WR PTCH FX:\n %s", patchFxWriteFlag ? "Write" : "Skip");
-                        sprintf(str_buf1, "WR PTCH FX:\n %s", patchFxWriteFlag ? "Write" : "Skip");
+                        sprintf(str_oledbuf, "WR PCH FX:\n %s", patchFxWriteFlag ? "Write" : "Skip");
+                        sprintf(str_buf1, "WR PCH FX:\n %s", patchFxWriteFlag ? "Write" : "Skip");
                         Serial8.println(str_buf1);
                     }
                     break;
