@@ -21,10 +21,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //    (remember to: Tools > Board: Teensy 4.1 and Tools > USB Type: Serial + MIDI)
 // Next, I had to modify C:\Arduino\hardware\teensy\avr\libraries\Audio\filter_variable.cpp
 // I've put my hacked version of the file in the repo here and renamed it "filter_variable_dot_cpp.txt"
-// so just rename this to "filter_variable.cpp" and put it wherever your ...\Audio folder is, replacing the original
+// and "filter_variable_dot_h.txt"
+// so just rename these to "filter_variable.cpp" and "filter_variable.h"
+//  and put them wherever your ...\Audio folder is, replacing the originals
 // This modified version does the following to AudioFilterStateVariable::update_variable(...) function
 // 1. uncommented line 42 to #define IMPROVE_HIGH_FREQUENCY_ACCURACY
-// 2. Reduced the fmult limit from 5378279 to 2965372 which is equivalent to 0.707
+// 2. Reduced the fmult limit from 5378279 to 2965372 which is equivalent to f = 0.707
 // 3. Changed the oversampling of filter from 2x to 4x
 // 4. also you can change line 55 of filter_variable.h to 	
 //          if (q < 0.5f) q = 0.5f; // min q 0.5 instead of 0.7
@@ -180,13 +182,11 @@ AudioMixer4              mix_ntcFilter1; //xy=1630.7777709960938,720.61087036132
 AudioEffectFreeverb      freeverb1;      //xy=1661.7777709960938,1691.6108703613281
 AudioFilterStateVariable filter4;        //xy=1720.7777709960938,1196.6108703613281
 AudioMixer4              mix_oscLevels;  //xy=1782.7777709960938,302.6108703613281
-AudioSynthWaveformDc     dc_filterPreMixLP;            //xy=1782.050048828125,1762.050048828125
 AudioFilterStateVariable filter2;        //xy=1790.7777709960938,997.6108703613281
 AudioMixer4              mix_reverb;     //xy=1815.7777709960938,1698.6108703613281
 AudioMixer4              mix_ntcFilter4; //xy=1882.7777709960938,1184.6108703613281
 AudioMixer4              mix_ntcFilter2; //xy=1980.7777709960938,982.6108703613281
 AudioFilterStateVariable filterPreMixLP; //xy=1989.77783203125,1699.61083984375
-AudioSynthWaveformDc     dc_filterPreMixHP; //xy=1999.6500244140625,1765.550048828125
 AudioFilterFIR           fir_formant;    //xy=2032.7777709960938,1046.6108703613281
 AudioMixer4              mix_Amp;        //xy=2052.7777709960938,1195.6108703613281
 AudioInputI2S            i2s2;           //xy=2171.7777099609375,1780.61083984375
@@ -324,28 +324,25 @@ AudioConnection          patchCord126(filter4, 1, mix_ntcFilter4, 2);
 AudioConnection          patchCord127(filter4, 2, mix_ntcFilter4, 3);
 AudioConnection          patchCord128(mix_oscLevels, 0, filter1, 0);
 AudioConnection          patchCord129(mix_oscLevels, 0, mix_ntcFilter1, 0);
-AudioConnection          patchCord130(dc_filterPreMixLP, 0, filterPreMixLP, 1);
-AudioConnection          patchCord131(filter2, 0, mix_ntcFilter2, 1);
-AudioConnection          patchCord132(filter2, 1, mix_ntcFilter2, 2);
-AudioConnection          patchCord133(filter2, 2, mix_ntcFilter2, 3);
-AudioConnection          patchCord134(mix_reverb, 0, filterPreMixLP, 0);
-AudioConnection          patchCord135(mix_ntcFilter4, 0, mix_Amp, 1);
-AudioConnection          patchCord136(mix_ntcFilter2, fir_formant);
-AudioConnection          patchCord137(filterPreMixLP, 0, filterPreMixHP, 0);
-AudioConnection          patchCord138(dc_filterPreMixHP, 0, filterPreMixHP, 1);
-AudioConnection          patchCord139(fir_formant, 0, mix_Amp, 0);
-AudioConnection          patchCord140(mix_Amp, 0, filter5, 0);
-AudioConnection          patchCord141(i2s2, 0, mix_lineInL, 1);
-AudioConnection          patchCord142(i2s2, 1, mix_lineInR, 1);
-AudioConnection          patchCord143(filterPreMixHP, 2, mix_lineInL, 0);
-AudioConnection          patchCord144(filterPreMixHP, 2, mix_lineInR, 0);
-AudioConnection          patchCord145(filter5, 2, mix_chorus_fb, 0);
-AudioConnection          patchCord146(filter5, 2, mix_chorus_dry, 0);
-AudioConnection          patchCord147(mix_lineInL, 0, i2s1, 0);
-AudioConnection          patchCord148(mix_lineInR, 0, i2s1, 1);
+AudioConnection          patchCord130(filter2, 0, mix_ntcFilter2, 1);
+AudioConnection          patchCord131(filter2, 1, mix_ntcFilter2, 2);
+AudioConnection          patchCord132(filter2, 2, mix_ntcFilter2, 3);
+AudioConnection          patchCord133(mix_reverb, 0, filterPreMixLP, 0);
+AudioConnection          patchCord134(mix_ntcFilter4, 0, mix_Amp, 1);
+AudioConnection          patchCord135(mix_ntcFilter2, fir_formant);
+AudioConnection          patchCord136(filterPreMixLP, 0, filterPreMixHP, 0);
+AudioConnection          patchCord137(fir_formant, 0, mix_Amp, 0);
+AudioConnection          patchCord138(mix_Amp, 0, filter5, 0);
+AudioConnection          patchCord139(i2s2, 0, mix_lineInL, 1);
+AudioConnection          patchCord140(i2s2, 1, mix_lineInR, 1);
+AudioConnection          patchCord141(filterPreMixHP, 2, mix_lineInL, 0);
+AudioConnection          patchCord142(filterPreMixHP, 2, mix_lineInR, 0);
+AudioConnection          patchCord143(filter5, 2, mix_chorus_fb, 0);
+AudioConnection          patchCord144(filter5, 2, mix_chorus_dry, 0);
+AudioConnection          patchCord145(mix_lineInL, 0, i2s1, 0);
+AudioConnection          patchCord146(mix_lineInR, 0, i2s1, 1);
 AudioControlSGTL5000     sgtl5000_1;     //xy=267.77777099609375,274.6108703613281
 // GUItool: end automatically generated code
-
 
 
 //-------- paste above here Auto generated code from Audio System Design Tooll --------
@@ -416,11 +413,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.32"};
-char str_buf1[64] ={"Version: 0.0.32"};
-char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.32"};
+char str_buf[64] ={"version: 0.0.33"};
+char str_buf1[64] ={"Version: 0.0.33"};
+char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.33"};
 bool PRINT_VALUES_FLAG = false;
-char version_str[] = {"Windy 1\n   ver:\n   0.0.32"};
+char version_str[] = {"Windy 1\n   ver:\n   0.0.33"};
 
 
 // globals for loop control
@@ -854,8 +851,6 @@ void setup() {
     filterPreMixLP.frequency(20500);  // LP filter
     filterPreMixLP.resonance(0.707);
     filterPreMixLP.octaveControl(1.0);
-    dc_filterPreMixLP.amplitude(0.0); // to force usage of update_variable insteadof update_fixed
-    dc_filterPreMixHP.amplitude(0.0); // to force usage of update_variable insteadof update_fixed
     //ws_threshOsc1.shape(waveShape_threshOsc1, 3);
     //ws_threshOsc2.shape(waveShape_threshOsc2, 3);
 
