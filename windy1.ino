@@ -44,6 +44,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #define CC_MODULATION_WHEEL               1
 #define CC_BREATH                         2
+#define CC_VOLUME                         7
+#define CC_EXPRESSION                     11
 #define CC_PORTA_TIME                     5
 #define CC_NRPN_DATA_ENTRY                6
 #define CC_NRPN_LSB                       98
@@ -58,6 +60,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define FINE_TUNE_CENTS_EEPROM_ADDR ( (int)12 )
 #define TRANSPOSE_EEPROM_ADDR ( (int)16 )
 #define OCTAVE_EEPROM_ADDR ( (int)20 )
+#define BREATH_CC_EEPROM_ADDR ( (int)24 )
 
 //------------ includes -------------------------------
 #include <Bounce.h>
@@ -386,8 +389,8 @@ bool submenu_active = false;
 const uint32_t UITimeoutInterval = 7000;  // milliseconds
 typedef enum {SPLASH_SCREEN, VOL_ADJ, PATCH_SEL, MENU} uism_t;
 uism_t UISM = SPLASH_SCREEN;
-//typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT} menusm_t;
-typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT, MENU_RVB_PATCH, MENU_DLY_PATCH, MENU_CHRS_PATCH, MENU_WR_PATCH_FX } menusm_t;
+typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT, MENU_BR,
+              MENU_RVB_PATCH, MENU_DLY_PATCH, MENU_CHRS_PATCH, MENU_WR_PATCH_FX } menusm_t;
 menusm_t MENUSM = MENU_EXIT;
 
 bool patchFxWriteFlag = false;
@@ -413,11 +416,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.33"};
-char str_buf1[64] ={"Version: 0.0.33"};
-char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.33"};
+char str_buf[64] ={"version: 0.0.34"};
+char str_buf1[64] ={"Version: 0.0.34"};
+char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.34"};
 bool PRINT_VALUES_FLAG = false;
-char version_str[] = {"Windy 1\n   ver:\n   0.0.33"};
+char version_str[] = {"Windy 1\n   ver:\n   0.0.34"};
 
 
 // globals for loop control
@@ -485,7 +488,9 @@ int eeprom_Transpose = 0;
 float Transposef = 0.0;  	
 int32_t Octave = 0;  	// octaves  +/- 2 
 int eeprom_Octave = 0;
-float Octavef = 0.0;  	
+float Octavef = 0.0;  
+int32_t breath_cc = 2;  // can be 2 or 11 for cc02 or cc11 (default cc02)
+int eeprom_breath_cc = 2;
 
 // synth variable limits and references
 float maxPwmLfoFreq = 10.0;         // 4000s is 10 Hz at 100%
@@ -1061,6 +1066,18 @@ void setup() {
     Octave = eeprom_Octave; 
     Octavef =  ((float)Octave*12.0);
 
+    EEPROM.get(BREATH_CC_EEPROM_ADDR, eeprom_breath_cc);
+    sprintf(str_buf1, "read eeprom_breath_cc (%03ld)", eeprom_breath_cc );     
+    Serial8.println(str_buf1);
+    if(eeprom_breath_cc < 1 || eeprom_breath_cc > 11)
+    {
+        sprintf(str_buf1, "eeprom_breath_cc (%03d) out of range.", eeprom_breath_cc );     
+        Serial8.println(str_buf1);
+        eeprom_breath_cc = 2; // default cc02 (breath)
+        EEPROM.put(BREATH_CC_EEPROM_ADDR,eeprom_breath_cc);
+    }
+
+    breath_cc = eeprom_breath_cc;
 
     EEPROM.get(MIX_LINEIN_EEPROM_ADDR, eeprom_mix_linein);
     sprintf(str_buf1, "read eeprom_mix_linein (%03ld)", eeprom_mix_linein );     
@@ -1447,7 +1464,7 @@ void loop()
     if( !updateEpromFlag && ((current_patchNumber != eeprom_patchNumber)
                             ||(eeprom_mix_linein != mix_linein)||(eeprom_FineTuneCents != FineTuneCents)
                             ||(eeprom_vol != vol) || (eeprom_Transpose != Transpose) 
-                            || (eeprom_Octave != Octave) ))
+                            || (eeprom_Octave != Octave) || (eeprom_breath_cc != breath_cc)  ))
     {
         updateEpromFlag = true;
         eepromCurrentMillis = millis();
@@ -1483,6 +1500,10 @@ void loop()
             sprintf(str_buf1, "Writing Octave (%03ld) to EEPROM", eeprom_Octave );     
             Serial8.println(str_buf1);
             EEPROM_update(OCTAVE_EEPROM_ADDR, eeprom_Octave);  
+            sprintf(str_buf1, "Writing breath_cc (%03ld) to EEPROM", eeprom_breath_cc );     
+            eeprom_breath_cc = breath_cc;
+            Serial8.println(str_buf1);
+            EEPROM_update(BREATH_CC_EEPROM_ADDR, eeprom_breath_cc);  
             updateEpromFlag = false;
         }
     }
@@ -1768,66 +1789,76 @@ void processMIDI(void)
     {
         case midi_ho.ControlChange: //0xB0
             switch (data1){
-                case CC_BREATH:
-                    data2f = ((float)data2) * DIV127;
-                    dc_breathLfoFilter1_amp = lfoThresh(data2f,LfoThreshOscFilter1,LfoDepthOscFilter1,LfoBreathOscFilter1);
-                    dc_breathLfoFilter2_amp = lfoThresh(data2f,LfoThreshOscFilter2,LfoDepthOscFilter2,LfoBreathOscFilter2);
-                    dc_breathLfoFilter3_amp = lfoThresh(data2f,LfoThreshNoiseFilter3,LfoDepthNoiseFilter3,LfoBreathNoiseFilter3);
-                    dc_breathLfoFilter4_amp = lfoThresh(data2f,LfoThreshNoiseFilter4,LfoDepthNoiseFilter4,LfoBreathNoiseFilter4);
-                    dc_breathLfoFilter1.amplitude(dc_breathLfoFilter1_amp,6);
-                    dc_breathLfoFilter2.amplitude(dc_breathLfoFilter2_amp,6);
-                    dc_breathLfoFilter3.amplitude(dc_breathLfoFilter3_amp,6);
-                    dc_breathLfoFilter4.amplitude(dc_breathLfoFilter4_amp,6);
-                    //dc_breathOscFilter1_amp = lin_to_log(data2, 127, BreathCurveOscFilter1)*DIV127;
-                    dc_breathOscFilter1_amp = gamma_func(data2f, BreathCurveOscFilter1);
-                    //dc_breathOscFilter2_amp = lin_to_log(data2, 127, BreathCurveOscFilter2)*DIV127;
-                    dc_breathOscFilter2_amp = gamma_func(data2f, BreathCurveOscFilter2);
-                    //dc_breathNoiseFilter3_amp = lin_to_log(data2, 127, BreathCurveNoiseFilter3)*DIV127;
-                    dc_breathNoiseFilter3_amp = gamma_func(data2f, BreathCurveNoiseFilter3);
-                    //dc_breathNoiseFilter4_amp = lin_to_log(data2, 127, BreathCurveNoiseFilter4)*DIV127;
-                    dc_breathNoiseFilter4_amp = gamma_func(data2f, BreathCurveNoiseFilter4);
-                    //dc_breathNoise_amp = lin_to_log(data2, 127, NoiseBreathCurve)*DIV127;
-                    //dc_breathNoise_amp = limit(pow(data2f,limit(NoiseBreathCurve,maxGamma,minGamma)),1.0,0.0);
-                    dc_breathNoise_amp = gamma_func(data2f,NoiseBreathCurve);
-                    //dc_breathNoise_amp = data2f*NoiseBreathCurve;
-                    if(BreathAttainOsc1 > 0.0)
-                        dc_breathSweepOsc1.amplitude(BreathDepthOsc1*(1.0-limit(data2f/BreathAttainOsc1,1.0,-1.0)),6.0); // 6ms smoothing
+                case CC_MODULATION_WHEEL:
+                case CC_BREATH: 
+                case CC_VOLUME:
+                case CC_EXPRESSION:
+                    if (data1 != (uint8_t)breath_cc )
+                    {
+                        break;
+                    }
                     else
-                        dc_breathSweepOsc1.amplitude(0.0);
-                    if(BreathAttainOsc2 > 0.0)
-                        dc_breathSweepOsc2.amplitude(BreathDepthOsc2*(1.0-limit(data2f/BreathAttainOsc2,1.0,-1.0)),6.0); // 6ms smoothing
-                    else
-                        dc_breathSweepOsc2.amplitude(0.0);
+                    {
+                        data2f = ((float)data2) * DIV127;
+                        dc_breathLfoFilter1_amp = lfoThresh(data2f,LfoThreshOscFilter1,LfoDepthOscFilter1,LfoBreathOscFilter1);
+                        dc_breathLfoFilter2_amp = lfoThresh(data2f,LfoThreshOscFilter2,LfoDepthOscFilter2,LfoBreathOscFilter2);
+                        dc_breathLfoFilter3_amp = lfoThresh(data2f,LfoThreshNoiseFilter3,LfoDepthNoiseFilter3,LfoBreathNoiseFilter3);
+                        dc_breathLfoFilter4_amp = lfoThresh(data2f,LfoThreshNoiseFilter4,LfoDepthNoiseFilter4,LfoBreathNoiseFilter4);
+                        dc_breathLfoFilter1.amplitude(dc_breathLfoFilter1_amp,6);
+                        dc_breathLfoFilter2.amplitude(dc_breathLfoFilter2_amp,6);
+                        dc_breathLfoFilter3.amplitude(dc_breathLfoFilter3_amp,6);
+                        dc_breathLfoFilter4.amplitude(dc_breathLfoFilter4_amp,6);
+                        //dc_breathOscFilter1_amp = lin_to_log(data2, 127, BreathCurveOscFilter1)*DIV127;
+                        dc_breathOscFilter1_amp = gamma_func(data2f, BreathCurveOscFilter1);
+                        //dc_breathOscFilter2_amp = lin_to_log(data2, 127, BreathCurveOscFilter2)*DIV127;
+                        dc_breathOscFilter2_amp = gamma_func(data2f, BreathCurveOscFilter2);
+                        //dc_breathNoiseFilter3_amp = lin_to_log(data2, 127, BreathCurveNoiseFilter3)*DIV127;
+                        dc_breathNoiseFilter3_amp = gamma_func(data2f, BreathCurveNoiseFilter3);
+                        //dc_breathNoiseFilter4_amp = lin_to_log(data2, 127, BreathCurveNoiseFilter4)*DIV127;
+                        dc_breathNoiseFilter4_amp = gamma_func(data2f, BreathCurveNoiseFilter4);
+                        //dc_breathNoise_amp = lin_to_log(data2, 127, NoiseBreathCurve)*DIV127;
+                        //dc_breathNoise_amp = limit(pow(data2f,limit(NoiseBreathCurve,maxGamma,minGamma)),1.0,0.0);
+                        dc_breathNoise_amp = gamma_func(data2f,NoiseBreathCurve);
+                        //dc_breathNoise_amp = data2f*NoiseBreathCurve;
+                        if(BreathAttainOsc1 > 0.0)
+                            dc_breathSweepOsc1.amplitude(BreathDepthOsc1*(1.0-limit(data2f/BreathAttainOsc1,1.0,-1.0)),6.0); // 6ms smoothing
+                        else
+                            dc_breathSweepOsc1.amplitude(0.0);
+                        if(BreathAttainOsc2 > 0.0)
+                            dc_breathSweepOsc2.amplitude(BreathDepthOsc2*(1.0-limit(data2f/BreathAttainOsc2,1.0,-1.0)),6.0); // 6ms smoothing
+                        else
+                            dc_breathSweepOsc2.amplitude(0.0);
 
-                    if(note_is_on)
-                    {
-                        //dc_breathThreshOsc1_amp = pow(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
-                        dc_breathThreshOsc1_amp = gamma_func(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
-                        //dc_breathThreshOsc2_amp = pow(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
-                        dc_breathThreshOsc2_amp = gamma_func(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
-                        //dc_breath.amplitude(dc_breath_amp,2);
-                        dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime);
-                        dc_breathOscFilter2.amplitude(dc_breathOscFilter2_amp,dc_breathFilterN_rampTime);
-                        dc_breathNoiseFilter3.amplitude(dc_breathNoiseFilter3_amp,dc_breathFilterN_rampTime);
-                        dc_breathNoiseFilter4.amplitude(dc_breathNoiseFilter4_amp,dc_breathFilterN_rampTime);
-                        //if( (NoiseLevel > 0) && (NoiseTime == 0 || NoiseTime >= maxTimeNoise/2.0) )
-                        if( NoiseLevel > 0 )
+                        if(note_is_on)
                         {
-                            dc_breathNoise.amplitude(dc_breathNoise_amp,6);
+                            //dc_breathThreshOsc1_amp = pow(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
+                            dc_breathThreshOsc1_amp = gamma_func(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
+                            //dc_breathThreshOsc2_amp = pow(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
+                            dc_breathThreshOsc2_amp = gamma_func(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
+                            //dc_breath.amplitude(dc_breath_amp,2);
+                            dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime);
+                            dc_breathOscFilter2.amplitude(dc_breathOscFilter2_amp,dc_breathFilterN_rampTime);
+                            dc_breathNoiseFilter3.amplitude(dc_breathNoiseFilter3_amp,dc_breathFilterN_rampTime);
+                            dc_breathNoiseFilter4.amplitude(dc_breathNoiseFilter4_amp,dc_breathFilterN_rampTime);
+                            //if( (NoiseLevel > 0) && (NoiseTime == 0 || NoiseTime >= maxTimeNoise/2.0) )
+                            if( NoiseLevel > 0 )
+                            {
+                                dc_breathNoise.amplitude(dc_breathNoise_amp,6);
+                            }
                         }
+                        else
+                        {
+                            dc_breathThreshOsc1_amp = 0;
+                            dc_breathThreshOsc2_amp = 0;
+                            //dc_breath.amplitude(0,6);   // slower decay when note is off (no 'thwap')
+                            dc_breathOscFilter1.amplitude(0,6);
+                            dc_breathOscFilter2.amplitude(0,6);
+                            dc_breathNoiseFilter3.amplitude(0,6);
+                            dc_breathNoiseFilter4.amplitude(0,6);
+                            dc_breathNoise.amplitude(0,6);
+                        }
+                        break;
                     }
-                    else
-                    {
-                        dc_breathThreshOsc1_amp = 0;
-                        dc_breathThreshOsc2_amp = 0;
-                        //dc_breath.amplitude(0,6);   // slower decay when note is off (no 'thwap')
-                        dc_breathOscFilter1.amplitude(0,6);
-                        dc_breathOscFilter2.amplitude(0,6);
-                        dc_breathNoiseFilter3.amplitude(0,6);
-                        dc_breathNoiseFilter4.amplitude(0,6);
-                        dc_breathNoise.amplitude(0,6);
-                    }
-                    break;
                 case CC_PORTA_TIME:
                   dc_portatime_val = ((float)data2)*DIV127;    // PortamentoTime MSB
                   break;
@@ -2154,7 +2185,8 @@ void updateUISM(void)
                 
             break;
         case  MENU: 
-            // MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT,  MENU_RVB_PATCH, MENU_DLY_PATCH, MENU_CHRS_PATCH, MENU_WR_PATCH_FX
+            // MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT, MENU_BR, 
+            // MENU_RVB_PATCH, MENU_DLY_PATCH, MENU_CHRS_PATCH, MENU_WR_PATCH_FX
             switch (MENUSM)   
             { 
                 case MENU_EXIT:
@@ -2168,8 +2200,6 @@ void updateUISM(void)
                         }
                         else if(newKnob < 0) 
                         {
-                            //MENUSM = MENU_OCT;
-                            //sprintf(str_oledbuf, "MENU:\n OCT");
                             MENUSM = MENU_WR_PATCH_FX;
                             sprintf(str_oledbuf, "MENU:\n WR PCH FX");
                             break; 
@@ -2335,13 +2365,15 @@ void updateUISM(void)
                         Serial8.println(str_buf1);
                     }
                     break;
+
                 case MENU_OCT:
                     if(!submenu_active)
                     {
                         if (newKnob > 0)
                         {
-                            MENUSM = MENU_RVB_PATCH;
-                            sprintf(str_oledbuf, "MENU:\n RVB Patch");
+                            //MENUSM = MENU_RVB_PATCH;
+                            MENUSM = MENU_BR;
+                            sprintf(str_oledbuf, "MENU:\n BrCC ");
                         }
                         else if(newKnob < 0) 
                         {
@@ -2385,6 +2417,70 @@ void updateUISM(void)
                     }
                     break;
 
+                case MENU_BR:
+                    if(!submenu_active)
+                    {
+                        if (newKnob > 0)
+                        {
+                            MENUSM = MENU_RVB_PATCH;
+                            sprintf(str_oledbuf, "MENU:\n RVB Patch");
+                        }
+                        else if(newKnob < 0) 
+                        {
+                            //MENUSM = MENU_TRANS;
+                            MENUSM = MENU_OCT;
+                            sprintf(str_oledbuf, "MENU:\n OCT");
+                        }
+                        else
+                        {
+                            if(shortKnobButtonPress)
+                            {
+                                submenu_active = true;
+                                shortKnobButtonPress = false;
+                                sprintf(str_oledbuf, "BrCC: %03ld", breath_cc );
+                                break; 
+                            }
+                            MENUSM = MENU_BR;
+                            sprintf(str_oledbuf, "MENU:\n BrCC");
+                        }
+                    }
+                    else 
+                    {
+                        if(shortKnobButtonPress)
+                        {
+                            submenu_active = false;
+                            shortKnobButtonPress = false;
+                            MENUSM = MENU_EXIT;
+                            sprintf(str_oledbuf, "MENU:\n EXIT");
+                            break; 
+                        }
+                        if (newKnob)
+                        {
+                           switch (breath_cc)
+                           {
+                                case CC_MODULATION_WHEEL:
+                                    breath_cc = newKnob > 0 ? CC_BREATH : CC_EXPRESSION;
+                                    break;
+                                case CC_BREATH: 
+                                    breath_cc = newKnob > 0 ? CC_VOLUME : CC_MODULATION_WHEEL;
+                                    break;
+                                case CC_VOLUME:
+                                    breath_cc = newKnob > 0 ? CC_EXPRESSION : CC_BREATH;
+                                    break;
+                                case CC_EXPRESSION:
+                                    breath_cc = newKnob > 0 ? CC_MODULATION_WHEEL : CC_VOLUME;
+                                    break;
+                                default:
+                                    breath_cc = CC_BREATH;
+                                    break;
+                            }
+                        }
+                        sprintf(str_oledbuf, "BrCC: %03ld", breath_cc);
+                        sprintf(str_buf1, "BrCC: %03ld", breath_cc);
+                        Serial8.println(str_buf1);
+                    }
+                    break;
+
                 case MENU_RVB_PATCH:
                     if(!submenu_active)
                     {
@@ -2395,8 +2491,9 @@ void updateUISM(void)
                         }
                         else if(newKnob < 0) 
                         {
-                            MENUSM = MENU_OCT;
-                            sprintf(str_oledbuf, "MENU:\n OCT");
+                            //MENUSM = MENU_OCT;
+                            MENUSM = MENU_BR;
+                            sprintf(str_oledbuf, "MENU:\n BrCC");
                         }
                         else
                         {
