@@ -416,11 +416,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.34"};
-char str_buf1[64] ={"Version: 0.0.34"};
-char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.34"};
+char str_buf[64] ={"version: 0.0.35"};
+char str_buf1[64] ={"Version: 0.0.35"};
+char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.35"};
 bool PRINT_VALUES_FLAG = false;
-char version_str[] = {"Windy 1\n   ver:\n   0.0.34"};
+char version_str[] = {"Windy 1\n   ver:\n   0.0.35"};
 
 
 // globals for loop control
@@ -1322,7 +1322,6 @@ void loop()
     noteNumberFilter2 = dc_portatimef.read()*128 + SemiOsc2+FineOsc2;
     noteFreqOsc1 = 440.0 * pow(2, (noteNumberOsc1-69.0)/12 );  // 69 is note number for A4=440Hz
     noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2-69.0)/12 );  // 69 is note number for A4=440Hz
-    //noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-18.0)/12 );  // always Oct below noteNumberOsc1  TODO: match 4000s
     noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-12.0)/12 );  // always Oct below noteNumberOsc1  TODO: match 4000s
     dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
     dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
@@ -1535,20 +1534,17 @@ float lin_to_log( int input, int input_max, float gamma) {
 float gen_osc_gamma(float input) {
        float x = 1.0-input; 
        float gamma = pow( x, 2.75)*12.8; 
-      //float gamma = pow( x, 2.5)*12.0; 
     return gamma;
 }
 
 float gen_filter_gamma(float input) {
        float x = 1.0-input; 
-      // float gamma = pow( x, 2.75)*12.8; 
        float gamma = pow( x, 1.0)*2.0; 
     return gamma;
 }
 
 float gen_noise_gamma(float input) {
        float x = 1.0-input; 
-      // float gamma = pow( x, 2.75)*12.8; 
        float gamma = pow( x, 1.5)*5.0; 
     return gamma;
 }
@@ -1578,13 +1574,10 @@ float lfoThresh(float x, float th, float depth, float breath)
 {
     if(breath < 0.0)
     {
-        //return (x < th) ? limit( depth*breath*(x/th - 1.0),1.0,0.0) : 0.0;
-        //return (x < th) ? limit( depth+breath*(x/th - 1.0),1.0,0.0) : 0.0;
         return (x < th) ? limit( breath*(x/th - 1.0*depth),1.0,0.0) : 0.0;
     }
     else
     {
-        //return (x > th) ? limit( depth*breath*(x-th)/(1.0-th),1.0,0.0) : 0.0;
         return (x > th) ? limit( depth+breath*(x-th)/(1.0-th),1.0,0.0) : 0.0;
     }
 }
@@ -1808,18 +1801,11 @@ void processMIDI(void)
                         dc_breathLfoFilter2.amplitude(dc_breathLfoFilter2_amp,6);
                         dc_breathLfoFilter3.amplitude(dc_breathLfoFilter3_amp,6);
                         dc_breathLfoFilter4.amplitude(dc_breathLfoFilter4_amp,6);
-                        //dc_breathOscFilter1_amp = lin_to_log(data2, 127, BreathCurveOscFilter1)*DIV127;
                         dc_breathOscFilter1_amp = gamma_func(data2f, BreathCurveOscFilter1);
-                        //dc_breathOscFilter2_amp = lin_to_log(data2, 127, BreathCurveOscFilter2)*DIV127;
                         dc_breathOscFilter2_amp = gamma_func(data2f, BreathCurveOscFilter2);
-                        //dc_breathNoiseFilter3_amp = lin_to_log(data2, 127, BreathCurveNoiseFilter3)*DIV127;
                         dc_breathNoiseFilter3_amp = gamma_func(data2f, BreathCurveNoiseFilter3);
-                        //dc_breathNoiseFilter4_amp = lin_to_log(data2, 127, BreathCurveNoiseFilter4)*DIV127;
                         dc_breathNoiseFilter4_amp = gamma_func(data2f, BreathCurveNoiseFilter4);
-                        //dc_breathNoise_amp = lin_to_log(data2, 127, NoiseBreathCurve)*DIV127;
-                        //dc_breathNoise_amp = limit(pow(data2f,limit(NoiseBreathCurve,maxGamma,minGamma)),1.0,0.0);
                         dc_breathNoise_amp = gamma_func(data2f,NoiseBreathCurve);
-                        //dc_breathNoise_amp = data2f*NoiseBreathCurve;
                         if(BreathAttainOsc1 > 0.0)
                             dc_breathSweepOsc1.amplitude(BreathDepthOsc1*(1.0-limit(data2f/BreathAttainOsc1,1.0,-1.0)),6.0); // 6ms smoothing
                         else
@@ -1831,16 +1817,12 @@ void processMIDI(void)
 
                         if(note_is_on)
                         {
-                            //dc_breathThreshOsc1_amp = pow(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
                             dc_breathThreshOsc1_amp = gamma_func(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
-                            //dc_breathThreshOsc2_amp = pow(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
                             dc_breathThreshOsc2_amp = gamma_func(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
-                            //dc_breath.amplitude(dc_breath_amp,2);
                             dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime);
                             dc_breathOscFilter2.amplitude(dc_breathOscFilter2_amp,dc_breathFilterN_rampTime);
                             dc_breathNoiseFilter3.amplitude(dc_breathNoiseFilter3_amp,dc_breathFilterN_rampTime);
                             dc_breathNoiseFilter4.amplitude(dc_breathNoiseFilter4_amp,dc_breathFilterN_rampTime);
-                            //if( (NoiseLevel > 0) && (NoiseTime == 0 || NoiseTime >= maxTimeNoise/2.0) )
                             if( NoiseLevel > 0 )
                             {
                                 dc_breathNoise.amplitude(dc_breathNoise_amp,6);
@@ -1850,7 +1832,6 @@ void processMIDI(void)
                         {
                             dc_breathThreshOsc1_amp = 0;
                             dc_breathThreshOsc2_amp = 0;
-                            //dc_breath.amplitude(0,6);   // slower decay when note is off (no 'thwap')
                             dc_breathOscFilter1.amplitude(0,6);
                             dc_breathOscFilter2.amplitude(0,6);
                             dc_breathNoiseFilter3.amplitude(0,6);
@@ -1868,15 +1849,9 @@ void processMIDI(void)
         case midi_ho.NoteOn: //(type==0x90)
           //  TODO: create amplitude transition between legato notes
             data2f = ((float)data2)* DIV127;
-            //dc_breathThreshOsc1_amp = pow(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
             dc_breathThreshOsc1_amp = gamma_func(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
-            //dc_breathThreshOsc2_amp = pow(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
             dc_breathThreshOsc2_amp = gamma_func(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
-            //dc_breathThreshNoise_amp = pow( data2f , NoiseBreathCurve);
-           // dc_breathNoise_amp = lin_to_log(data2, 127, NoiseBreathCurve)*DIV127;
-            //dc_breathNoise_amp = limit(pow(data2f,limit(NoiseBreathCurve,maxGamma,minGamma)),1.0,0.0);
             dc_breathNoise_amp = gamma_func(data2f,NoiseBreathCurve);
-            //dc_breathNoise_amp = data2f*NoiseBreathCurve;
             dc_breathLfoFilter1_amp = lfoThresh(data2f,LfoThreshOscFilter1,LfoDepthOscFilter1,LfoBreathOscFilter1);
             dc_breathLfoFilter2_amp = lfoThresh(data2f,LfoThreshOscFilter2,LfoDepthOscFilter2,LfoBreathOscFilter2);
             dc_breathLfoFilter3_amp = lfoThresh(data2f,LfoThreshNoiseFilter3,LfoDepthNoiseFilter3,LfoBreathNoiseFilter3);
@@ -1885,16 +1860,12 @@ void processMIDI(void)
             dc_breathLfoFilter2.amplitude(dc_breathLfoFilter2_amp,6);
             dc_breathLfoFilter3.amplitude(dc_breathLfoFilter3_amp,6);
             dc_breathLfoFilter4.amplitude(dc_breathLfoFilter4_amp,6);
-            //dc_breathOscFilter1_amp = lin_to_log(data2, 127, BreathCurveOscFilter1)*DIV127;
             dc_breathOscFilter1_amp = gamma_func(data2f, BreathCurveOscFilter1);
             dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime);
-            //dc_breathOscFilter2_amp = lin_to_log(data2, 127, BreathCurveOscFilter2)*DIV127;
             dc_breathOscFilter2_amp = gamma_func(data2f, BreathCurveOscFilter2);
             dc_breathOscFilter2.amplitude(dc_breathOscFilter2_amp,dc_breathFilterN_rampTime);
-            //dc_breathNoiseFilter3_amp = lin_to_log(data2, 127, BreathCurveNoiseFilter3)*DIV127;
             dc_breathNoiseFilter3_amp = gamma_func(data2f, BreathCurveNoiseFilter3);
             dc_breathNoiseFilter3.amplitude(dc_breathNoiseFilter3_amp,dc_breathFilterN_rampTime);
-            //dc_breathNoiseFilter4_amp = lin_to_log(data2, 127, BreathCurveNoiseFilter4)*DIV127;
             dc_breathNoiseFilter4_amp = gamma_func(data2f, BreathCurveNoiseFilter4);
             dc_breathNoiseFilter4.amplitude(dc_breathNoiseFilter4_amp,dc_breathFilterN_rampTime);
             dc_breathNoise.amplitude(dc_breathNoise_amp,6);
@@ -1940,7 +1911,6 @@ void processMIDI(void)
                 // dc_beatOsc2.amplitude(beatOsc2); // TODO calculate beat number
                 if(NoiseLevel >0)
                 {
-                    //dc_timeNoise.amplitude(1.0); // effectively set by pink_Noise.amplitude(NoiseLevel);
                     dc_timeNoise.amplitude(TimeNoiseAmp); // effectively set by pink_Noise.amplitude(NoiseLevel);
                     dc_timeNoise.amplitude(0.0,NoiseTime); // ramp down the noise level
                 }
@@ -2038,12 +2008,20 @@ void processMIDI(void)
                 fMidiNoteNorm = ((float)data1)/128.0;
                 dc_portatime.amplitude(fMidiNoteNorm); // 
                 dc_portatimef.amplitude(fMidiNoteNorm,portatimef_t); // 
+
+                // in case no breath signal comes after NoteOff
+                dc_breathThreshOsc1_amp = 0;
+                dc_breathThreshOsc2_amp = 0;
+                dc_breathOscFilter1.amplitude(0,6);
+                dc_breathOscFilter2.amplitude(0,6);
+                dc_breathNoiseFilter3.amplitude(0,6);
+                dc_breathNoiseFilter4.amplitude(0,6);
+                dc_breathNoise.amplitude(0,6);
             }
             break;
 
         case midi_ho.PitchBend:
             dc_pitchbend.amplitude((data1+data2*128.0-8192.0)*DIV8192, dc_pitchbend_ramp_rate);
-            //dc_pitchbend_value = data1+data2*128.0-8192.0;
             break;
         case midi_ho.ProgramChange: //0xC0
             programChangeData = data1;
