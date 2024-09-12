@@ -41,6 +41,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //  basically if F = Fc*2^(signal*octaves) > 14,744Hz you will get a full volume, random noise 
 //  out of the filter if you don't make this hack.
 //  https://forum.pjrc.com/threads/67358-AudioFilterStateVariable-unwanted-noise
+//  Also added hack to AudioFilterStateVariable (filter_variable.h) to allow octaveControl to go to 7.9998 (instead of 6.9999)
 
 #define CC_MODULATION_WHEEL               1
 #define CC_BREATH                         2
@@ -416,11 +417,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.35"};
-char str_buf1[64] ={"Version: 0.0.35"};
-char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.35"};
+char str_buf[64] ={"version: 0.0.37"};
+char str_buf1[64] ={"Version: 0.0.37"};
+char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.37"};
 bool PRINT_VALUES_FLAG = false;
-char version_str[] = {"Windy 1\n   ver:\n   0.0.35"};
+char version_str[] = {"Windy 1\n   ver:\n   0.0.37"};
 
 
 // globals for loop control
@@ -524,10 +525,15 @@ float keyfollowFilter1 = 1.0;
 float keyfollowFilter2 = 1.0;
 float keyfollowFilter3 = 1.0;
 float keyfollowFilter4 = 1.0;
-float octaveControlFilter1 = 7.0;
-float octaveControlFilter2 = 7.0;
-float octaveControlFilter3 = 7.0;
-float octaveControlFilter4 = 7.0;
+//float octaveControlFilter1 = 7.0;
+//float octaveControlFilter2 = 7.0;
+//float octaveControlFilter3 = 7.0;
+//float octaveControlFilter4 = 7.0;
+float octaveControlFilter1 = 8.0;
+float octaveControlFilter2 = 8.0;
+float octaveControlFilter3 = 8.0;
+float octaveControlFilter4 = 8.0;
+
 float octaveControlFilter5 = 0.0;
 float offsetNoteKeyfollow = 86.0;  // 84 = C6, 72 = C5, 60 = C4
 float minPreNoiseNoteNumbr = 60.0;  // 84 = C6, 72 = C5, 60 = C4  4000s noise stops changing below about C4
@@ -549,7 +555,7 @@ float TimeNoiseGamma = 4.0;
 float maxNoiseLevel = 1.0; //0.23;  
 float minGamma = 0.1;
 float maxGamma = 2.0;
-float maxReverbLevel = 0.2;
+float maxReverbLevel = 0.3;
 float maxDenseEarly = 0.5;
 bool  porta_step = false;    // round to nearest note for portamento = glissando  // Not really in EWI 4k, but I like it :)
 float octaveControlOsc1 = 1.0;

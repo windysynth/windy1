@@ -422,6 +422,40 @@ void setCurrentPatch(int patchNumber)
        current_patch.nrpn_msb_reverb[i] = loadedPatches[patchNumber].nrpn_msb_reverb[i];
 }
 
+void copyCurrentPatchToLoadedPatch(int patchNumber)
+{
+    uint8_t i = 0;
+    for(i = 0; i<31; i++)
+       loadedPatches[patchNumber].patch_string[i] = current_patch.patch_string[i];
+    for( i = 0; i<NRPN_MSB_OSC1_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_osc1[i] = current_patch.nrpn_msb_osc1[i];
+    for( i = 0; i<NRPN_MSB_OSC2_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_osc2[i] = current_patch.nrpn_msb_osc2[i];
+    for( i = 0; i<NRPN_MSB_OSC_FILT1_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_osc_filt1[i] = current_patch.nrpn_msb_osc_filt1[i];
+    for( i = 0; i<NRPN_MSB_OSC_FILT2_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_osc_filt2[i] = current_patch.nrpn_msb_osc_filt2[i];
+    for( i = 0; i<NRPN_MSB_NOISE_FILT3_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_noise_filt3[i] = current_patch.nrpn_msb_noise_filt3[i];
+    for( i = 0; i<NRPN_MSB_NOISE_FILT4_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_noise_filt4[i] = current_patch.nrpn_msb_noise_filt4[i];
+    for( i = 0; i<NRPN_MSB_SPARE_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_spare[i] = current_patch.nrpn_msb_spare[i];
+    for( i = 0; i<NRPN_MSB_NOISE_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_noise[i] = current_patch.nrpn_msb_noise[i];
+    for( i = 0; i<NRPN_MSB_COMMON1_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_common1[i] = current_patch.nrpn_msb_common1[i];
+    for( i = 0; i<NRPN_MSB_COMMON2_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_common2[i] = current_patch.nrpn_msb_common2[i];
+    for( i = 0; i<NRPN_MSB_CHORUS_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_chorus[i] = current_patch.nrpn_msb_chorus[i];
+    for( i = 0; i<NRPN_MSB_DELAY_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_delay[i] = current_patch.nrpn_msb_delay[i];
+    for( i = 0; i<NRPN_MSB_REVERB_LENGTH; i++)
+       loadedPatches[patchNumber].nrpn_msb_reverb[i] = current_patch.nrpn_msb_reverb[i];
+}
+
+
 //---------------------
 // SD card access
 //---------------------
@@ -500,6 +534,7 @@ void setCurrentPatch(int patchNumber)
 //        Serial8.write((byte*)&current_patch, sizeof(loadedPatches[0]));
         dataFile.close();
         sprintf(str_buf1,"current_patch written into %03d.PAT", i);
+        copyCurrentPatchToLoadedPatch(i);
         Serial8.println(str_buf1);
       }
     }
