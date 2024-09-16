@@ -93,7 +93,7 @@ void processNrpnMessage()
 
 void processUsbMIDI(void) 
 {
-  byte type, channel, data1, data2, cable;
+  byte type, channel, data1, data2; //, cable;
     unsigned int sysexSize = 0;
     byte *pSysexData = NULL;
   // fetch the MIDI message, defined by these 5 numbers (except SysEX)
@@ -102,7 +102,7 @@ void processUsbMIDI(void)
   channel = usbMIDI.getChannel(); // which MIDI channel, 1-16
   data1 = usbMIDI.getData1();     // first data byte of message, 0-127
   data2 = usbMIDI.getData2();     // second data byte of message, 0-127
-  cable = usbMIDI.getCable();     // which virtual cable with MIDIx8, 0-7
+  //cable = usbMIDI.getCable();     // which virtual cable with MIDIx8, 0-7
 
   // uncomment if using multiple virtual cables
   //Serial8.print("cable ");
@@ -274,7 +274,7 @@ void processSysex(const uint8_t *pSysexData, unsigned int size)
     uint8_t patchNumber = 0x7F;  // valid numbers are from 0-0x63 (00-99dec)
     bool savePresetToSDFlag = false;
     bool updateCurrentPatchFlag = false;
-    bool fetchPresetFlag = false;
+    //bool fetchPresetFlag = false;
     if (pSysexData[0]==0xF0 && size == EWI_SYSEX_PRESET_DUMP_LEN) // EWI4k patch dump commands are always length of 206
     {
         switch (pSysexData[4]){ 
@@ -369,7 +369,7 @@ void processSysex(const uint8_t *pSysexData, unsigned int size)
         switch (pSysexData[4]){ 
             case MIDI_PRESET_DUMP_REQ:  // pushed "GET SELECTED" or "GET" button
                 // set flag to save preset to location pSysexData[5]
-                fetchPresetFlag = true;
+                //fetchPresetFlag = true;
                 patchNumber = pSysexData[5];
                 sysexPresetSendBuffer[5] = patchNumber;
                 for(i=0;i<PATCH_STRING_LENGTH;i++)

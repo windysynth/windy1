@@ -155,8 +155,8 @@ void AudioFilterStateVariable::update_variable(const int16_t *in,
 		#endif
 		n = n >> (6 - (control >> 27)); // 4 integer control bits
 		fmult = multiply_32x32_rshift32_rounded(fcenter, n);
-        //if (fmult > 4194303) fmult = 4194303; // Tims hack max fmult = 1.0 (2^22-1)
-        if (fmult > 2965372) fmult = 2965372; // Tims hack max fmult = .707, so q can be >= .5
+        //if (fmult > 4194303) fmult = 4194303; // max fmult = 1.0*(2^22-1), q >= .707
+        if (fmult > 2965372) fmult = 2965372; // max fmult = .707*(2^22-1), so q can be >= .5
 		fmult = fmult << 8;
 		// fmult is within 0.4% accuracy for all but the top 2 octaves
 		// of the audio band.  This math improves accuracy above 5 kHz.

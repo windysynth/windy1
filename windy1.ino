@@ -11,28 +11,31 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //
 // Windy1 is a teensy 4.1 project and is
 // a MIDI host synthesizer designed 
-// to work with an EWI5000 or EWIUSB initially and an EWISOLO in future
+// to work with usb class complaint Wind controllers (e.g., EWI5000, EWIUSB,NuEVI, NuRAD, WARBL2, etc.)
 // The patches are editable with the Vyzex EWI4000S editor software
 // and uses the Teensy Audio Library
 //
 // There are a couple of tweeks to the Teensy Audio Library
 // First, to use WAVEFORM_BANDLIMIT_SAWTOOTH with the AudioSynthWaveformModulated
-// you need at least Teensyduino 1.54
+// you need at least Teensyduino 1.60 Beta #1
+// on Arduino IDE 2.3.2 or higher
 //    (remember to: Tools > Board: Teensy 4.1 and Tools > USB Type: Serial + MIDI)
 // Next, I had to modify C:\Arduino\hardware\teensy\avr\libraries\Audio\filter_variable.cpp
 // I've put my hacked version of the file in the repo here and renamed it "filter_variable_dot_cpp.txt"
 // and "filter_variable_dot_h.txt"
 // so just rename these to "filter_variable.cpp" and "filter_variable.h"
 //  and put them wherever your ...\Audio folder is, replacing the originals
+// At some point I'll do a pull request to add these mods to Teensyduino Audio git repo.
 // This modified version does the following to AudioFilterStateVariable::update_variable(...) function
 // 1. uncommented line 42 to #define IMPROVE_HIGH_FREQUENCY_ACCURACY
 // 2. Reduced the fmult limit from 5378279 to 2965372 which is equivalent to f = 0.707
 // 3. Changed the oversampling of filter from 2x to 4x
 // 4. also you can change line 55 of filter_variable.h to 	
 //          if (q < 0.5f) q = 0.5f; // min q 0.5 instead of 0.7
+// 5. Also the octaveControl limit is now able to go to 7.9998f (instead of just 6.0000f)
 //  This allows the filter to be stable with a resonance ('q') down to 0.5, while
 //  still allowing the Cuttoff frequency (Fc) to go up to at least 20kHz.
-//  Without this hack, the filter can produce a really harsh white noise when
+//  Without this change, the filter can produce a really harsh white noise when
 //  the fmult gets too high because of the combnation of:
 //  resonance(), to low e.g 0.707
 //  frequency(),  e.g above 113
@@ -41,7 +44,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //  basically if F = Fc*2^(signal*octaves) > 14,744Hz you will get a full volume, random noise 
 //  out of the filter if you don't make this hack.
 //  https://forum.pjrc.com/threads/67358-AudioFilterStateVariable-unwanted-noise
-//  Also added hack to AudioFilterStateVariable (filter_variable.h) to allow octaveControl to go to 7.9998 (instead of 6.9999)
 
 #define CC_MODULATION_WHEEL               1
 #define CC_BREATH                         2
@@ -64,7 +66,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define BREATH_CC_EEPROM_ADDR ( (int)24 )
 
 //------------ includes -------------------------------
-#include <Bounce.h>
+#include <Bounce2.h>
 #include <USBHost_t36.h>
 #include <MIDI.h>
 #include "patches.h"
@@ -382,7 +384,7 @@ int currentKnobButtonState = 0;
 int oldKnobButtonState = 0;
 bool longKnobButtonPressPending = false;
 bool longKnobButtonPress = false;
-int longKnobButtonPressTime = 500;  // milliiseconds
+uint32_t longKnobButtonPressTime = 500;  // milliiseconds
 bool shortKnobButtonPress = false;
 bool firstKnobButtonPress = true;
 bool KnobButtonRising = false;
@@ -417,11 +419,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.37"};
-char str_buf1[64] ={"Version: 0.0.37"};
-char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.37"};
+char str_buf[64] ={"version: 0.0.39"};
+char str_buf1[64] ={"Version: 0.0.39"};
+char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.39"};
 bool PRINT_VALUES_FLAG = false;
-char version_str[] = {"Windy 1\n   ver:\n   0.0.37"};
+char version_str[] = {"Windy 1\n   ver:\n   0.0.39"};
 
 
 // globals for loop control
@@ -1027,14 +1029,15 @@ void setup() {
     Serial8.println(str_buf1);
     if(eeprom_patchNumber < 0 || eeprom_patchNumber >= NUMBER_OF_PATCHES)
     {
-        sprintf(str_buf1, "loadPatchNumberEEPROM (%03d) not within 0 to NUMBER_OF_PATCHES-1. overwrite with 000.", eeprom_patchNumber ); 
+        //loadPatchNumberEEPROM not within 0 to NUMBER_OF_PATCHES-1. overwrite with 000. 
+        sprintf(str_buf1, "loadPatchNumberEEPROM (%03d) out of range. set to 000.", eeprom_patchNumber ); 
         Serial8.println(str_buf1);
         eeprom_patchNumber = 0;
         EEPROM.put(PATCH_NUMBER_EEPROM_ADDR, eeprom_patchNumber);  // address 0
     }
     
     EEPROM.get(FINE_TUNE_CENTS_EEPROM_ADDR, eeprom_FineTuneCents);
-    sprintf(str_buf1, "read eeprom_FineTuneCents (%03ld)", eeprom_FineTuneCents );     
+    sprintf(str_buf1, "read eeprom_FineTuneCents (%03d)", eeprom_FineTuneCents );     
     Serial8.println(str_buf1);
     if(eeprom_FineTuneCents < -100 || eeprom_FineTuneCents > 100)
     {
@@ -1047,7 +1050,7 @@ void setup() {
     FineTuneCentsf =  ((float)FineTuneCents)/100.0f;
 
     EEPROM.get(TRANSPOSE_EEPROM_ADDR, eeprom_Transpose);
-    sprintf(str_buf1, "read eeprom_Transpose (%03ld)", eeprom_Transpose );     
+    sprintf(str_buf1, "read eeprom_Transpose (%03d)", eeprom_Transpose );     
     Serial8.println(str_buf1);
     if(eeprom_Transpose < -12 || eeprom_Transpose > 12)
     {
@@ -1060,7 +1063,7 @@ void setup() {
     Transposef =  ((float)Transpose);
 
     EEPROM.get(OCTAVE_EEPROM_ADDR, eeprom_Octave);
-    sprintf(str_buf1, "read eeprom_Octave (%03ld)", eeprom_Octave );     
+    sprintf(str_buf1, "read eeprom_Octave (%03d)", eeprom_Octave );     
     Serial8.println(str_buf1);
     if(eeprom_Octave < -2 || eeprom_Octave > 2)
     {
@@ -1073,7 +1076,7 @@ void setup() {
     Octavef =  ((float)Octave*12.0);
 
     EEPROM.get(BREATH_CC_EEPROM_ADDR, eeprom_breath_cc);
-    sprintf(str_buf1, "read eeprom_breath_cc (%03ld)", eeprom_breath_cc );     
+    sprintf(str_buf1, "read eeprom_breath_cc (%03d)", eeprom_breath_cc );     
     Serial8.println(str_buf1);
     if(eeprom_breath_cc < 1 || eeprom_breath_cc > 11)
     {
@@ -1086,7 +1089,7 @@ void setup() {
     breath_cc = eeprom_breath_cc;
 
     EEPROM.get(MIX_LINEIN_EEPROM_ADDR, eeprom_mix_linein);
-    sprintf(str_buf1, "read eeprom_mix_linein (%03ld)", eeprom_mix_linein );     
+    sprintf(str_buf1, "read eeprom_mix_linein (%03d)", eeprom_mix_linein );     
     Serial8.println(str_buf1);
     if(eeprom_mix_linein <0 || eeprom_mix_linein > 100)
     {
@@ -1097,7 +1100,7 @@ void setup() {
     mix_lineinf =  ((float)mix_linein)/100.0f;
 
     EEPROM.get(VOL_EEPROM_ADDR, eeprom_vol);
-    sprintf(str_buf1, "read eeprom_vol (%03ld)", eeprom_vol );     
+    sprintf(str_buf1, "read eeprom_vol (%03d)", eeprom_vol );     
     Serial8.println(str_buf1);
     if(eeprom_vol <0 || eeprom_vol > 100)
     {
@@ -1486,26 +1489,26 @@ void loop()
             Serial8.println(str_buf1);
             EEPROM_update(PATCH_NUMBER_EEPROM_ADDR, eeprom_patchNumber);  
             eeprom_vol = vol;
-            sprintf(str_buf1, "Writing vol (%03ld) to EEPROM", eeprom_vol );     
+            sprintf(str_buf1, "Writing vol (%03d) to EEPROM", eeprom_vol );     
             Serial8.println(str_buf1);
             EEPROM_update(VOL_EEPROM_ADDR, eeprom_vol);  
             eeprom_mix_linein = mix_linein;
-            sprintf(str_buf1, "Writing mix_linein (%03ld) to EEPROM", eeprom_mix_linein );     
+            sprintf(str_buf1, "Writing mix_linein (%03d) to EEPROM", eeprom_mix_linein );     
             Serial8.println(str_buf1);
             EEPROM_update(MIX_LINEIN_EEPROM_ADDR, eeprom_mix_linein);  
             eeprom_FineTuneCents = FineTuneCents;
-            sprintf(str_buf1, "Writing FineTuneCents (%03ld) to EEPROM", eeprom_FineTuneCents );     
+            sprintf(str_buf1, "Writing FineTuneCents (%03d) to EEPROM", eeprom_FineTuneCents );     
             Serial8.println(str_buf1);
             EEPROM_update(FINE_TUNE_CENTS_EEPROM_ADDR, eeprom_FineTuneCents);  
             eeprom_Transpose = Transpose;
-            sprintf(str_buf1, "Writing Transpose (%03ld) to EEPROM", eeprom_Transpose );     
+            sprintf(str_buf1, "Writing Transpose (%03d) to EEPROM", eeprom_Transpose );     
             Serial8.println(str_buf1);
             EEPROM_update(TRANSPOSE_EEPROM_ADDR, eeprom_Transpose);  
             eeprom_Octave = Octave;
-            sprintf(str_buf1, "Writing Octave (%03ld) to EEPROM", eeprom_Octave );     
+            sprintf(str_buf1, "Writing Octave (%03d) to EEPROM", eeprom_Octave );     
             Serial8.println(str_buf1);
             EEPROM_update(OCTAVE_EEPROM_ADDR, eeprom_Octave);  
-            sprintf(str_buf1, "Writing breath_cc (%03ld) to EEPROM", eeprom_breath_cc );     
+            sprintf(str_buf1, "Writing breath_cc (%03d) to EEPROM", eeprom_breath_cc );     
             eeprom_breath_cc = breath_cc;
             Serial8.println(str_buf1);
             EEPROM_update(BREATH_CC_EEPROM_ADDR, eeprom_breath_cc);  
@@ -1948,7 +1951,7 @@ void processMIDI(void)
                         dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter1);
                     }
                 }
-                if(~LinkOscFilters)
+                if(!LinkOscFilters)
                 {
                     if(SweepDepthOscFilter2 >0.0)
                     {
@@ -1987,7 +1990,7 @@ void processMIDI(void)
                         dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter3);
                     }
                 }
-                if(~LinkNoiseFilters)
+                if(!LinkNoiseFilters)
                 {
                     if(SweepDepthNoiseFilter4 > 0.0)
                     {
@@ -2486,7 +2489,7 @@ void updateUISM(void)
                                 submenu_active = true;
                                 shortKnobButtonPress = false;
                                 uint8_t temp_rvb = (uint8_t)current_patch.nrpn_msb_reverb[CCEFFECTSREVERBLEVEL];
-                                sprintf(str_oledbuf, "RVB Patch: %03ld", temp_rvb);
+                                sprintf(str_oledbuf, "RVB Patch: %03d", temp_rvb);
                                 break; 
                             }
                             MENUSM = MENU_RVB_PATCH;
@@ -2515,8 +2518,8 @@ void updateUISM(void)
                             EffectsReverbLevel = ((float)temp_rvb*DIV127*maxReverbLevel);
                             updateSynthVariablesFlag = true;
                         }
-                        sprintf(str_oledbuf, "RVB Patch: %03ld", temp_rvb);
-                        sprintf(str_buf1, "RVB Patch: %03ld",temp_rvb);
+                        sprintf(str_oledbuf, "RVB Patch: %03d", temp_rvb);
+                        sprintf(str_buf1, "RVB Patch: %03d",temp_rvb);
                         Serial8.println(str_buf1);
                     }
                     break;
@@ -2541,7 +2544,7 @@ void updateUISM(void)
                                 submenu_active = true;
                                 shortKnobButtonPress = false;
                                 uint8_t temp_dly = (uint8_t)current_patch.nrpn_msb_delay[CCEFFECTSDELAYLEVEL];
-                                sprintf(str_oledbuf, "DLY Patch: %03ld", temp_dly);
+                                sprintf(str_oledbuf, "DLY Patch: %03d", temp_dly);
                                 break; 
                             }
                             MENUSM = MENU_DLY_PATCH;
@@ -2570,8 +2573,8 @@ void updateUISM(void)
                             EffectsDelayLevel = ((float)temp_dly*DIV127);
                             updateSynthVariablesFlag = true;
                         }
-                        sprintf(str_oledbuf, "DLY Patch: %03ld", temp_dly);
-                        sprintf(str_buf1, "DLY Patch: %03ld",temp_dly);
+                        sprintf(str_oledbuf, "DLY Patch: %03d", temp_dly);
+                        sprintf(str_buf1, "DLY Patch: %03d",temp_dly);
                         Serial8.println(str_buf1);
                     }
                     break;
@@ -2744,14 +2747,14 @@ void readKnobAndKnobButton(void)
     newKnob = newKnob_temp > 0 ? 1 : newKnob_temp < 0 ? -1 : 0; //don't need 4X counting mode, so integer div by 4
     knobButton.update();
     currentKnobButtonState = knobButton.read();
-    if( !longKnobButtonPressPending && !currentKnobButtonState && (knobButton.duration() > longKnobButtonPressTime) )
+    if( !longKnobButtonPressPending && !currentKnobButtonState && (knobButton.currentDuration() > longKnobButtonPressTime) )
     {
         longKnobButtonPressPending = true;
         sprintf(str_buf1, "Long knobButton Press" );     
         Serial8.println(str_buf1);
         resetUITimeout();
     }
-    KnobButtonRising = knobButton.risingEdge();
+    KnobButtonRising = knobButton.rose();
 
     if(KnobButtonRising)
     {

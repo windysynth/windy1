@@ -27,8 +27,8 @@
 #ifndef filter_variable_h_
 #define filter_variable_h_
 
-#include "Arduino.h"
-#include "AudioStream.h"
+#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
+#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
 
 //#define AVG_OUTPUTS
 #define OVERSAMPLE_4X
@@ -67,9 +67,13 @@ public:
 	void octaveControl(float n) {
 		// filter's corner frequency is Fcenter * 2^(control * N)
 		// where "control" ranges from -1.0 to +1.0
-		// and "N" allows the frequency to change from 0 to 8 octaves // ws hack; (was 7 octaves)
+		// and "N" allows the frequency to change from 0 to 7 octaves (can be 8 octaves with OVERSAMPlE_4X)
 		if (n < 0.0f) n = 0.0f;
-		else if (n > 7.9998f) n = 7.9998f; //ws hack; was "else if (n > 6.9999f) n = 6.9999f;"
+#ifdef OVERSAMPLE_4X
+		else if (n > 7.9998f) n = 7.9998f; 
+#else
+		else if (n > 6.9999f) n = 6.9999f;
+#endif
 		setting_octavemult = n * 4096.0f;
 	}
 	virtual void update(void);

@@ -41,7 +41,11 @@ The Windy 1 mimics the synth inside an EWI 4000 (monophonic only).
         
 
 # Version
-ver 0.0.32
+ver 0.0.39
+
+# Build tools
+Arduino IDE 2.3.2
+Teensyduino 1.6 Beta #1
  
 # TODO
 * Add Formant Filters
