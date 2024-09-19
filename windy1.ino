@@ -376,7 +376,7 @@ Encoder knob(30, 31);
 int32_t newKnob = 0;
 const int knobButtonPin = 32;
 const int patchNextButton = 29;
-const uint32_t debounceDelay = 75; // 50 ms
+const uint32_t debounceDelay = 50; // 50 ms
 uint32_t patchNextButtonPressedTime = 0;
 uint32_t knobButtonPressedTime = 0;
 Bounce knobButton(knobButtonPin, debounceDelay);
@@ -399,7 +399,7 @@ menusm_t MENUSM = MENU_EXIT;
 bool patchFxWriteFlag = false;
 
 //const uint32_t gatherSensorInterval = 50;  // milliseconds
-const uint32_t readKnobInterval = 50;  // milliseconds
+const uint32_t readKnobInterval = 75;  // milliseconds
 
 
 //-------------- USB HOST MIDI Class Compliant --------------------------
@@ -419,11 +419,11 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.39"};
-char str_buf1[64] ={"Version: 0.0.39"};
-char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.39"};
+char str_buf[64] ={"version: 0.0.41"};
+char str_buf1[64] ={"Version: 0.0.41"};
+char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.41"};
 bool PRINT_VALUES_FLAG = false;
-char version_str[] = {"Windy 1\n   ver:\n   0.0.39"};
+char version_str[] = {"Windy 1\n   ver:\n   0.0.41"};
 
 
 // globals for loop control
@@ -775,18 +775,19 @@ void setup() {
     Serial8.begin(1000000);
     Serial.begin(1000000);
     configureSD();
+    //delay(10000);
     sgtl5000_1.enable();
+    sgtl5000_1.muteHeadphone();
+    sgtl5000_1.muteLineout();
     sgtl5000_1.inputSelect(AUDIO_INPUT_LINEIN);
-    sgtl5000_1.volume(0.80);
-    AudioMemory(540);  //TODO: how much AudioMemory do I need? (delay 2.9ms per block for 1270/2.9 = 438
-    // sgtl5000_1.audioPostProcessorEnable();
-    // //sgtl5000_1.surroundSoundEnable();
-    // //sgtl5000_1.surroundSound(7, 3);
-    //  sgtl5000_1.adcHighPassFilterDisable();
-    //  sgtl5000_1.eqSelect(3);//5-band eq
-    //  sgtl5000_1.eqBands(eq_1, eq_2, eq_3, eq_4, eq_5);
+    sgtl5000_1.dacVolumeRamp();
     sgtl5000_1.lineOutLevel(13);  //3.16V p-p
     sgtl5000_1.lineInLevel(0);    // 3.12V p-p
+    sgtl5000_1.unmuteLineout();
+    sgtl5000_1.unmuteHeadphone();
+    sgtl5000_1.volume(0.80);
+    
+    AudioMemory(540);  //TODO: how much AudioMemory do I need? (delay 2.9ms per block for 1270/2.9 = 438
     AudioNoInterrupts();
     dc_pwOsc1.amplitude(PwOsc1); // default 50% dutycycle
     sine_lfoOsc1.amplitude(PwmDepthOsc1);
@@ -1164,6 +1165,8 @@ void setup() {
         display.display();
         resetUITimeout();
     }
+
+
 } // setup()
 
 void loop() 
@@ -2761,7 +2764,11 @@ void readKnobAndKnobButton(void)
         KnobButtonRising = false;
         if(firstKnobButtonPress)
         {
+           // firstKnowButtonPress is never a valid push so clear out the ButtonPress flags
            firstKnobButtonPress = false; 
+           longKnobButtonPressPending = false;
+           shortKnobButtonPress = false;
+           longKnobButtonPress = false;
            return;
         }
         if(longKnobButtonPressPending)
