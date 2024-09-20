@@ -399,7 +399,7 @@ menusm_t MENUSM = MENU_EXIT;
 bool patchFxWriteFlag = false;
 
 //const uint32_t gatherSensorInterval = 50;  // milliseconds
-const uint32_t readKnobInterval = 75;  // milliseconds
+const uint32_t readKnobInterval = 50;  // milliseconds
 
 
 //-------------- USB HOST MIDI Class Compliant --------------------------
@@ -419,12 +419,15 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-char str_buf[64] ={"version: 0.0.41"};
-char str_buf1[64] ={"Version: 0.0.41"};
-char str_oledbuf[64] ={"Windy 1\n  ver:\n   0.0.41"};
+String verNum_str = {"0.0.43"};
+String verTxt_str = {"version: "}; 
+String splashTxt = {"Windy 1\n  ver:\n   "}; 
+String version_str = verTxt_str + verNum_str;
+String splashScreen_str = {splashTxt + verNum_str};
+char str_buf[64] = {0};
+char str_buf1[64] = {0};
+char str_oledbuf[64] = {0};
 bool PRINT_VALUES_FLAG = false;
-char version_str[] = {"Windy 1\n   ver:\n   0.0.41"};
-
 
 // globals for loop control
 uint32_t previousMillis = 0;
@@ -769,6 +772,12 @@ filterMode_t modeFilter4_old = THRU;
 
 void setup() {
     // put your setup code here, to run once:
+    
+    //init str buffers
+    sprintf(str_buf, version_str.c_str());
+    sprintf(str_buf1, version_str.c_str());
+    sprintf(str_oledbuf, splashScreen_str.c_str());
+
     pinMode(patchNextButton, INPUT_PULLUP);
     pinMode(knobButtonPin, INPUT_PULLUP);
     //Serial1.begin(1000000);
@@ -776,7 +785,23 @@ void setup() {
     Serial.begin(1000000);
     configureSD();
     //delay(10000);
-    sgtl5000_1.enable();
+   
+    //  
+    #ifdef SGTL5000_CHECK_PWRON_DEFAULT // defined in control_sgtl5000.h
+    // ws added read_b4_enable() to avoid loud click due to calling enable() when already enabled
+    // when coming out of bootloader 
+    #define SGTL5000_0030_PWRON_DEFAULT 0x7060 
+    unsigned int sgtl_val = sgtl5000_1.read_b4_enable((unsigned int)0x0030);
+    if ( SGTL5000_0030_PWRON_DEFAULT == sgtl_val ){  
+        sgtl5000_1.enable();
+    }
+    else{
+        String test_str= verNum_str +  "\n sgtl:\n 0x%04X";
+        sprintf(str_oledbuf, test_str.c_str(), sgtl_val);
+    }
+    #else
+        sgtl5000_1.enable();
+    #endif
     sgtl5000_1.muteHeadphone();
     sgtl5000_1.muteLineout();
     sgtl5000_1.inputSelect(AUDIO_INPUT_LINEIN);
