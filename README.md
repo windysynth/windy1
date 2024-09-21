@@ -42,12 +42,16 @@ The Windy 1 mimics the synth inside an EWI 4000 (monophonic only).
 
 # Version History
 ver 0.0.44:  Changed to stereo reverb (freeverbs) and increased maxDenseEarly to 0.8 from 0.5
+
 ver 0.0.43:  Check if SGTL5000 already enable before enable(), to avoid loud click when exiting bootloader
+
 ver 0.0.41:  Fixed UISM first state after splash screen to Vol instead of Menu Exit
+
 ver 0.0.39:  Updated to Arduino IDE 2.3.2 and Teensyduino 1.60 Beta #1
 
 # Build tools
 Arduino IDE 2.3.2
+
 Teensyduino 1.6 Beta #1 (plus custom changes in Pull Request #484 to https://github.com/PaulStoffregen/Audio/ )
  
 # TODO
