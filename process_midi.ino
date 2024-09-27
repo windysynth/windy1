@@ -326,7 +326,7 @@ void processSysex(const uint8_t *pSysexData, unsigned int size)
             for( i = 0; i<NRPN_MSB_REVERB_LENGTH; i++)
                current_patch.nrpn_msb_reverb[i] = pSysexData[NRPN_MSB_REVERB_SYSPOS+3+i];
             patchToSynthVariables(&current_patch);
-            PRINT_VALUES_FLAG = true;
+            //PRINT_VALUES_FLAG = true;
         }
         if(savePresetToSDFlag)
         {

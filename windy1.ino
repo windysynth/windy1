@@ -1482,18 +1482,14 @@ void loop()
         }
     }
     
-    if(1) //if(millis() - previousDebugPrintTime >=500)
+    if(millis() - previousDebugPrintTime >=500)
     {
         if(PRINT_VALUES_FLAG)
         {
             printPatchValues();   
             PRINT_VALUES_FLAG = false;
-            // sprintf(str_buf1, "clippedFreqFilterPreNoise: %5.3f ", clippedFreqFilterPreNoise );     
-            //Serial8.println(str_buf1);
         }
-        //previousDebugPrintTime = millis();
-        //sprintf(str_buf1, "foo: %5.3f", foo );      
-        //Serial8.println(str_buf1); 
+        previousDebugPrintTime = millis();
     }
 
 
