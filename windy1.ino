@@ -410,6 +410,10 @@ bool patchFxWriteFlag = false;
 //const uint32_t gatherSensorInterval = 50;  // milliseconds
 const uint32_t readKnobInterval = 50;  // milliseconds
 
+//-------------- MIDI DIN connection ----------------------
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDIs1);
+
+
 
 //-------------- USB HOST MIDI Class Compliant --------------------------
 USBHost myUSBHost;
@@ -428,7 +432,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.44"};
+String verNum_str = {"0.0.45"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -474,7 +478,7 @@ float dc_breathLfoFilter2_amp = 0.0;
 float dc_breathLfoFilter3_amp = 0.0;
 float dc_breathLfoFilter4_amp = 0.0;
 float dc_portatime_val = 0.0;
-float dc_portatime_range = 500.0/12.0; // number of ms when _val is 1.0
+float dc_portatime_range = 1000.0/12.0; // number of ms when _val is 1.0
 float noteNumberOsc1 = 69.0;  
 float noteFreqOsc1 = 440.0;  
 float noteNumberOsc2 = 69.0;  
@@ -510,7 +514,7 @@ int eeprom_breath_cc = 2;
 // synth variable limits and references
 float maxPwmLfoFreq = 10.0;         // 4000s is 10 Hz at 100%
 float maxPwmDepthOsc = 0.50;        // 4000s is +/- 25% at 100% depth
-float maxSweepTimeOsc = 1500.0;       // TODO: set this to match 4000s
+float maxSweepTimeOsc = 500.0;       // TODO: set this to match 4000s
 float sweepTimeOscGamma = 4.0;       // TODO: adjust this to match 4000s
 float maxSweepTimeOscFilter = 2000.0; // 255.0;
 float sweepTimeOscFilterGamma = 4.0;       // TODO: adjust this to match 4000s
@@ -564,7 +568,7 @@ float maxDelayDamp = 3000.0; //TODO: find out correct value
 float maxDelayLevel = 0.15; //TODO: find out correct value
 float gammaDelayLevel = 3.0; //TODO: find out correct value
 float gammaDelayFeedback = 1.5; //TODO: find out correct value
-float maxTimeNoise = 2000;  // 1000 ms
+float maxTimeNoise = 1000;  // 1000 ms
 float TimeNoiseGamma = 4.0;  
 float maxNoiseLevel = 1.0; //0.23;  
 float minGamma = 0.1;
@@ -789,9 +793,8 @@ void setup() {
 
     pinMode(patchNextButton, INPUT_PULLUP);
     pinMode(knobButtonPin, INPUT_PULLUP);
-    //Serial1.begin(1000000);
     Serial8.begin(1000000);
-    Serial.begin(1000000);
+    MIDIs1.begin(MIDI_CHANNEL_OMNI);
     configureSD();
     //delay(10000);
    
@@ -937,11 +940,11 @@ void setup() {
 
     // just needt to mix these, levels are set by wfmod_<name>.amplitude 
     mix_osc1.gain(0, 1.0);
-    mix_osc1.gain(1, 1.0);
+    mix_osc1.gain(1, 1.0); // triOsc1
     mix_osc1.gain(2, 1.0);
     mix_osc1.gain(3, 0.0);
     mix_osc2.gain(0, 1.0);
-    mix_osc2.gain(1, 1.0);
+    mix_osc2.gain(1, 1.0); // triOsc2
     mix_osc2.gain(2, 1.0);
     mix_osc2.gain(3, 0.0);
     mix_oscLevels.gain(0, LevelOsc1);
@@ -1057,8 +1060,6 @@ void setup() {
     mix_delayLevel.gain(0,maxDelayLevel);
     mix_delayLevel.gain(1,maxDelayLevel*pow(EffectsDelayLevel, gammaDelayLevel));
 
-    Serial.println(str_buf);
-    // Serial1.println(str_buf1);
     Serial8.println(str_buf1);
     //sprintf(str_buf1, "AUDIO_BLOCK_SAMPLES: (%03d)", AUDIO_BLOCK_SAMPLES );     
     //Serial8.println(str_buf1);
@@ -1230,7 +1231,6 @@ void loop()
         // gatherSensorsData();
         // print somee stuff for debugging
         // sprintf(str_buf, "%d,%d", fslpPressure, fslpPosition);
-        // Serial.println(str_buf);
         // readPot();
         readKnobAndKnobButton();
     }
@@ -1376,7 +1376,8 @@ void loop()
     noteNumberFilter2 = dc_portatimef.read()*128 + SemiOsc2+FineOsc2;
     noteFreqOsc1 = 440.0 * pow(2, (noteNumberOsc1-69.0)/12 );  // 69 is note number for A4=440Hz
     noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2-69.0)/12 );  // 69 is note number for A4=440Hz
-    noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-12.0)/12 );  // always Oct below noteNumberOsc1  TODO: match 4000s
+    //noteFreqFilter5 = 440.0 * pow(2, (min(noteNumberOsc1,noteNumberOsc2)-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
+    noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
     dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
     dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
     keyfollowFilter1 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter1/144.0); //72 is C5   
@@ -1826,12 +1827,16 @@ void processMIDI(void)
       channel =    midi_ho.getChannel();
      // const uint8_t *sys = midi_ho.getSysExArray();
      //sprintf(str_buf, "type: %d, data1: %d, data2: %d, channel: %d", type,data1, data2, channel);
-     // Serial.println(str_buf);
      //Serial8.println(str_buf);
 
     switch (type) 
     {
+        case midi_ho.AfterTouchPoly: //0xA0
+            MIDIs1.sendPolyPressure(data1,data2,channel);
+        case midi_ho.AfterTouchChannel: //0xD0
+            MIDIs1.sendAfterTouch(data1,channel); // TODO: add AT as method of breath control
         case midi_ho.ControlChange: //0xB0
+            MIDIs1.sendControlChange(data1,data2,channel);
             switch (data1){
                 case CC_MODULATION_WHEEL:
                 case CC_BREATH: 
@@ -1892,14 +1897,24 @@ void processMIDI(void)
                         break;
                     }
                 case CC_PORTA_TIME:
-                  dc_portatime_val = ((float)data2)*DIV127;    // PortamentoTime MSB
+                    dc_portatime_val = ((float)data2)*DIV127;    // PortamentoTime MSB
+                    if(note_is_on) 
+                    {   // update portamento any time it changes and note is on
+                        portatime_temp = dc_portatime_val*dc_portatime_range*fMidiNoteNorm_diff;
+                        if ( portatime_temp < portatime_min )
+                            portatime_temp = portatime_min;
+                        //dc_portatime.amplitude(fMidiNoteNorm, max(6.0f, portatime_temp) );
+                        dc_portatime.amplitude(fMidiNoteNorm,  portatime_temp );
+                    }
                   break;
             }
             break;     
 
         case midi_ho.NoteOn: //(type==0x90)
+            MIDIs1.sendNoteOn(data1,data2,channel);
           //  TODO: create amplitude transition between legato notes
             data2f = ((float)data2)* DIV127;
+          /* don't treat Note on Velocity as a Breath value
             dc_breathThreshOsc1_amp = gamma_func(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
             dc_breathThreshOsc2_amp = gamma_func(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
             dc_breathNoise_amp = gamma_func(data2f,NoiseBreathCurve);
@@ -1920,8 +1935,6 @@ void processMIDI(void)
             dc_breathNoiseFilter4_amp = gamma_func(data2f, BreathCurveNoiseFilter4);
             dc_breathNoiseFilter4.amplitude(dc_breathNoiseFilter4_amp,dc_breathFilterN_rampTime);
             dc_breathNoise.amplitude(dc_breathNoise_amp,6);
-            fMidiNoteNorm = ((float)data1)/128.0;
-            fMidiNoteNorm_diff = abs( (float)(data1 - currentMidiNote));
             if(BreathAttainOsc1 > 0.0)
                 dc_breathSweepOsc1.amplitude(BreathDepthOsc1*(1.0-limit(data2f/BreathAttainOsc1,1.0,-1.0)),6.0); // 2ms fudge filter
             else
@@ -1930,7 +1943,9 @@ void processMIDI(void)
                 dc_breathSweepOsc2.amplitude(BreathDepthOsc2*(1.0-limit(data2f/BreathAttainOsc2,1.0,-1.0)),6.0); // 2ms fudge filter
             else
                 dc_breathSweepOsc2.amplitude(0.0);
-
+            */
+            fMidiNoteNorm = ((float)data1)/128.0;
+            fMidiNoteNorm_diff = abs( (float)(data1 - currentMidiNote));
             if(note_is_on) // legato 
             {
                 // 2nd dc_portatime for filter movement instead of using the one for osc freq for both.
@@ -2053,6 +2068,7 @@ void processMIDI(void)
             break;
 
         case midi_ho.NoteOff:  //(type==0x80)
+            MIDIs1.sendNoteOff(data1,data2,channel);
             if(data1==currentMidiNote)
             {
                 note_is_on = false;
@@ -2072,9 +2088,11 @@ void processMIDI(void)
             break;
 
         case midi_ho.PitchBend:
+            MIDIs1.sendPitchBend(data1+data2*128,channel);
             dc_pitchbend.amplitude((data1+data2*128.0-8192.0)*DIV8192, dc_pitchbend_ramp_rate);
             break;
         case midi_ho.ProgramChange: //0xC0
+            MIDIs1.sendProgramChange(data1,channel);
             programChangeData = data1;
             programChangeFlag = true; // used in UISM
             //  sprintf(str_buf, "type: %d, data1: %d, channel: %d", type,data1, channel);
@@ -2117,7 +2135,9 @@ void updateUISM(void)
             {
                 shortKnobButtonPress = false;
                 UISM = PATCH_SEL;
-                sprintf(str_oledbuf, "Patch: %03d", current_patchNumber+1);
+                String ps( current_patch.patch_string );
+                ps.setCharAt( ps.indexOf(' '), '\n');
+                sprintf(str_oledbuf, "Patch: %03d\n%s", current_patchNumber+1, ps.c_str() );
                 break; 
             }
             if(longKnobButtonPress)
@@ -2181,19 +2201,20 @@ void updateUISM(void)
                 {
                     loadPatchSD(current_patchNumber);
                 }
+                String ps( current_patch.patch_string );
+                ps.setCharAt( ps.indexOf(' '), '\n');
+                sprintf(str_oledbuf, "Patch: %03d\n%s", current_patchNumber+1, ps.c_str() );
                 Serial8.println(current_patch.patch_string);
                 if (updateEpromFlag)
                 {
                     eepromCurrentMillis = millis();
                     eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
                 }
-                sprintf(str_oledbuf, "Patch: %03d", current_patchNumber+1);
             }
             if (programChangeFlag)
             {
                 current_patchNumber = programChangeData % NUMBER_OF_PATCHES;
                 programChangeFlag = false;
-                sprintf(str_oledbuf, "Patch: %03d", current_patchNumber+1);
                 // load the patch 
                 if (patchLoaded[current_patchNumber])
                 {
@@ -2204,6 +2225,9 @@ void updateUISM(void)
                 {
                     loadPatchSD(current_patchNumber);
                 }
+                String ps( current_patch.patch_string );
+                ps.setCharAt( ps.indexOf(' '), '\n');
+                sprintf(str_oledbuf, "Patch: %03d\n%s", current_patchNumber+1, ps.c_str() );
                 Serial8.println(current_patch.patch_string);
                 if (updateEpromFlag)
                 {
@@ -2755,7 +2779,11 @@ void updateUISM(void)
 
    if (UISM != SPLASH_SCREEN)
     {
-        display.setTextSize(2.0); // configuration of size of caracters caractères
+        if (UISM == PATCH_SEL){
+            display.setTextSize(2.0,2.0); // configuration of size of characters 
+        }else{
+            display.setTextSize(2.0); // configuration of size of characters 
+        }
         display.setTextColor(WHITE);
         display.clearDisplay(); // erase display
         display.display(); // refresh display
