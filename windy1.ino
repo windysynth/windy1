@@ -432,7 +432,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.46"};
+String verNum_str = {"0.0.47"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -478,7 +478,8 @@ float dc_breathLfoFilter2_amp = 0.0;
 float dc_breathLfoFilter3_amp = 0.0;
 float dc_breathLfoFilter4_amp = 0.0;
 float dc_portatime_val = 0.0;
-float dc_portatime_range = 1000.0/12.0; // number of ms when _val is 1.0
+float dc_portatime_range = 2500.0/12.0; // number of ms when _val is 1.0
+float dc_portatime_gamma = 4.0;  // TODO: match VL-70m
 float noteNumberOsc1 = 69.0;  
 float noteFreqOsc1 = 440.0;  
 float noteNumberOsc2 = 69.0;  
@@ -1913,7 +1914,8 @@ void processMIDI(bool midi_from_host_flag)
                         break;
                     }
                 case CC_PORTA_TIME:
-                    dc_portatime_val = ((float)data2)*DIV127;    // PortamentoTime MSB
+                    // PortamentoTime MSB
+                    dc_portatime_val = gamma_func( ((float)data2)*DIV127, dc_portatime_gamma ); 
                     if(note_is_on) 
                     {   // update portamento any time it changes and note is on
                         portatime_temp = dc_portatime_val*dc_portatime_range*fMidiNoteNorm_diff;
