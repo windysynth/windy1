@@ -432,7 +432,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.45"};
+String verNum_str = {"0.0.46"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -1497,9 +1497,15 @@ void loop()
     //-------------------------------------------------------
     //  Read and process incomming Midi 
     //-------------------------------------------------------
+    while ( MIDIs1.read() )
+    {
+        processMIDI(false); // process midi coming from the MIDIin 5pin DIN
+    }
+   
     while ( midi_ho.read() ) 
     {
-        processMIDI(); // process midi coming from the ewi
+        // process midi coming from the ewi on Host port and mirror to MIDIout 5pin Din
+        processMIDI(true); 
     }
 
     // usbMIDI.read() needs to be called rapidly from loop().  When
@@ -1508,7 +1514,7 @@ void loop()
     if (usbMIDI.read()) {
         processUsbMIDI();  // process midi coming from computer
     }
-   
+    
     //------------------------------------------------------
     // update eeprom if any values stored there have changed
     //------------------------------------------------------
@@ -1817,14 +1823,21 @@ void changeFilterMode(void)
 //  see https://www.pjrc.com/teensy/td_libs_MIDI.html for
 //            MIDI using
 //------------------------------------------------------
-void processMIDI(void) 
+void processMIDI(bool midi_from_host_flag) 
 {
     // Note: callback method was too slow
     //      see https://www.pjrc.com/teensy/td_midi.html
+    if (midi_from_host_flag){
       type =       midi_ho.getType();
       data1 =      midi_ho.getData1();
       data2 =      midi_ho.getData2();
       channel =    midi_ho.getChannel();
+    } else{
+      type =       MIDIs1.getType();
+      data1 =      MIDIs1.getData1();
+      data2 =      MIDIs1.getData2();
+      channel =    MIDIs1.getChannel();
+    } 
      // const uint8_t *sys = midi_ho.getSysExArray();
      //sprintf(str_buf, "type: %d, data1: %d, data2: %d, channel: %d", type,data1, data2, channel);
      //Serial8.println(str_buf);
@@ -1832,11 +1845,14 @@ void processMIDI(void)
     switch (type) 
     {
         case midi_ho.AfterTouchPoly: //0xA0
-            MIDIs1.sendPolyPressure(data1,data2,channel);
+            if (midi_from_host_flag)
+                MIDIs1.sendPolyPressure(data1,data2,channel);
         case midi_ho.AfterTouchChannel: //0xD0
-            MIDIs1.sendAfterTouch(data1,channel); // TODO: add AT as method of breath control
+            if (midi_from_host_flag)
+                MIDIs1.sendAfterTouch(data1,channel); // TODO: add AT as method of breath control
         case midi_ho.ControlChange: //0xB0
-            MIDIs1.sendControlChange(data1,data2,channel);
+            if (midi_from_host_flag)
+                MIDIs1.sendControlChange(data1,data2,channel);
             switch (data1){
                 case CC_MODULATION_WHEEL:
                 case CC_BREATH: 
@@ -1911,7 +1927,8 @@ void processMIDI(void)
             break;     
 
         case midi_ho.NoteOn: //(type==0x90)
-            MIDIs1.sendNoteOn(data1,data2,channel);
+            if (midi_from_host_flag)
+                MIDIs1.sendNoteOn(data1,data2,channel);
           //  TODO: create amplitude transition between legato notes
             data2f = ((float)data2)* DIV127;
           /* don't treat Note on Velocity as a Breath value
@@ -2068,7 +2085,8 @@ void processMIDI(void)
             break;
 
         case midi_ho.NoteOff:  //(type==0x80)
-            MIDIs1.sendNoteOff(data1,data2,channel);
+            if (midi_from_host_flag)
+                MIDIs1.sendNoteOff(data1,data2,channel);
             if(data1==currentMidiNote)
             {
                 note_is_on = false;
@@ -2088,11 +2106,13 @@ void processMIDI(void)
             break;
 
         case midi_ho.PitchBend:
-            MIDIs1.sendPitchBend(data1+data2*128,channel);
+            if (midi_from_host_flag)
+                MIDIs1.sendPitchBend(data1+data2*128-8192,channel); // 0 = no bend, -2^13 ot +2^13-1
             dc_pitchbend.amplitude((data1+data2*128.0-8192.0)*DIV8192, dc_pitchbend_ramp_rate);
             break;
         case midi_ho.ProgramChange: //0xC0
-            MIDIs1.sendProgramChange(data1,channel);
+            if (midi_from_host_flag)
+                MIDIs1.sendProgramChange(data1,channel);
             programChangeData = data1;
             programChangeFlag = true; // used in UISM
             //  sprintf(str_buf, "type: %d, data1: %d, channel: %d", type,data1, channel);
@@ -2240,6 +2260,16 @@ void updateUISM(void)
         case  MENU: 
             // MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT, MENU_BR, 
             // MENU_RVB_PATCH, MENU_DLY_PATCH, MENU_CHRS_PATCH, MENU_WR_PATCH_FX
+            if(longKnobButtonPress)
+            {
+                longKnobButtonPress = false;
+                UISM = MENU;
+                MENUSM = MENU_EXIT;
+                submenu_active = false;
+                sprintf(str_oledbuf, "MENU:\n EXIT");
+                resetUITimeout();
+                break; 
+            }
             switch (MENUSM)   
             { 
                 case MENU_EXIT:
@@ -2817,6 +2847,11 @@ void readKnobAndKnobButton(void)
     newKnob = newKnob_temp > 0 ? 1 : newKnob_temp < 0 ? -1 : 0; //don't need 4X counting mode, so integer div by 4
     knobButton.update();
     currentKnobButtonState = knobButton.read();
+    if( !currentKnobButtonState && (newKnob != 0) ){ 
+        knob.write(0); // reset knob position to zero
+        newKnob = 0;
+    }
+    
     if( !longKnobButtonPressPending && !currentKnobButtonState && (knobButton.currentDuration() > longKnobButtonPressTime) )
     {
         longKnobButtonPressPending = true;
