@@ -432,7 +432,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.47"};
+String verNum_str = {"0.0.48"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -494,6 +494,7 @@ float fMidiNoteNorm =69.0/128.0;  //440.0;
 float fMidiNoteNorm_diff = 0.0;
 float data2f = 0.0;
 float data1f = 0.0;
+float lastBreathf = 0.0;
 int32_t vol = 75;
 int eeprom_vol = 75;
 float volf = 1.5;
@@ -516,10 +517,10 @@ int eeprom_breath_cc = 2;
 float maxPwmLfoFreq = 10.0;         // 4000s is 10 Hz at 100%
 float maxPwmDepthOsc = 0.50;        // 4000s is +/- 25% at 100% depth
 float maxSweepTimeOsc = 500.0;       // TODO: set this to match 4000s
-float sweepTimeOscGamma = 4.0;       // TODO: adjust this to match 4000s
-float maxSweepTimeOscFilter = 2000.0; // 255.0;
+float sweepTimeOscGamma = 3.50;       // TODO: adjust this to match 4000s
+float maxSweepTimeOscFilter = 1000.0; // 255.0;
 float sweepTimeOscFilterGamma = 4.0;       // TODO: adjust this to match 4000s
-float maxSweepTimeNoiseFilter = 1000.0;
+float maxSweepTimeNoiseFilter = 750.0;
 float sweepTimeNoiseFilterGamma = 4.0;       // TODO: adjust this to match 4000s
 float maxSweepDepthFilter = 1.0;   // TODO: set this to match 4000s
 float maxLfoFreqFilter1 = 100.0;
@@ -1235,6 +1236,12 @@ void loop()
         // readPot();
         readKnobAndKnobButton();
     }
+    if( programChangeFlag )
+    {
+        resetUITimeout();
+        updateUISM();  // updated User Interface State Machine
+    }
+
     if ( (!ALREADY_TIMED_OUT)&&(currentUITimeoutTime - previousUITimeoutTime >= UITimeoutInterval) )
     {
         UITimeout();
@@ -1377,8 +1384,8 @@ void loop()
     noteNumberFilter2 = dc_portatimef.read()*128 + SemiOsc2+FineOsc2;
     noteFreqOsc1 = 440.0 * pow(2, (noteNumberOsc1-69.0)/12 );  // 69 is note number for A4=440Hz
     noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2-69.0)/12 );  // 69 is note number for A4=440Hz
-    //noteFreqFilter5 = 440.0 * pow(2, (min(noteNumberOsc1,noteNumberOsc2)-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
-    noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
+    noteFreqFilter5 = 440.0 * pow(2, (min(60,min(noteNumberOsc1,noteNumberOsc2))-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
+    //noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
     dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
     dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
     keyfollowFilter1 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter1/144.0); //72 is C5   
@@ -1488,7 +1495,7 @@ void loop()
     {
         if(PRINT_VALUES_FLAG)
         {
-            printPatchValues();   
+         //   printPatchValues();   
             PRINT_VALUES_FLAG = false;
         }
         previousDebugPrintTime = millis();
@@ -1845,6 +1852,14 @@ void processMIDI(bool midi_from_host_flag)
 
     switch (type) 
     {
+        case midi_ho.ProgramChange: //0xC0
+            programChangeData = data1;
+            programChangeFlag = true; // used in UISM
+            sprintf(str_buf, "type: %d, data1: %d, channel: %d", type,data1, channel);
+            Serial8.println(str_buf);
+            if (midi_from_host_flag)
+                MIDIs1.sendProgramChange(data1,channel);
+            break;
         case midi_ho.AfterTouchPoly: //0xA0
             if (midi_from_host_flag)
                 MIDIs1.sendPolyPressure(data1,data2,channel);
@@ -1866,6 +1881,7 @@ void processMIDI(bool midi_from_host_flag)
                     else
                     {
                         data2f = ((float)data2) * DIV127;
+                        lastBreathf = data2f;
                         dc_breathLfoFilter1_amp = lfoThresh(data2f,LfoThreshOscFilter1,LfoDepthOscFilter1,LfoBreathOscFilter1);
                         dc_breathLfoFilter2_amp = lfoThresh(data2f,LfoThreshOscFilter2,LfoDepthOscFilter2,LfoBreathOscFilter2);
                         dc_breathLfoFilter3_amp = lfoThresh(data2f,LfoThreshNoiseFilter3,LfoDepthNoiseFilter3,LfoBreathNoiseFilter3);
@@ -1933,36 +1949,37 @@ void processMIDI(bool midi_from_host_flag)
                 MIDIs1.sendNoteOn(data1,data2,channel);
           //  TODO: create amplitude transition between legato notes
             data2f = ((float)data2)* DIV127;
-          /* don't treat Note on Velocity as a Breath value
-            dc_breathThreshOsc1_amp = gamma_func(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
-            dc_breathThreshOsc2_amp = gamma_func(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
-            dc_breathNoise_amp = gamma_func(data2f,NoiseBreathCurve);
-            dc_breathLfoFilter1_amp = lfoThresh(data2f,LfoThreshOscFilter1,LfoDepthOscFilter1,LfoBreathOscFilter1);
-            dc_breathLfoFilter2_amp = lfoThresh(data2f,LfoThreshOscFilter2,LfoDepthOscFilter2,LfoBreathOscFilter2);
-            dc_breathLfoFilter3_amp = lfoThresh(data2f,LfoThreshNoiseFilter3,LfoDepthNoiseFilter3,LfoBreathNoiseFilter3);
-            dc_breathLfoFilter4_amp = lfoThresh(data2f,LfoThreshNoiseFilter4,LfoDepthNoiseFilter4,LfoBreathNoiseFilter4);
+            if (lastBreathf <= 0.0f){ lastBreathf = data2f; } 
+         // /* don't treat Note on Velocity as a Breath value
+            dc_breathThreshOsc1_amp = gamma_func(thresh( lastBreathf,BreathThreshOsc1), BreathCurveOsc1);
+            dc_breathThreshOsc2_amp = gamma_func(thresh( lastBreathf,BreathThreshOsc2), BreathCurveOsc2);
+            dc_breathLfoFilter1_amp = lfoThresh(lastBreathf,LfoThreshOscFilter1,LfoDepthOscFilter1,LfoBreathOscFilter1);
+            dc_breathLfoFilter2_amp = lfoThresh(lastBreathf,LfoThreshOscFilter2,LfoDepthOscFilter2,LfoBreathOscFilter2);
+            dc_breathLfoFilter3_amp = lfoThresh(lastBreathf,LfoThreshNoiseFilter3,LfoDepthNoiseFilter3,LfoBreathNoiseFilter3);
+            dc_breathLfoFilter4_amp = lfoThresh(lastBreathf,LfoThreshNoiseFilter4,LfoDepthNoiseFilter4,LfoBreathNoiseFilter4);
             dc_breathLfoFilter1.amplitude(dc_breathLfoFilter1_amp,6);
             dc_breathLfoFilter2.amplitude(dc_breathLfoFilter2_amp,6);
             dc_breathLfoFilter3.amplitude(dc_breathLfoFilter3_amp,6);
             dc_breathLfoFilter4.amplitude(dc_breathLfoFilter4_amp,6);
-            dc_breathOscFilter1_amp = gamma_func(data2f, BreathCurveOscFilter1);
+            dc_breathOscFilter1_amp = gamma_func(lastBreathf, BreathCurveOscFilter1);
             dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime);
-            dc_breathOscFilter2_amp = gamma_func(data2f, BreathCurveOscFilter2);
+            dc_breathOscFilter2_amp = gamma_func(lastBreathf, BreathCurveOscFilter2);
             dc_breathOscFilter2.amplitude(dc_breathOscFilter2_amp,dc_breathFilterN_rampTime);
-            dc_breathNoiseFilter3_amp = gamma_func(data2f, BreathCurveNoiseFilter3);
+            dc_breathNoiseFilter3_amp = gamma_func(lastBreathf, BreathCurveNoiseFilter3);
             dc_breathNoiseFilter3.amplitude(dc_breathNoiseFilter3_amp,dc_breathFilterN_rampTime);
-            dc_breathNoiseFilter4_amp = gamma_func(data2f, BreathCurveNoiseFilter4);
+            dc_breathNoiseFilter4_amp = gamma_func(lastBreathf, BreathCurveNoiseFilter4);
             dc_breathNoiseFilter4.amplitude(dc_breathNoiseFilter4_amp,dc_breathFilterN_rampTime);
-            dc_breathNoise.amplitude(dc_breathNoise_amp,6);
+            dc_breathNoise_amp = gamma_func(lastBreathf,NoiseBreathCurve);
+            if( NoiseLevel > 0) { dc_breathNoise.amplitude(dc_breathNoise_amp,6); }
             if(BreathAttainOsc1 > 0.0)
-                dc_breathSweepOsc1.amplitude(BreathDepthOsc1*(1.0-limit(data2f/BreathAttainOsc1,1.0,-1.0)),6.0); // 2ms fudge filter
+                dc_breathSweepOsc1.amplitude(BreathDepthOsc1*(1.0-limit(lastBreathf/BreathAttainOsc1,1.0,-1.0)),6.0); // 2ms fudge filter
             else
                 dc_breathSweepOsc1.amplitude(0.0);
             if(BreathAttainOsc2 > 0.0)
-                dc_breathSweepOsc2.amplitude(BreathDepthOsc2*(1.0-limit(data2f/BreathAttainOsc2,1.0,-1.0)),6.0); // 2ms fudge filter
+                dc_breathSweepOsc2.amplitude(BreathDepthOsc2*(1.0-limit(lastBreathf/BreathAttainOsc2,1.0,-1.0)),6.0); // 2ms fudge filter
             else
                 dc_breathSweepOsc2.amplitude(0.0);
-            */
+          //  */
             fMidiNoteNorm = ((float)data1)/128.0;
             fMidiNoteNorm_diff = abs( (float)(data1 - currentMidiNote));
             if(note_is_on) // legato 
@@ -2112,14 +2129,11 @@ void processMIDI(bool midi_from_host_flag)
                 MIDIs1.sendPitchBend(data1+data2*128-8192,channel); // 0 = no bend, -2^13 ot +2^13-1
             dc_pitchbend.amplitude((data1+data2*128.0-8192.0)*DIV8192, dc_pitchbend_ramp_rate);
             break;
-        case midi_ho.ProgramChange: //0xC0
-            if (midi_from_host_flag)
-                MIDIs1.sendProgramChange(data1,channel);
-            programChangeData = data1;
-            programChangeFlag = true; // used in UISM
-            //  sprintf(str_buf, "type: %d, data1: %d, channel: %d", type,data1, channel);
-            //  Serial8.println(str_buf);
+        default: 
+            sprintf(str_buf, "Default! type: %d, data1: %d, channel: %d", type,data1, channel);
+            Serial8.println(str_buf);
             break;
+
     } // switch (type)
 }
 
@@ -2171,6 +2185,14 @@ void updateUISM(void)
                 resetUITimeout();
                 break; 
             }
+            if (programChangeFlag)
+            {
+                UISM = PATCH_SEL;
+               // String ps( current_patch.patch_string );
+               // ps.setCharAt( ps.indexOf(' '), '\n');
+               // sprintf(str_oledbuf, "Patch: %03d\n%s", current_patchNumber+1, ps.c_str() );
+                break;
+            }
             if (newKnob)
             {
                 vol = vol + newKnob*4;
@@ -2180,15 +2202,36 @@ void updateUISM(void)
                 volf = (volf*volf)*2.0f;
                 updateSynthVariablesFlag = true;
             }
-            if (programChangeFlag)
-            {
-                UISM = PATCH_SEL;
-            }
             sprintf(str_oledbuf, "Vol: %03ld", vol);
             sprintf(str_buf1, "Vol: %03ld", vol);
             Serial8.println(str_buf1);
             break;
         case PATCH_SEL:
+            if (programChangeFlag)
+            {
+                current_patchNumber = programChangeData % NUMBER_OF_PATCHES;
+                programChangeFlag = false;
+                // load the patch 
+                if (patchLoaded[current_patchNumber])
+                {
+                    setCurrentPatch(current_patchNumber);
+                    patchToSynthVariables(&current_patch);
+                } 
+                else 
+                {
+                    loadPatchSD(current_patchNumber);
+                }
+                String ps( current_patch.patch_string );
+                ps.setCharAt( ps.indexOf(' '), '\n');
+                sprintf(str_oledbuf, "Patch: %03d\n%s", current_patchNumber+1, ps.c_str() );
+                Serial8.println(current_patch.patch_string);
+                if (updateEpromFlag)
+                {
+                    eepromCurrentMillis = millis();
+                    eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+                }
+                break;
+            }
             if(shortKnobButtonPress)
             {
                 shortKnobButtonPress = false;
@@ -2233,31 +2276,6 @@ void updateUISM(void)
                     eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
                 }
             }
-            if (programChangeFlag)
-            {
-                current_patchNumber = programChangeData % NUMBER_OF_PATCHES;
-                programChangeFlag = false;
-                // load the patch 
-                if (patchLoaded[current_patchNumber])
-                {
-                    setCurrentPatch(current_patchNumber);
-                    patchToSynthVariables(&current_patch);
-                } 
-                else 
-                {
-                    loadPatchSD(current_patchNumber);
-                }
-                String ps( current_patch.patch_string );
-                ps.setCharAt( ps.indexOf(' '), '\n');
-                sprintf(str_oledbuf, "Patch: %03d\n%s", current_patchNumber+1, ps.c_str() );
-                Serial8.println(current_patch.patch_string);
-                if (updateEpromFlag)
-                {
-                    eepromCurrentMillis = millis();
-                    eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
-                }
-            }
-                
             break;
         case  MENU: 
             // MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT, MENU_BR, 
@@ -2888,7 +2906,7 @@ void readKnobAndKnobButton(void)
         }
     }
 
-    if( programChangeFlag || longKnobButtonPress || shortKnobButtonPress || newKnob != 0 )
+    if( longKnobButtonPress || shortKnobButtonPress || newKnob != 0 )
     {
         resetUITimeout();
         updateUISM();  // updated User Interface State Machine

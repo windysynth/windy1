@@ -250,7 +250,7 @@ void processUsbMIDI(void)
       break;
 
     default:
-      Serial8.println("Opps, an unknown MIDI message type!");
+      Serial8.println("Oops, an unknown MIDI message type!");
       break;
   }
 }
