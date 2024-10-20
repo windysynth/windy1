@@ -432,7 +432,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.48"};
+String verNum_str = {"0.0.50"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -522,7 +522,7 @@ float maxSweepTimeOscFilter = 1000.0; // 255.0;
 float sweepTimeOscFilterGamma = 4.0;       // TODO: adjust this to match 4000s
 float maxSweepTimeNoiseFilter = 750.0;
 float sweepTimeNoiseFilterGamma = 4.0;       // TODO: adjust this to match 4000s
-float maxSweepDepthFilter = 1.0;   // TODO: set this to match 4000s
+float maxSweepDepthFilter = 0.875;   // 7/8 = 0.875 (because new max filter modulation is 8 octaves) TODO: set this to match 4000s
 float maxLfoFreqFilter1 = 100.0;
 float maxLfoFreqFilter2 = 100.0;
 float maxLfoFreqFilter3 = 100.0;
@@ -556,13 +556,11 @@ float octaveControlFilter4 = 8.0;
 
 float octaveControlFilter5 = 0.0;
 float offsetNoteKeyfollow = 86.0;  // 84 = C6, 72 = C5, 60 = C4
+float offsetNoteKeyfollowNoise = 60.0;  // 84 = C6, 72 = C5, 60 = C4
 float minPreNoiseNoteNumbr = 60.0;  // 84 = C6, 72 = C5, 60 = C4  4000s noise stops changing below about C4
 const uint32_t updatedAudioSystemInterval = 1;  // milliseconds
 float freqOscFilterOctaveOffset  = 0.0;    // use 3 to divide FreqOscFilterN by 2^3 to allow modulation to go from -1 to +3/7 
-//float fOFOFactor = pow(2,-freqOscFilterOctaveOffset); //TODO: fix this 
-float fOFOFactor = 1.0; 
-//float fOFOHack = freqOscFilterOctaveOffset/octaveControlFilter1;
-float fOFOHack = 0;
+//float fOFOFactor = 1.0; 
 float maxFilterFreq = 20000; //12000.0; 
 float minFilterFreq = 65.4; // min note number 36
 float minFilterPreNoiseFreq = 261.63; // middle C (C4)
@@ -572,7 +570,7 @@ float gammaDelayLevel = 3.0; //TODO: find out correct value
 float gammaDelayFeedback = 1.5; //TODO: find out correct value
 float maxTimeNoise = 1000;  // 1000 ms
 float TimeNoiseGamma = 4.0;  
-float maxNoiseLevel = 1.0; //0.23;  
+float maxNoiseLevel = 0.85; //0.23;  
 float minGamma = 0.1;
 float maxGamma = 2.0;
 float maxReverbLevel = 0.3;
@@ -728,11 +726,11 @@ float LfoThreshNoiseFilter4 = 0;  	//75,8,0,127,
 float SweepDepthNoiseFilter4 = 0;  	//75,9,0,127,
 float SweepTimeNoiseFilter4 = 0;  	//75,10,0,127,
 float BreathCurveNoiseFilter4 = 1.0;  	//75,11,0,127, TODO: hook this up
-float KeyFollowPreNoiseFilter = 4;  // TODO: match 4000s
+float KeyFollowPreNoiseFilter = 5;  // TODO: match 4000s
 float keyfollowFilterPreNoise = 1.0; 
 float FreqPreNoiseFilter = 3000.0; // TODO: match 4000s
 float NoiseTime = 0.0;  	//80,0,0,127,
-float TimeNoiseAmp = 0.25;  	//80,0,0,127,
+float TimeNoiseAmp = 1.0;  	//80,0,0,127,
 float NoiseBreathCurve = 1.0;  	//80,1,0,127,
 float NoiseLevel = 1.0;  	//80,2,0,127,
 float BendRange = 2.0;  	//81,0,0,12,// num semitones
@@ -1392,7 +1390,7 @@ void loop()
     keyfollowFilter2 = pow(2, (noteNumberFilter2-offsetNoteKeyfollow)*KeyFollowOscFilter2/144.0); //72 is C5 
     keyfollowFilter3 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowNoiseFilter3/144.0); //72 is C5
     keyfollowFilter4 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowNoiseFilter4/144.0); //72 is C5 
-    keyfollowFilterPreNoise = pow(2, ( (noteNumberFilter1 < minPreNoiseNoteNumbr ? minPreNoiseNoteNumbr : noteNumberFilter1)- offsetNoteKeyfollow )
+    keyfollowFilterPreNoise = pow(2, ( (noteNumberFilter1 < minPreNoiseNoteNumbr ? minPreNoiseNoteNumbr : noteNumberFilter1)- offsetNoteKeyfollowNoise )
                                 *KeyFollowPreNoiseFilter/144.0); //72 is C5 
     wfmod_sawOsc1.frequency(noteFreqOsc1);
     wfmod_triOsc1.frequency(noteFreqOsc1);
@@ -1400,33 +1398,33 @@ void loop()
     wfmod_sawOsc2.frequency(noteFreqOsc2);
     wfmod_triOsc2.frequency(noteFreqOsc2);
     wfmod_pulseOsc2.frequency(noteFreqOsc2);
-    // octaveControlFilter<N> can only go +/-7 Octaves and we need -10, so we hack the Freq fOFOFacter down 3 octaves and change
-    // modulation to go from -7 to +3 octaves.
-    clippedFreqFilter1 = (keyfollowFilter1*FreqOscFilter1*fOFOFactor < minFilterFreq)  // fOFOFactor needs fOFOHack below
-                        ? minFilterFreq : (keyfollowFilter1*FreqOscFilter1*fOFOFactor < maxFilterFreq) 
-                        ? keyfollowFilter1*FreqOscFilter1*fOFOFactor : maxFilterFreq;  
-    clippedFreqFilter2 = (keyfollowFilter2*FreqOscFilter2*fOFOFactor < minFilterFreq)  
-                        ? minFilterFreq : (keyfollowFilter2*FreqOscFilter2*fOFOFactor < maxFilterFreq) 
-                        ? keyfollowFilter2*FreqOscFilter2*fOFOFactor : maxFilterFreq;  
-    clippedFreqFilter3 = (keyfollowFilter3*FreqNoiseFilter3*fOFOFactor < minFilterFreq)  
-                        ? minFilterFreq : (keyfollowFilter3*FreqNoiseFilter3*fOFOFactor < maxFilterFreq) 
-                        ? keyfollowFilter3*FreqNoiseFilter3*fOFOFactor : maxFilterFreq;  
-    clippedFreqFilter4 = (keyfollowFilter4*FreqNoiseFilter4*fOFOFactor < minFilterFreq)  
-                        ? minFilterFreq : (keyfollowFilter4*FreqNoiseFilter4*fOFOFactor < maxFilterFreq) 
-                        ? keyfollowFilter4*FreqNoiseFilter4*fOFOFactor : maxFilterFreq;  
+    // octaveControlFilter<N> can now go +/- 7.9998 Octaves A0 is 27.5Hz*2^8 = 7040, and 20000/2^8 = 78.125 ~= D#2, close enough
+    // minFilterFreq of 65.4 = C2, 65.4*2^8 = 16742Hz
+    clippedFreqFilter1 = (keyfollowFilter1*FreqOscFilter1 < minFilterFreq)  
+                        ? minFilterFreq : (keyfollowFilter1*FreqOscFilter1 < maxFilterFreq) 
+                        ? keyfollowFilter1*FreqOscFilter1 : maxFilterFreq;  
+    clippedFreqFilter2 = (keyfollowFilter2*FreqOscFilter2 < minFilterFreq)  
+                        ? minFilterFreq : (keyfollowFilter2*FreqOscFilter2 < maxFilterFreq) 
+                        ? keyfollowFilter2*FreqOscFilter2 : maxFilterFreq;  
+    clippedFreqFilter3 = (keyfollowFilter3*FreqNoiseFilter3 < minFilterFreq)  
+                        ? minFilterFreq : (keyfollowFilter3*FreqNoiseFilter3 < maxFilterFreq) 
+                        ? keyfollowFilter3*FreqNoiseFilter3 : maxFilterFreq;  
+    clippedFreqFilter4 = (keyfollowFilter4*FreqNoiseFilter4 < minFilterFreq)  
+                        ? minFilterFreq : (keyfollowFilter4*FreqNoiseFilter4 < maxFilterFreq) 
+                        ? keyfollowFilter4*FreqNoiseFilter4 : maxFilterFreq;  
     clippedFreqFilterPreNoise = keyfollowFilterPreNoise*FreqPreNoiseFilter < minFilterPreNoiseFreq // TODO: add offset or factor relative to current note freq
                         ? minFilterPreNoiseFreq : keyfollowFilterPreNoise*FreqPreNoiseFilter < maxFilterFreq
                         ? keyfollowFilterPreNoise*FreqPreNoiseFilter : maxFilterFreq;
     filter1.frequency(clippedFreqFilter1);  
     filter1.resonance(QFactorOscFilter1);   // Q factor
-    mix_fcModFilter1.gain(0,fOFOHack + BreathModOscFilter1); // allow breath to go from 0 to Hack-BM (fOFOHack needs fOFOFactor above)
+    mix_fcModFilter1.gain(0, BreathModOscFilter1); 
     mix_fcModFilter1.gain(3, modOffsetFilter1); 
     dc_modOffsetOscFilter1.amplitude(-BreathModOscFilter1);  // subtract off BM, 
     if (LinkOscFilters) 
     {
         filter2.frequency(clippedFreqFilter1);
         filter2.resonance(QFactorOscFilter1);   // Q factor
-        mix_fcModFilter2.gain(0, fOFOHack + BreathModOscFilter1); 
+        mix_fcModFilter2.gain(0,  BreathModOscFilter1); 
         mix_fcModFilter2.gain(3, modOffsetFilter1); 
         ModeOscFilter2 = ModeOscFilter1;    
         dc_modOffsetOscFilter2.amplitude(-BreathModOscFilter1);
@@ -1435,21 +1433,21 @@ void loop()
     {
         filter2.frequency(clippedFreqFilter2);
         filter2.resonance(QFactorOscFilter2);   // Q factor
-        mix_fcModFilter2.gain(0, fOFOHack + BreathModOscFilter2); 
+        mix_fcModFilter2.gain(0,  BreathModOscFilter2); 
         mix_fcModFilter2.gain(3, modOffsetFilter2); 
         dc_modOffsetOscFilter2.amplitude(-BreathModOscFilter2);
     }
     filter3.frequency(clippedFreqFilter3);  
     filter3.resonance(QFactorNoiseFilter3);   // Q factor
-    mix_fcModFilter3.gain(0, fOFOHack + BreathModNoiseFilter3); 
+    mix_fcModFilter3.gain(0,  BreathModNoiseFilter3); 
     mix_fcModFilter3.gain(3, modOffsetFilter3); 
     dc_modOffsetNoiseFilter3.amplitude(-BreathModNoiseFilter3);
     if (LinkNoiseFilters)
     {
         filter4.frequency(clippedFreqFilter3);
         filter4.resonance(QFactorNoiseFilter3);   // Q factor
-        mix_fcModFilter4.gain(0, fOFOHack + BreathModNoiseFilter3); 
-        mix_fcModFilter4.gain(3, modOffsetFilter4); 
+        mix_fcModFilter4.gain(0,  BreathModNoiseFilter3); 
+        mix_fcModFilter4.gain(3, modOffsetFilter3); 
         ModeNoiseFilter4 = ModeNoiseFilter3;    
         dc_modOffsetNoiseFilter4.amplitude(-BreathModNoiseFilter3);
     }
@@ -1457,7 +1455,7 @@ void loop()
     {
         filter4.frequency(clippedFreqFilter4);
         filter4.resonance(QFactorNoiseFilter4);   // Q factor
-        mix_fcModFilter4.gain(0, fOFOHack + BreathModNoiseFilter4); 
+        mix_fcModFilter4.gain(0,  BreathModNoiseFilter4); 
         mix_fcModFilter4.gain(3, modOffsetFilter4); 
         dc_modOffsetNoiseFilter4.amplitude(-BreathModNoiseFilter4);
     }
@@ -1495,7 +1493,8 @@ void loop()
     {
         if(PRINT_VALUES_FLAG)
         {
-         //   printPatchValues();   
+            printPatchValues();   
+            //printCurveMidiData();
             PRINT_VALUES_FLAG = false;
         }
         previousDebugPrintTime = millis();

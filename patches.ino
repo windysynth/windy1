@@ -25,11 +25,10 @@ void patchToSynthVariables(patch_t *patch) {
     PwmFreqOsc1 = (float)patch->nrpn_msb_osc1[CCPWMFREQOSC1]*DIV127*maxPwmLfoFreq;  	//64,9,0,127,
     PwmDepthOsc1 = (float)patch->nrpn_msb_osc1[CCPWMDEPTHOSC1]*DIV127;  	//64,10,0,127,  
     SweepDepthOsc1 = ((float)patch->nrpn_msb_osc1[CCSWEEPDEPTHOSC1]-64.0)/64.0;  	//64,11,0,127,
-    SweepTimeOsc1 = pow( (float)patch->nrpn_msb_osc1[CCSWEEPTIMEOSC1]*DIV127, sweepTimeOscGamma)*maxSweepTimeOsc;  	//64,12,0,127,
+    SweepTimeOsc1 = sweepTimeOscCurve( (float)patch->nrpn_msb_osc1[CCSWEEPTIMEOSC1]*DIV127);  	//64,12,0,127,
     BreathDepthOsc1 = ((float)patch->nrpn_msb_osc1[CCBREATHDEPTHOSC1]-64.0)/64.0;  	//64,13,0,127,
     BreathAttainOsc1 = (float)patch->nrpn_msb_osc1[CCBREATHATTAINOSC1]*DIV127;  	//64,14,0,127,
-    //BreathCurveOsc1 = 1.0 - ((float)patch->nrpn_msb_osc1[CCBREATHCURVEOSC1]-64.0)/64.0;  	//64,15,0,127,
-    BreathCurveOsc1 = gen_osc_gamma(((float)patch->nrpn_msb_osc1[CCBREATHCURVEOSC1])*DIV128);  	//64,15,0,127,
+    BreathCurveOsc1 = gen_osc_gamma(((float)patch->nrpn_msb_osc1[CCBREATHCURVEOSC1])*DIV127);  	//64,15,0,127,
     BreathThreshOsc1 = (float)patch->nrpn_msb_osc1[CCBREATHTHRESHOSC1]*DIV127;  	//64,16,0,127,
     LevelOsc1 = (float)patch->nrpn_msb_osc1[CCLEVELOSC1]*DIV127;  		//64,17,0,127,
     OctOsc2 = (float)patch->nrpn_msb_osc2[CCOCTOSC2]-64.0;      //65,0,62,66,
@@ -43,11 +42,10 @@ void patchToSynthVariables(patch_t *patch) {
     PwmFreqOsc2 = (float)patch->nrpn_msb_osc2[CCPWMFREQOSC2]*DIV127*maxPwmLfoFreq;  	//65,9,0,127,
     PwmDepthOsc2 = (float)patch->nrpn_msb_osc2[CCPWMDEPTHOSC2]*DIV127;  	//65,10,0,127,
     SweepDepthOsc2 = ((float)patch->nrpn_msb_osc2[CCSWEEPDEPTHOSC2]-64.0)/64;  	//65,11,0,127,
-    SweepTimeOsc2 = pow((float)patch->nrpn_msb_osc2[CCSWEEPTIMEOSC2]*DIV127, sweepTimeOscGamma)*maxSweepTimeOsc;  	//65,12,0,127,
+    SweepTimeOsc2 = sweepTimeOscCurve((float)patch->nrpn_msb_osc2[CCSWEEPTIMEOSC2]*DIV127);  	//65,12,0,127,
     BreathDepthOsc2 = ((float)patch->nrpn_msb_osc2[CCBREATHDEPTHOSC2]-64.0)/64.0;  	//65,13,0,127,
     BreathAttainOsc2 = (float)patch->nrpn_msb_osc2[CCBREATHATTAINOSC2]*DIV127;  	//65,14,0,127,
-    //BreathCurveOsc2 = 1.0 - ((float)patch->nrpn_msb_osc2[CCBREATHCURVEOSC2]-64.0)/64.0;  	//65,15,0,127,
-    BreathCurveOsc2 = gen_osc_gamma(((float)patch->nrpn_msb_osc2[CCBREATHCURVEOSC2])*DIV128);  	//65,15,0,127,
+    BreathCurveOsc2 = gen_osc_gamma(((float)patch->nrpn_msb_osc2[CCBREATHCURVEOSC2])*DIV127);  	//65,15,0,127,
     BreathThreshOsc2 = (float)patch->nrpn_msb_osc2[CCBREATHTHRESHOSC2]*DIV127;  	//65,16,0,127,
     LevelOsc2 = (float)patch->nrpn_msb_osc2[CCLEVELOSC2]*DIV127;  	//65,17,0,127,
     ModeOscFilter1 = (filterMode_t)patch->nrpn_msb_osc_filt1[CCMODEOSCFILTER1];  	//72,0,0,4,//LP HP BP NTC OFF
@@ -61,9 +59,8 @@ void patchToSynthVariables(patch_t *patch) {
     LfoBreathOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCLFOBREATHOSCFILTER1]-64.0)/64.0;  	//72,7,0,127,
     LfoThreshOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCLFOTHRESHOSCFILTER1]*DIV127;  	//72,8,0,127,
     SweepDepthOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCSWEEPDEPTHOSCFILTER1]-64.0)/64.0;  	//72,9,0,127,
-    SweepTimeOscFilter1 = pow((float)patch->nrpn_msb_osc_filt1[CCSWEEPTIMEOSCFILTER1]*DIV127,sweepTimeOscFilterGamma)*maxSweepTimeOscFilter;  	//72,10,0,127,
-    //BreathCurveOscFilter1 = 1.0 -((float)patch->nrpn_msb_osc_filt1[CCBREATHCURVEOSCFILTER1]-64.0)/64.0;  	//72,11,0,127,
-    BreathCurveOscFilter1 = gen_filter_gamma(((float)patch->nrpn_msb_osc_filt1[CCBREATHCURVEOSCFILTER1])*DIV128);  	//72,11,0,127,
+    SweepTimeOscFilter1 = sweepTimeFilterCurve((float)patch->nrpn_msb_osc_filt1[CCSWEEPTIMEOSCFILTER1]*DIV127);  	//72,10,0,127,
+    BreathCurveOscFilter1 = gen_filter_gamma(((float)patch->nrpn_msb_osc_filt1[CCBREATHCURVEOSCFILTER1])*DIV127);  	//72,11,0,127,
     ModeOscFilter2 = (filterMode_t)patch->nrpn_msb_osc_filt2[CCMODEOSCFILTER2];  	//73,0,0,4,//LP HP BP NTC OFF
     FreqOscFilter2 = 440.0*pow(2, ((float)patch->nrpn_msb_osc_filt2[CCFREQOSCFILTER2]-69.0)/12 ); //73,1,36,124,//Midi Note 36 to 124
     QFactorOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCQFACTOROSCFILTER2]/10.0;  	//73,2,5,127,"// 5=0.5, 127=12.7"
@@ -74,9 +71,8 @@ void patchToSynthVariables(patch_t *patch) {
     LfoBreathOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCLFOBREATHOSCFILTER2]-64.0)/64.0;  	//73,7,0,127,
     LfoThreshOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCLFOTHRESHOSCFILTER2]*DIV127;  	//73,8,0,127,
     SweepDepthOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCSWEEPDEPTHOSCFILTER2]-64.0)/64.0;  	//73,9,0,127,
-    SweepTimeOscFilter2 = pow((float)patch->nrpn_msb_osc_filt2[CCSWEEPTIMEOSCFILTER2]*DIV127,sweepTimeOscFilterGamma)*maxSweepTimeOscFilter;  	//73,10,0,127,
-    //BreathCurveOscFilter2 = 1.0 - ((float)patch->nrpn_msb_osc_filt2[CCBREATHCURVEOSCFILTER2]-64.0)/64.0;  	//73,11,0,127,
-    BreathCurveOscFilter2 = gen_filter_gamma(((float)patch->nrpn_msb_osc_filt2[CCBREATHCURVEOSCFILTER2])*DIV128);  	//73,11,0,127,
+    SweepTimeOscFilter2 = sweepTimeFilterCurve((float)patch->nrpn_msb_osc_filt2[CCSWEEPTIMEOSCFILTER2]*DIV127);  	//73,10,0,127,
+    BreathCurveOscFilter2 = gen_filter_gamma(((float)patch->nrpn_msb_osc_filt2[CCBREATHCURVEOSCFILTER2])*DIV127);  	//73,11,0,127,
     ModeNoiseFilter3 = (filterMode_t)patch->nrpn_msb_noise_filt3[CCMODENOISEFILTER3];  	//74,0,0,4,//LP HP BP NTC OFF
     FreqNoiseFilter3 = 440.0*pow(2, ((float)patch->nrpn_msb_noise_filt3[CCFREQNOISEFILTER3]-69.0)/12 );//74,1,36,124,//Note# 36 to 124
     QFactorNoiseFilter3 = (float)patch->nrpn_msb_noise_filt3[CCQFACTORNOISEFILTER3]/10.0;  	//74,2,5,127,"// 5=0.5, 127=12.7"
@@ -87,9 +83,8 @@ void patchToSynthVariables(patch_t *patch) {
     LfoBreathNoiseFilter3 = ((float)patch->nrpn_msb_noise_filt3[CCLFOBREATHNOISEFILTER3]-64.0)/64.0;  	//74,7,0,127,
     LfoThreshNoiseFilter3 = (float)patch->nrpn_msb_noise_filt3[CCLFOTHRESHNOISEFILTER3]*DIV127;  	//74,8,0,127,
     SweepDepthNoiseFilter3 = ((float)patch->nrpn_msb_noise_filt3[CCSWEEPDEPTHNOISEFILTER3]-64.0)/64.0;  	//74,9,0,127,
-    SweepTimeNoiseFilter3 = pow((float)patch->nrpn_msb_noise_filt3[CCSWEEPTIMENOISEFILTER3]*DIV127, sweepTimeNoiseFilterGamma)*maxSweepTimeNoiseFilter;  	//74,10,0,127,
-    //BreathCurveNoiseFilter3 = 1.0 - ((float)patch->nrpn_msb_noise_filt3[CCBREATHCURVENOISEFILTER3]-64.0)/64.0;  	//74,11,0,127,
-    BreathCurveNoiseFilter3 = gen_filter_gamma(((float)patch->nrpn_msb_noise_filt3[CCBREATHCURVENOISEFILTER3])*DIV128);  	//74,11,0,127,
+    SweepTimeNoiseFilter3 = sweepTimeFilterCurve((float)patch->nrpn_msb_noise_filt3[CCSWEEPTIMENOISEFILTER3]*DIV127);  	//74,10,0,127,
+    BreathCurveNoiseFilter3 = gen_filter_gamma(((float)patch->nrpn_msb_noise_filt3[CCBREATHCURVENOISEFILTER3])*DIV127);  	//74,11,0,127,
     ModeNoiseFilter4 = (filterMode_t)patch->nrpn_msb_noise_filt4[CCMODENOISEFILTER4];  	//75,0,0,4,//LP HP BP NTC OFF
     FreqNoiseFilter4 = 440.0*pow(2, ((float)patch->nrpn_msb_noise_filt4[CCFREQNOISEFILTER4]-69.0)/12 ); //75,1,36,124,//Note# 36 to 124
     QFactorNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCQFACTORNOISEFILTER4]/10.0;  	//75,2,5,127,"// 5=0.5, 127=12.7"
@@ -100,13 +95,10 @@ void patchToSynthVariables(patch_t *patch) {
     LfoBreathNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCLFOBREATHNOISEFILTER4]-64.0)/64.0;  	//75,7,0,127,
     LfoThreshNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCLFOTHRESHNOISEFILTER4]*DIV127;  	//75,8,0,127,
     SweepDepthNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCSWEEPDEPTHNOISEFILTER4]-64.0)/64.0;  	//75,9,0,127,
-    SweepTimeNoiseFilter4 = pow((float)patch->nrpn_msb_noise_filt4[CCSWEEPTIMENOISEFILTER4]*DIV127,sweepTimeNoiseFilterGamma)*maxSweepTimeNoiseFilter;  	//75,10,0,127,
-    //BreathCurveNoiseFilter4 = 1.0 - ((float)patch->nrpn_msb_noise_filt4[CCBREATHCURVENOISEFILTER4]-64.0)/64.0;  	//75,11,0,127,
-    BreathCurveNoiseFilter4 = gen_filter_gamma(((float)patch->nrpn_msb_noise_filt4[CCBREATHCURVENOISEFILTER4])*DIV128);  	//75,11,0,127,
-    NoiseTime = pow((float)patch->nrpn_msb_noise[CCNOISETIME]*DIV127,TimeNoiseGamma)*maxTimeNoise;  	//80,0,0,127,
-    //NoiseBreathCurve = 1.0 - ((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE])-64.0)/64.0;  	//80,1,0,127,
-    NoiseBreathCurve = gen_noise_gamma(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV128);  	//80,1,0,127,
-   // NoiseBreathCurve = (float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE])*DIV128;  	//80,1,0,127,
+    SweepTimeNoiseFilter4 = sweepTimeFilterCurve((float)patch->nrpn_msb_noise_filt4[CCSWEEPTIMENOISEFILTER4]*DIV127);  	//75,10,0,127,
+    BreathCurveNoiseFilter4 = gen_filter_gamma(((float)patch->nrpn_msb_noise_filt4[CCBREATHCURVENOISEFILTER4])*DIV127);  	//75,11,0,127,
+    NoiseTime = noiseTimeCurve((float)patch->nrpn_msb_noise[CCNOISETIME]*DIV127);  	//80,0,0,127,
+    NoiseBreathCurve = gen_noise_gamma(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV127);  	//80,1,0,127,
     NoiseLevel = pow((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,.65)*maxNoiseLevel;  	//80,2,0,127,
     BendRange = (float)patch->nrpn_msb_common1[CCBENDRANGE];  	//81,0,0,12,// num semitones
     BendStep = (bool)patch->nrpn_msb_common1[CCBENDSTEP];  	//81,1,0,1,//0=off 1=on
@@ -134,7 +126,6 @@ void patchToSynthVariables(patch_t *patch) {
     EffectsChorusDryLevel = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL]*DIV127;//112,8,0,127,
     EffectsDelayTime = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*10.0;  	//113,0,0,127, 0 to 1270 ms
     EffectsDelayFeedback = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]*DIV127; //113,1,0,127,
-    //EffectsDelayDamp = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP]*DIV127;  	//113,2,0,127,
     EffectsDelayDamp =maxDelayDamp*pow(2, -( (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP])/24.0 );  	//113,2,0,127,
     EffectsDelayLevel = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYLEVEL]*DIV127;  	//113,3,0,127,
     EffectsDelaySpare = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYSPARE]*DIV127;  	//113,3,0,127,
@@ -142,9 +133,27 @@ void patchToSynthVariables(patch_t *patch) {
     EffectsReverbLevel = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBLEVEL]*DIV127*maxReverbLevel;  	//114,1,0,127,
     EffectsReverbDenseEarly = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDENSEEARLY]*DIV127*maxDenseEarly;  	//114,2,0,127, (using this for roomsize)
     EffectsReverbTime = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBTIME]*100;  	//114,3,10,50,//1000 to 5000 ms
-    //EffectsReverbDamp = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDAMP]-64.0;  	//114,4,54,74,//-10 to +10
     EffectsReverbDamp = ((float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDAMP]-54)/20.0;  	//114,4,54,74,//-10 to +10
     updateSynthVariablesFlag = true;
+}
+
+void printCurveMidiData()
+{
+    Serial8.println(current_patch.patch_string);
+    sprintf(str_buf1, "CCBREATHCURVEOSC1: %d", current_patch.nrpn_msb_osc1[CCBREATHCURVEOSC1]);      
+    Serial8.println(str_buf1);
+    sprintf(str_buf1, "CCBREATHCURVEOSC2: %d", current_patch.nrpn_msb_osc2[CCBREATHCURVEOSC2]);      
+    Serial8.println(str_buf1);
+    sprintf(str_buf1, "CCBREATHCURVEOSCFILTER1: %d", current_patch.nrpn_msb_osc_filt1[CCBREATHCURVEOSCFILTER1]);      
+    Serial8.println(str_buf1);
+    sprintf(str_buf1, "CCBREATHCURVEOSCFILTER2: %d", current_patch.nrpn_msb_osc_filt2[CCBREATHCURVEOSCFILTER2]);      
+    Serial8.println(str_buf1);
+    sprintf(str_buf1, "CCBREATHCURVENOISEFILTER3: %d", current_patch.nrpn_msb_noise_filt3[CCBREATHCURVENOISEFILTER3]);      
+    Serial8.println(str_buf1);
+    sprintf(str_buf1, "CCBREATHCURVENOISEFILTER4: %d", current_patch.nrpn_msb_noise_filt4[CCBREATHCURVENOISEFILTER4]);      
+    Serial8.println(str_buf1);
+    sprintf(str_buf1, "CCNOISEBREATHCURVE: %d", current_patch.nrpn_msb_noise[CCNOISEBREATHCURVE]);      
+    Serial8.println(str_buf1);
 }
 
 void printPatchValues()
@@ -586,6 +595,50 @@ void copyCurrentPatchToLoadedPatch(int patchNumber)
           Serial8.println(str_buf1);
     }
 
+float noiseTimeCurve(float noiseTimePercent) {
+    float a = 0.0f;
+    float b = 1.0f;
+    if (noiseTimePercent <= 0){
+        a = 0.0f;
+        b = 0.0f;
+    } else if (noiseTimePercent < 0.7f){
+         a = 0.0564f * 1000.0f; // 1000 for time in mS
+         b = 2.75f;
+    } else if (noiseTimePercent < 0.9f) {
+        a = 0.0105f * 1000.0f; // 1000 for time in mS
+        b = 5.2f;
+    } else {
+        a = 0.0001f * 1000.0f; // 1000 for time in mS
+        b = 10.4f;
+    }
+    float y = a*exp(b*noiseTimePercent);
+    return y;
+}
 
+float sweepTimeFilterCurve(float sweepTime) {
+    float a = 0.0f;
+    float b = 1.0f;
+    if (sweepTime <= 0){
+        a = 0.0f;
+        b = 0.0f;
+    } else if (sweepTime < 0.7f){
+         a = 0.0103f * 1000.0f; // 1000 for time in mS
+         b = 4.1647f;
+    } else if (sweepTime < 0.9f) {
+        a = 0.0021f * 1000.0f; // 1000 for time in mS
+        b = 6.4453f;
+    } else {
+        a = 0.0000003f * 1000.0f; // 1000 for time in mS
+        b = 16.27f;
+    }
+    float y = a*exp(b*sweepTime);
+    return y;
+}
+
+float sweepTimeOscCurve(float sweepTime){
+    // separate func in case it needs to be different
+    // but just call the FilterCurve one for now 
+    return sweepTimeFilterCurve(sweepTime);
+}
 
 
