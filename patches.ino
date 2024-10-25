@@ -99,7 +99,7 @@ void patchToSynthVariables(patch_t *patch) {
     BreathCurveNoiseFilter4 = gen_filter_gamma(((float)patch->nrpn_msb_noise_filt4[CCBREATHCURVENOISEFILTER4])*DIV127);  	//75,11,0,127,
     NoiseTime = noiseTimeCurve((float)patch->nrpn_msb_noise[CCNOISETIME]*DIV127);  	//80,0,0,127,
     NoiseBreathCurve = gen_noise_gamma(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV127);  	//80,1,0,127,
-    NoiseLevel = pow((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,.65)*maxNoiseLevel;  	//80,2,0,127,
+    NoiseLevel = pow((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,.35)*maxNoiseLevel;  	//80,2,0,127,
     BendRange = (float)patch->nrpn_msb_common1[CCBENDRANGE];  	//81,0,0,12,// num semitones
     BendStep = (bool)patch->nrpn_msb_common1[CCBENDSTEP];  	//81,1,0,1,//0=off 1=on
     VibratoPitch = (float)patch->nrpn_msb_common1[CCVIBRATOPITCH]*DIV127;  	//81,2,0,127,  (this isn't necessary since bite sensor pb and plate pb are the same).
@@ -124,7 +124,7 @@ void patchToSynthVariables(patch_t *patch) {
     EffectsChorusFeedback = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK]-64.0)/64.0;//112,6,0,127,
     EffectsChorusLfoFreq = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ]/10.0; //112,7,0,127,
     EffectsChorusDryLevel = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL]*DIV127;//112,8,0,127,
-    EffectsDelayTime = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*10.0;  	//113,0,0,127, 0 to 1270 ms
+    EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*10.0;  	//113,0,0,127, 0 to 1270 ms
     EffectsDelayFeedback = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]*DIV127; //113,1,0,127,
     EffectsDelayDamp =maxDelayDamp*pow(2, -( (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP])/24.0 );  	//113,2,0,127,
     EffectsDelayLevel = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYLEVEL]*DIV127;  	//113,3,0,127,
@@ -373,7 +373,7 @@ void printPatchValues()
     Serial8.println(str_buf1);
     sprintf(str_buf1, "EffectsChorusDryLevel: %5.3f", EffectsChorusDryLevel);
     Serial8.println(str_buf1);
-    sprintf(str_buf1, "EffectsDelayTime: %5.3f", EffectsDelayTime);  	
+    sprintf(str_buf1, "EffectsDelayTimeL: %5.3f", EffectsDelayTimeL);  	
     Serial8.println(str_buf1);
     sprintf(str_buf1, "EffectsDelayFeedback: %5.3f", EffectsDelayFeedback); 
     Serial8.println(str_buf1);
