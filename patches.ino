@@ -132,7 +132,7 @@ void patchToSynthVariables(patch_t *patch) {
     EffectsReverbSpare = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBSPARE]*DIV127;  	//114,1,0,127,
     EffectsReverbLevel = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBLEVEL]*DIV127*maxReverbLevel;  	//114,1,0,127,
     EffectsReverbDenseEarly = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDENSEEARLY]*DIV127*maxDenseEarly;  	//114,2,0,127, (using this for roomsize)
-    EffectsReverbTime = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBTIME]*100;  	//114,3,10,50,//1000 to 5000 ms
+    EffectsReverbTime = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBTIME]/100.0f+0.1f; //114,3,10,50,//1000 to 5000 ms
     EffectsReverbDamp = ((float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDAMP]-54)/20.0;  	//114,4,54,74,//-10 to +10
     updateSynthVariablesFlag = true;
 }
