@@ -194,6 +194,16 @@ typedef struct __attribute__((packed)) Patch{
     uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH];   // 5
 } patch_t;
 
+void patchToSynthVariables(patch_t *patch);
+void printCurveMidiData();
+void printPatchValues();
+void setCurrentPatch(int patchNumber);
+void copyCurrentPatchToLoadedPatch(int patchNumber);
+void configureSD();
+void savePatchSD(int i);
+void saveCurrentPatchSD(int i); 
+void loadPatchSD(int i);
+void loadAllPatches();
 
 
 
