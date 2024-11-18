@@ -1,4 +1,5 @@
 #pragma once
+#include <stack>
 #include <MenuClass.h>
 //#include "globals.h"
 
@@ -46,6 +47,8 @@ public:
   char str_serial8buf[64] = {0};
   MenuList *previousMenu; // to go back up from leaf menu
   int previousItemIndex = 0;
+  std::stack<MenuList *> previousMenuStack; // to go back up from leaf menu
+  std::stack<int> previousItemIndexStack;
   
 };
 

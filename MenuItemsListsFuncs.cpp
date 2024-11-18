@@ -40,7 +40,6 @@ MenuItem PROGMEM volAdjustMenu[1] = {
 bool volAdjustFun() {
  if(myMenu.updateLeafValue){
     vol += myMenu.updateLeafValue;
-    vol = vol + newKnob*4;
     vol = vol < 0 ? 0 : vol >= 100 ? 100 : vol;
     volf = ((float)vol)/100.0f;
     volf = (volf*volf)*2.0f;
@@ -52,7 +51,8 @@ bool volAdjustFun() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   Serial8.println(F("volAdjustFun: goto TopMenu"));
-  myMenu.setCurrentMenu(&listTopMenu);
+  //myMenu.setCurrentMenu(&listTopMenu);
+  gotoTopMenu();
   return true;
 }
 MenuItem PROGMEM patchSelectMenu[1] = {
@@ -62,11 +62,12 @@ MenuItem PROGMEM patchSelectMenu[1] = {
 bool patchSelectFun() {
  if(myMenu.updateLeafValue){
     current_patchNumber += myMenu.updateLeafValue;
-    if(current_patchNumber >= NUMBER_OF_PATCHES-1 )
+    if(current_patchNumber > NUMBER_OF_PATCHES-1 ){
         current_patchNumber = 0; 
-    else if(current_patchNumber <= 0 )
+    }
+    else if(current_patchNumber < 0 ) {
         current_patchNumber = NUMBER_OF_PATCHES-1; 
-    
+    } 
     // load the patch 
     if (patchLoaded[current_patchNumber])
     {
@@ -78,8 +79,8 @@ bool patchSelectFun() {
         loadPatchSD(current_patchNumber);
     }
     String ps( current_patch.patch_string );
-    ps.setCharAt( ps.indexOf(' '), '\n');
-    sprintf(myMenu.str_oledbuf, "Patch: %03d\n%s", current_patchNumber+1, ps.c_str() );
+    ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+    sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
     Serial8.println(current_patch.patch_string);
     if (updateEpromFlag)
     {
@@ -91,29 +92,30 @@ bool patchSelectFun() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   Serial8.println(F("patchSelectFun: goto TopMenu"));
-  myMenu.setCurrentMenu(&listTopMenu);
+  //myMenu.setCurrentMenu(&listTopMenu);
+  gotoTopMenu();
   return true;
 }
 MenuItem PROGMEM patchResetMenu[2] = {
     { "Back    " , goUpOneMenu   }
    ,{ "Reset   " , patchResetFun   }
 };
-bool patchResetFun(){ return true; }
+bool patchResetFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM patchCopyMenu[2] = {
     { "Back    " , goUpOneMenu   }
    ,{ "Copy    " , patchCopyFun   }
 };
-bool patchCopyFun(){ return true; }
+bool patchCopyFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM patchPasteMenu[2] = {
     { "Back    " , goUpOneMenu   }
    ,{ "Paste   " , patchPasteFun   }
 };
-bool patchPasteFun(){ return true; }
+bool patchPasteFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM patchSwapMenu[2] = {
     { "Back:\n " , goUpOneMenu   }
    ,{ "Swap:\n " , patchSwapFun   }
 };
-bool patchSwapFun(){ return true; }
+bool patchSwapFun(){ return goUpOneMenu(); }
 
 MenuItem PROGMEM patchFxMenu[22] = {
     { "Back    " , goUpOneMenu   }
@@ -144,89 +146,95 @@ MenuItem PROGMEM fxCopyMenu[2] = {
     { "Back    " , goUpOneMenu   }
    ,{ "CopyFx  " , fxCopyFun   }
 };
-bool fxCopyFun(){ return true; }
+bool fxCopyFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM fxPasteMenu[2] = {
     { "Back    " , goUpOneMenu   }
    ,{ "PasteFx " , fxPasteFun   }
 };
-bool fxPasteFun(){ return true; }
+bool fxPasteFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM fxSwapMenu[2] = {
     { "Back:\n " , goUpOneMenu   }
    ,{ "SwapFx:\n " , fxSwapFun   }
 };
-bool fxSwapFun(){ return true; }
+bool fxSwapFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM delayLevelMenu[1] = {
     { "Dly Lev:\n " , delayLevelFun   }
 };
-bool delayLevelFun(){ return true; }
+bool delayLevelFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM delayTimeMenu[1] = {
     { "DlyTime:\n " , delayTimeFun   }
 };
-bool delayTimeFun(){ return true; }
+bool delayTimeFun(){ 
+     if(myMenu.updateLeafValue){
+         return true;
+     }
+    Serial8.println(F("delayLevelFun calls goUpOneMenu"));
+    return goUpOneMenu(); 
+}
 MenuItem PROGMEM delayFeedbackMenu[1] = {
     { "Dly FB: \n " , delayFeedbackFun   }
 };
-bool delayFeedbackFun(){ return true; }
+bool delayFeedbackFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM delayDampMenu[1] = {
     { "DlyDamp:\n " , delayDampFun   }
 };
-bool delayDampFun(){ return true; }
+bool delayDampFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM reverbLevelMenu[1] = {
     { "Rvb Lev:\n " , reverbLevelFun   }
 };
-bool reverbLevelFun(){ return true; }
+bool reverbLevelFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM reverbTimeMenu[1] = {
     { "RvbTime:\n " , reverbTimeFun   }
 };
-bool reverbTimeFun(){ return true; }
+bool reverbTimeFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM reverbDensityMenu[1] = {
     { "RvbDens:\n " , reverbDensityFun   }
 };
-bool reverbDensityFun(){ return true; }
+bool reverbDensityFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM reverbDampMenu[1] = {
     { "RvbDamp:\n " , reverbDampFun   }
 };
-bool reverbDampFun(){ return true; }
+bool reverbDampFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM chorusOnMenu[1] = {
     { "Chrs On:\n " , chorusOnFun   }
 };
-bool chorusOnFun(){ return true; }
+bool chorusOnFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM chorusDryMenu[1] = {
     { "ChrsDry:\n " , chorusDryFun   }
 };
-bool chorusDryFun(){ return true; }
+bool chorusDryFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM chorusLfoFMenu[1] = {
     { "ChsLfoF:\n " , chorusLfoFFun   }
 };
-bool chorusLfoFFun(){ return true; }
+bool chorusLfoFFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM chorusFeedbackMenu[1] = {
     { "Chrs FB:\n " , chorusFeedbackFun   }
 };
-bool chorusFeedbackFun(){ return true; }
+bool chorusFeedbackFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM chorusDelay1Menu[1] = {
     { "ChsDly1:\n " , chorusDelay1Fun   }
 };
-bool chorusDelay1Fun(){ return true; }
+bool chorusDelay1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM chorusMod1Menu[1] = {
     { "ChsMod1:\n " , chorusMod1Fun   }
 };
-bool chorusMod1Fun(){ return true; }
+bool chorusMod1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM chorusWet1Menu[1] = {
     { "ChsWet1:\n " , chorusWet1Fun   }
 };
-bool chorusWet1Fun(){ return true; }
+bool chorusWet1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM chorusDelay2Menu[1] = {
     { "ChsDly2:\n " , chorusDelay2Fun   }
 };
-bool chorusDelay2Fun(){ return true; }
+bool chorusDelay2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM chorusMod2Menu[1] = {
     { "ChsMod2:\n " , chorusMod2Fun   }
 };
-bool chorusMod2Fun(){ return true; }
+bool chorusMod2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM chorusWet2Menu[1] = {
     { "ChsWet2:\n " , chorusWet2Fun   }
 };
-bool chorusWet2Fun(){ return true; }
+bool chorusWet2Fun(){ return goUpOneMenu(); }
 
 MenuItem PROGMEM patchOsc1Menu[18] = {
     { "Back    " , goUpOneMenu   }
@@ -252,71 +260,71 @@ MenuItem PROGMEM patchOsc1Menu[18] = {
 MenuItem PROGMEM octOsc1Menu[1] = {
     { "OctOsc1:\n " , octOsc1Fun   }  // TODO: 
 };
-bool octOsc1Fun(){ return true; }
+bool octOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM semiOsc1Menu[1] = {
     { "SemiOs1:\n " , semiOsc1Fun   }
 };
-bool semiOsc1Fun(){ return true; }
+bool semiOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM centsOsc1Menu[1] = {
     { "CentOs1:\n " , centsOsc1Fun   }
 };
-bool centsOsc1Fun(){ return true; }
+bool centsOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM beatOsc1Menu[1] = {
     { "BeatOs1:\n " , beatOsc1Fun   }
 };
-bool beatOsc1Fun(){ return true; }
+bool beatOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM sawOsc1Menu[1] = {
     { "SawOsc1:\n " , sawOsc1Fun   }
 };
-bool sawOsc1Fun(){ return true; }
+bool sawOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM triOsc1Menu[1] = {
     { "TriOsc1:\n " , triOsc1Fun   }
 };
-bool triOsc1Fun(){ return true; }
+bool triOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM pulesOsc1Menu[1] = {
     { "PlsOsc1:\n " , pulseOsc1Fun   }
 };
-bool pulseOsc1Fun(){ return true; }
+bool pulseOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM PWOsc1Menu[1] = {
     { "PW Osc1:\n " , PWOsc1Fun   }
 };
-bool PWOsc1Fun(){ return true; }
+bool PWOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM pwmFreqOsc1Menu[1] = {
     { "PwmFOs1:\n " , pwmFreqOsc1Fun   }
 };
-bool pwmFreqOsc1Fun(){ return true; }
+bool pwmFreqOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM pwmDepthOsc1Menu[1] = {
     { "PwmDOs1:\n " , pwmDepthOsc1Fun   }
 };
-bool pwmDepthOsc1Fun(){ return true; }
+bool pwmDepthOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM sweepTimeOsc1Menu[1] = {
     { "SwpTOs1:\n " , sweepTimeOsc1Fun   }
 };
-bool sweepTimeOsc1Fun(){ return true; }
+bool sweepTimeOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM sweepDepthOsc1Menu[1] = {
     { "SwpDOs1:\n " , sweepDepthOsc1Fun   }
 };
-bool sweepDepthOsc1Fun(){ return true; }
+bool sweepDepthOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM breathAttainOsc1Menu[1] = {
     { "BAtnOs1:\n " , breathAttainOsc1Fun   }
 };
-bool breathAttainOsc1Fun(){ return true; }
+bool breathAttainOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM breathDepthOsc1Menu[1] = {
     { "BDptOs1:\n " , breathDepthOsc1Fun   }
 };
-bool breathDepthOsc1Fun(){ return true; }
+bool breathDepthOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM breathThresholdOsc1Menu[1] = {
     { "BthrOs1:\n " , breathThresholdOsc1Fun   }
 };
-bool breathThresholdOsc1Fun(){ return true; }
+bool breathThresholdOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM breathCurveOsc1Menu[1] = {
     { "BCrvOs1:\n " , breathCurveOsc1Fun   }
 };
-bool breathCurveOsc1Fun(){ return true; }
+bool breathCurveOsc1Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM levelOsc1Menu[1] = {
     { "LevOsc1:\n " , levelOsc1Fun   }
 };
-bool levelOsc1Fun(){ return true; }
+bool levelOsc1Fun(){ return goUpOneMenu(); }
 
 MenuItem PROGMEM patchOsc2Menu[19] = {
     { "Back    " , goUpOneMenu   }
@@ -343,75 +351,75 @@ MenuItem PROGMEM patchOsc2Menu[19] = {
 MenuItem PROGMEM octOsc2Menu[1] = {
     { "OctOsc2:\n " , octOsc2Fun   }
 };
-bool octOsc2Fun(){ return true; }
+bool octOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM semiOsc2Menu[1] = {
     { "SemiOs2:\n " , semiOsc2Fun   }
 };
-bool semiOsc2Fun(){ return true; }
+bool semiOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM centsOsc2Menu[1] = {
     { "CentOs2:\n " , centsOsc2Fun   }
 };
-bool centsOsc2Fun(){ return true; }
+bool centsOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM beatOsc2Menu[1] = {
     { "BeatOs2:\n " , beatOsc2Fun   }
 };
-bool beatOsc2Fun(){ return true; }
+bool beatOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM sawOsc2Menu[1] = {
     { "SawOsc2:\n " , sawOsc2Fun   }
 };
-bool sawOsc2Fun(){ return true; }
+bool sawOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM triOsc2Menu[1] = {
     { "TriOsc2:\n " , triOsc2Fun   }
 };
-bool triOsc2Fun(){ return true; }
+bool triOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM pulesOsc2Menu[1] = {
     { "PlsOsc2:\n " , pulseOsc2Fun   }
 };
-bool pulseOsc2Fun(){ return true; }
+bool pulseOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM PWOsc2Menu[1] = {
     { "PW Osc2:\n " , PWOsc2Fun   }
 };
-bool PWOsc2Fun(){ return true; }
+bool PWOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM pwmFreqOsc2Menu[1] = {
     { "PwmFOs2:\n " , pwmFreqOsc2Fun   }
 };
-bool pwmFreqOsc2Fun(){ return true; }
+bool pwmFreqOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM pwmDepthOsc2Menu[1] = {
     { "PwmDOs2:\n " , pwmDepthOsc2Fun   }
 };
-bool pwmDepthOsc2Fun(){ return true; }
+bool pwmDepthOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM sweepTimeOsc2Menu[1] = {
     { "SwpTOs2:\n " , sweepTimeOsc2Fun   }
 };
-bool sweepTimeOsc2Fun(){ return true; }
+bool sweepTimeOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM sweepDepthOsc2Menu[1] = {
     { "SwpDOs2:\n " , sweepDepthOsc2Fun   }
 };
-bool sweepDepthOsc2Fun(){ return true; }
+bool sweepDepthOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM breathAttainOsc2Menu[1] = {
     { "BAtnOs2:\n " , breathAttainOsc2Fun   }
 };
-bool breathAttainOsc2Fun(){ return true; }
+bool breathAttainOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM breathDepthOsc2Menu[1] = {
     { "BDptOs1:\n " , breathDepthOsc2Fun   }
 };
-bool breathDepthOsc2Fun(){ return true; }
+bool breathDepthOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM breathThresholdOsc2Menu[1] = {
     { "BthrOs2:\n " , breathThresholdOsc2Fun   }
 };
-bool breathThresholdOsc2Fun(){ return true; }
+bool breathThresholdOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM breathCurveOsc2Menu[1] = {
     { "BCrvOs2:\n " , breathCurveOsc2Fun   }
 };
-bool breathCurveOsc2Fun(){ return true; }
+bool breathCurveOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM levelOsc2Menu[1] = {
     { "LevOsc2:\n " , levelOsc2Fun   }
 };
-bool levelOsc2Fun(){ return true; }
+bool levelOsc2Fun(){ return goUpOneMenu(); }
 MenuItem PROGMEM xFadeOsc2Menu[1] = {
     { "XFadOs2:\n " , xFadeOsc2Fun   }
 };
-bool xFadeOsc2Fun(){ return true; }
+bool xFadeOsc2Fun(){ return goUpOneMenu(); }
 
 MenuItem PROGMEM patchOscFilter1Menu[14] = { 
     { "Back    " , goUpOneMenu   }
@@ -433,55 +441,55 @@ MenuItem PROGMEM patchOscFilter1Menu[14] = {
 MenuItem PROGMEM linkOscFiltersMenu[1] = {
     { "LinkOFs:\n " , linkOscFiltersFun   }
 };
-bool linkOscFiltersFun() { return true; }
+bool linkOscFiltersFun() { return goUpOneMenu(); }
 MenuItem PROGMEM modeOscFilter1Menu[1] = {
     { "ModeOF1:\n " , modeOscFilter1Fun   }
 };
-bool modeOscFilter1Fun() { return true; }
+bool modeOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM freqOscFilter1Menu[1] = {
     { "FreqOF1:\n " , freqOscFilter1Fun   }
 };
-bool freqOscFilter1Fun() { return true; }
+bool freqOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM qOscFilter1Menu[1] = {
     { "Q OscF1:\n " , qOscFilter1Fun   }
 };
-bool qOscFilter1Fun() { return true; }
+bool qOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM keyFollowOscFilter1Menu[1] = {
     { "KeyFOF1:\n " , keyFollowOscFilter1Fun   }
 };
-bool keyFollowOscFilter1Fun() { return true; }
+bool keyFollowOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM breathModOscFilter1Menu[1] = {
     { "BrMdOF1:\n " , breathModOscFilter1Fun   }
 };
-bool breathModOscFilter1Fun() { return true; }
+bool breathModOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM breathCurveOscFilter1Menu[1] = {
     { "BrCvOF1:\n " , breathCurveOscFilter1Fun   }
 };
-bool breathCurveOscFilter1Fun() { return true; }
+bool breathCurveOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoFreqOscFilter1Menu[1] = {
     { "LfoFOF1:\n " , lfoFreqOscFilter1Fun   }
 };
-bool lfoFreqOscFilter1Fun() { return true; }
+bool lfoFreqOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoDepthOscFilter1Menu[1] = {
     { "LfoDOF1:\n " , lfoDepthOscFilter1Fun   }
 };
-bool lfoDepthOscFilter1Fun() { return true; }
+bool lfoDepthOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoBreathOscFilter1Menu[1] = {
     { "LfoBOF1:\n " , lfoBreathOscFilter1Fun   }
 };
-bool lfoBreathOscFilter1Fun() { return true; }
+bool lfoBreathOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoThreshOscFilter1Menu[1] = {
     { "LfoTOF1:\n " , lfoThreshOscFilter1Fun   }
 };
-bool lfoThreshOscFilter1Fun() { return true; }
+bool lfoThreshOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM sweepTimeOscFilter1Menu[1] = {
     { "SwpTOF1:\n " , sweepTimeOscFilter1Fun   }
 };
-bool sweepTimeOscFilter1Fun() { return true; }
+bool sweepTimeOscFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM sweepDepthOscFilter1Menu[1] = {
     { "SwpDOF1:\n " , sweepDepthOscFilter1Fun   }
 };
-bool sweepDepthOscFilter1Fun() { return true; }
+bool sweepDepthOscFilter1Fun() { return goUpOneMenu(); }
 
 MenuItem PROGMEM patchOscFilter2Menu[13] = {
     { "Back    " , goUpOneMenu   }
@@ -502,51 +510,51 @@ MenuItem PROGMEM patchOscFilter2Menu[13] = {
 MenuItem PROGMEM modeOscFilter2Menu[1] = {
     { "ModeOF2:\n " , modeOscFilter2Fun   }
 };
-bool modeOscFilter2Fun() { return true; }
+bool modeOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM freqOscFilter2Menu[1] = {
     { "FreqOF2:\n " , freqOscFilter2Fun   }
 };
-bool freqOscFilter2Fun() { return true; }
+bool freqOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM qOscFilter2Menu[1] = {
     { "Q OscF2:\n " , qOscFilter2Fun   }
 };
-bool qOscFilter2Fun() { return true; }
+bool qOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM keyFollowOscFilter2Menu[1] = {
     { "KeyFOF2:\n " , keyFollowOscFilter2Fun   }
 };
-bool keyFollowOscFilter2Fun() { return true; }
+bool keyFollowOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM breathModOscFilter2Menu[1] = {
     { "BrMdOF2:\n " , breathModOscFilter2Fun   }
 };
-bool breathModOscFilter2Fun() { return true; }
+bool breathModOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM breathCurveOscFilter2Menu[1] = {
     { "BrCvOF2:\n " , breathCurveOscFilter2Fun   }
 };
-bool breathCurveOscFilter2Fun() { return true; }
+bool breathCurveOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoFreqOscFilter2Menu[1] = {
     { "LfoFOF2:\n " , lfoFreqOscFilter2Fun   }
 };
-bool lfoFreqOscFilter2Fun() { return true; }
+bool lfoFreqOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoDepthOscFilter2Menu[1] = {
     { "LfoDOF2:\n " , lfoDepthOscFilter2Fun   }
 };
-bool lfoDepthOscFilter2Fun() { return true; }
+bool lfoDepthOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoBreathOscFilter2Menu[1] = {
     { "LfoBOF2:\n " , lfoBreathOscFilter2Fun   }
 };
-bool lfoBreathOscFilter2Fun() { return true; }
+bool lfoBreathOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoThreshOscFilter2Menu[1] = {
     { "LfoTOF2:\n " , lfoThreshOscFilter2Fun   }
 };
-bool lfoThreshOscFilter2Fun() { return true; }
+bool lfoThreshOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM sweepTimeOscFilter2Menu[1] = {
     { "SwpTOF2:\n " , sweepTimeOscFilter2Fun   }
 };
-bool sweepTimeOscFilter2Fun() { return true; }
+bool sweepTimeOscFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM sweepDepthOscFilter2Menu[1] = {
     { "SwpDOF2:\n " , sweepDepthOscFilter2Fun   }
 };
-bool sweepDepthOscFilter2Fun() { return true; }
+bool sweepDepthOscFilter2Fun() { return goUpOneMenu(); }
 
 MenuItem PROGMEM patchNoiseFilter1Menu[14] = { 
     { "Back    " , goUpOneMenu   }
@@ -568,55 +576,55 @@ MenuItem PROGMEM patchNoiseFilter1Menu[14] = {
 MenuItem PROGMEM linkNoiseFiltersMenu[1] = {
     { "LinkNFs:\n " , linkNoiseFiltersFun   }
 };
-bool linkNoiseFiltersFun() { return true; }
+bool linkNoiseFiltersFun() { return goUpOneMenu(); }
 MenuItem PROGMEM modeNoiseFilter1Menu[1] = {
     { "ModeNF1:\n " , modeNoiseFilter1Fun   }
 };
-bool modeNoiseFilter1Fun() { return true; }
+bool modeNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM freqNoiseFilter1Menu[1] = {
     { "FreqNF1:\n " , freqNoiseFilter1Fun   }
 };
-bool freqNoiseFilter1Fun() { return true; }
+bool freqNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM qNoiseFilter1Menu[1] = {
     { "Q NoiF1:\n " , qNoiseFilter1Fun   }
 };
-bool qNoiseFilter1Fun() { return true; }
+bool qNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM keyFollowNoiseFilter1Menu[1] = {
     { "KeyFNF1:\n " , keyFollowNoiseFilter1Fun   }
 };
-bool keyFollowNoiseFilter1Fun() { return true; }
+bool keyFollowNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM breathModNoiseFilter1Menu[1] = {
     { "BrMdNF1:\n " , breathModNoiseFilter1Fun   }
 };
-bool breathModNoiseFilter1Fun() { return true; }
+bool breathModNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM breathCurveNoiseFilter1Menu[1] = {
     { "BrCvNF1:\n " , breathCurveNoiseFilter1Fun   }
 };
-bool breathCurveNoiseFilter1Fun() { return true; }
+bool breathCurveNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoFreqNoiseFilter1Menu[1] = {
     { "LfoFNF1:\n " , lfoFreqNoiseFilter1Fun   }
 };
-bool lfoFreqNoiseFilter1Fun() { return true; }
+bool lfoFreqNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoDepthNoiseFilter1Menu[1] = {
     { "LfoDNF1:\n " , lfoDepthNoiseFilter1Fun   }
 };
-bool lfoDepthNoiseFilter1Fun() { return true; }
+bool lfoDepthNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoBreathNoiseFilter1Menu[1] = {
     { "LfoBNF1:\n " , lfoBreathNoiseFilter1Fun   }
 };
-bool lfoBreathNoiseFilter1Fun() { return true; }
+bool lfoBreathNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoThreshNoiseFilter1Menu[1] = {
     { "LfoTNF1:\n " , lfoThreshNoiseFilter1Fun   }
 };
-bool lfoThreshNoiseFilter1Fun() { return true; }
+bool lfoThreshNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM sweepTimeNoiseFilter1Menu[1] = {
     { "SwpTNF1:\n " , sweepTimeNoiseFilter1Fun   }
 };
-bool sweepTimeNoiseFilter1Fun() { return true; }
+bool sweepTimeNoiseFilter1Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM sweepDepthNoiseFilter1Menu[1] = {
     { "SwpDNF1:\n " , sweepDepthNoiseFilter1Fun   }
 };
-bool sweepDepthNoiseFilter1Fun() { return true; }
+bool sweepDepthNoiseFilter1Fun() { return goUpOneMenu(); }
 
 MenuItem PROGMEM patchNoiseFilter2Menu[13] = {
     { "Back    " , goUpOneMenu   }
@@ -637,51 +645,51 @@ MenuItem PROGMEM patchNoiseFilter2Menu[13] = {
 MenuItem PROGMEM modeNoiseFilter2Menu[1] = {
     { "ModeNF2:\n " , modeNoiseFilter2Fun   }
 };
-bool modeNoiseFilter2Fun() { return true; }
+bool modeNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM freqNoiseFilter2Menu[1] = {
     { "FreqNF2:\n " , freqNoiseFilter2Fun   }
 };
-bool freqNoiseFilter2Fun() { return true; }
+bool freqNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM qNoiseFilter2Menu[1] = {
     { "Q NoiF2:\n " , qNoiseFilter2Fun   }
 };
-bool qNoiseFilter2Fun() { return true; }
+bool qNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM keyFollowNoiseFilter2Menu[1] = {
     { "KeyFNF2:\n " , keyFollowNoiseFilter2Fun   }
 };
-bool keyFollowNoiseFilter2Fun() { return true; }
+bool keyFollowNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM breathModNoiseFilter2Menu[1] = {
     { "BrMdNF2:\n " , breathModNoiseFilter2Fun   }
 };
-bool breathModNoiseFilter2Fun() { return true; }
+bool breathModNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM breathCurveNoiseFilter2Menu[1] = {
     { "BrCvNF2:\n " , breathCurveNoiseFilter2Fun   }
 };
-bool breathCurveNoiseFilter2Fun() { return true; }
+bool breathCurveNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoFreqNoiseFilter2Menu[1] = {
     { "LfoFNF2:\n " , lfoFreqNoiseFilter2Fun   }
 };
-bool lfoFreqNoiseFilter2Fun() { return true; }
+bool lfoFreqNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoDepthNoiseFilter2Menu[1] = {
     { "LfoDNF2:\n " , lfoDepthNoiseFilter2Fun   }
 };
-bool lfoDepthNoiseFilter2Fun() { return true; }
+bool lfoDepthNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoBreathNoiseFilter2Menu[1] = {
     { "LfoBNF2:\n " , lfoBreathNoiseFilter2Fun   }
 };
-bool lfoBreathNoiseFilter2Fun() { return true; }
+bool lfoBreathNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM lfoThreshNoiseFilter2Menu[1] = {
     { "LfoTNF2:\n " , lfoThreshNoiseFilter2Fun   }
 };
-bool lfoThreshNoiseFilter2Fun() { return true; }
+bool lfoThreshNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM sweepTimeNoiseFilter2Menu[1] = {
     { "SwpTNF2:\n " , sweepTimeNoiseFilter2Fun   }
 };
-bool sweepTimeNoiseFilter2Fun() { return true; }
+bool sweepTimeNoiseFilter2Fun() { return goUpOneMenu(); }
 MenuItem PROGMEM sweepDepthNoiseFilter2Menu[1] = {
     { "SwpDNF2:\n " , sweepDepthNoiseFilter2Fun   }
 };
-bool sweepDepthNoiseFilter2Fun() { return true; }
+bool sweepDepthNoiseFilter2Fun() { return goUpOneMenu(); }
 
 MenuItem PROGMEM patchNoiseMenu[4] = {
     { "Back    " , goUpOneMenu   }
@@ -693,25 +701,25 @@ MenuItem PROGMEM patchNoiseMenu[4] = {
 MenuItem PROGMEM noiseTimeMenu[1] = {
     { "Nz Time:\n " , noiseTimeFun   }
 };
-bool noiseTimeFun() { return true; }
+bool noiseTimeFun() { return goUpOneMenu(); }
 MenuItem PROGMEM noiseBreathMenu[1] = {
     { "NzBreth:\n " , noiseBreathFun   }
 };
-bool noiseBreathFun() { return true; }
+bool noiseBreathFun() { return goUpOneMenu(); }
 MenuItem PROGMEM noiseLevelMenu[1] = {
     { "NzLevel:\n " , noiseLevelFun   }
 };
-bool noiseLevelFun() { return true; }
+bool noiseLevelFun() { return goUpOneMenu(); }
 
 MenuItem PROGMEM patchFormantMenu[1] = {
     { "Formant:\n ", formantSelectFun    }
 };
-bool formantSelectFun() { return true; }
+bool formantSelectFun() { return goUpOneMenu(); }
 
 MenuItem PROGMEM patchAmpMenu[1] = {
     { "Patch\n Amp:\n ", patchAmpAdjustFun    }
 };
-bool patchAmpAdjustFun() { return true; }
+bool patchAmpAdjustFun() { return goUpOneMenu(); }
 
 MenuItem PROGMEM patchCommonMenu[5] = {
     { "Back    " , goUpOneMenu   }
@@ -725,19 +733,19 @@ MenuItem PROGMEM patchCommonMenu[5] = {
 MenuItem PROGMEM keyTriggerMenu[1] = {
     { "KeyTrig:\n ", keyTriggerFun    }
 };
-bool keyTriggerFun() { return true; }
+bool keyTriggerFun() { return goUpOneMenu(); }
 MenuItem PROGMEM octButtonLevelMenu[1] = {
     { "OctBtnL:\n ", octButtonLevelFun    }
 };
-bool octButtonLevelFun() { return true; }
+bool octButtonLevelFun() { return goUpOneMenu(); }
 MenuItem PROGMEM bendRangeMenu[1] = {
     { "BendRng:\n ", bendRangeFun    }
 };
-bool bendRangeFun() { return true; }
+bool bendRangeFun() { return goUpOneMenu(); }
 MenuItem PROGMEM bendStepMenu[1] = {
     { "BendStp:\n ", bendStepFun    }
 };
-bool bendStepFun() { return true; }
+bool bendStepFun() { return goUpOneMenu(); }
 
 MenuItem PROGMEM systemAdjMenu[6] = {
     { "Back    " , goUpOneMenu   }
@@ -750,23 +758,23 @@ MenuItem PROGMEM systemAdjMenu[6] = {
 MenuItem PROGMEM auxInMenu[1] = {
     { "Aux In: \n ", auxInFun    }
 };
-bool auxInFun() { return true; }
+bool auxInFun() { return goUpOneMenu(); }
 MenuItem PROGMEM octaveMenu[1] = {
     { "Octave: \n ", octaveFun    }
 };
-bool octaveFun() { return true; }
+bool octaveFun() { return goUpOneMenu(); }
 MenuItem PROGMEM semiMenu[1] = {
     { "Semiton:\n ", semiFun    }
 };
-bool semiFun() { return true; }
+bool semiFun() { return goUpOneMenu(); }
 MenuItem PROGMEM centsMenu[1] = {
     { "Cents:  \n ", centsFun    }
 };
-bool centsFun() { return true; }
+bool centsFun() { return goUpOneMenu(); }
 MenuItem PROGMEM breathCCMenu[1] = {
     { "BrethCC:\n ", breathCCFun    }
 };
-bool breathCCFun() { return true; }
+bool breathCCFun() { return goUpOneMenu(); }
 
 MenuList listTopMenu(topMenu, 18);
 MenuList listVolAdjustMenu(volAdjustMenu, 1);
@@ -947,102 +955,109 @@ bool gotoPatchSelectMenu() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listPatchSelectMenu);
+  String ps( current_patch.patch_string );
+  ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+  sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPatchResetMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchResetMenu);
   return true;
 }
 bool gotoPatchCopyMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchCopyMenu);
   return true;
 }
 bool gotoPatchPasteMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchPasteMenu);
     return true;
 }
 bool gotoPatchSwapMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchSwapMenu);
     return true;
 }
 bool gotoPatchFxMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  //myMenu.previousMenu = myMenu.currentMenu;
+  //myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchFxMenu);
     return true;
 }
 bool gotoPatchOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchOsc1Menu);
     return true;
 }
 bool gotoPatchOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchOsc2Menu);
     return true;
 }
 bool gotoPatchOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchOscFilter1Menu);
     return true;
 }
 bool gotoPatchOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchOscFilter2Menu);
     return true;
 }
 bool gotoPatchNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchNoiseFilter1Menu);
     return true;
 }
 bool gotoPatchNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchNoiseFilter2Menu);
     return true;
 }
 bool gotoPatchNoiseMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchNoiseMenu);
     return true;
 }
 bool gotoPatchFormantMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchFormantMenu);
     return true;
 }
 bool gotoPatchAmpMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchAmpMenu);
     return true;
 }
 bool gotoPatchCommonMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  myMenu.setCurrentMenu(&listPatchAmpMenu);
   myMenu.setCurrentMenu(&listPatchCommonMenu);
     return true;
 }
 
 bool gotoSystemAdjMenu() {
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSystemAdjMenu);
   return true;
 }
@@ -1050,12 +1065,25 @@ bool gotoSystemAdjMenu() {
 bool goUpOneMenu() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
-  myMenu.setCurrentMenu(myMenu.previousMenu);
-  myMenu.currentItemIndex = myMenu.previousItemIndex;
+  //myMenu.setCurrentMenu(myMenu.previousMenu);
+  //myMenu.currentItemIndex = myMenu.previousItemIndex;
+  if(!myMenu.previousMenuStack.empty() 
+          && !myMenu.previousItemIndexStack.empty()){
+      myMenu.setCurrentMenu(myMenu.previousMenuStack.top());
+      myMenu.currentItemIndex = myMenu.previousItemIndexStack.top();
+      myMenu.previousMenuStack.pop();
+      myMenu.previousItemIndexStack.pop();
+  }
   return true;
 }
 
 bool gotoTopMenu() {
+  while(!myMenu.previousMenuStack.empty()){
+      myMenu.previousMenuStack.pop();
+  }
+  while(!myMenu.previousItemIndexStack.empty()){
+      myMenu.previousItemIndexStack.pop();
+  }
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listTopMenu);
@@ -1067,232 +1095,234 @@ bool gotoTopMenu() {
 
 // patchFxMenu functions
 bool gotoFxCopyMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFxCopyMenu);
   return true;
 }
 bool gotoFxPasteMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFxPasteMenu);
   return true;
 }
 bool gotoFxSwapMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFxSwapMenu);
   return true;
 }
 bool gotoDelayLevelMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayLevelMenu);
   return true;
 }
 bool gotoDelayTimeMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  //myMenu.previousMenu = myMenu.currentMenu;
+  //myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayTimeMenu);
   return true;
 }
 bool gotoDelayFeedbackMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayFeedbackMenu);
   return true;
 }
 bool gotoDelayDampMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayDampMenu);
   return true;
 }
 bool gotoReverbLevelMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbLevelMenu);
   return true;
 }
 bool gotoReverbTimeMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbTimeMenu);
   return true;
 }
 bool gotoReverbDensityMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbDensityMenu);
   return true;
 }
 bool gotoReverbDampMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbDampMenu);
   return true;
 }
 bool gotoChorusOnMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusOnMenu);
   return true;
 }
 bool gotoChorusDryMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusDryMenu);
   return true;
 }
 bool gotoChorusLfoFMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusLfoFMenu);
   return true;
 }
 bool gotoChorusFeedbackMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusFeedbackMenu);
   return true;
 }
 bool gotoChorusDelay1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusDelay1Menu);
   return true;
 }
 bool gotoChorusMod1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusMod1Menu);
   return true;
 }
 bool gotoChorusWet1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusWet1Menu);
   return true;
 }
 bool gotoChorusDelay2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusDelay2Menu);
   return true;
 }
 bool gotoChorusMod2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusMod2Menu);
   return true;
 }
 bool gotoChorusWet2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusWet2Menu);
   return true;
 }
 
 // patchOsc1Menu functions
 bool gotoOctOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listOscOsc1Menu);
   return true;
 }
 bool gotoSemiOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSemiOsc1Menu);
   return true;
 }
 bool gotoCentsOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listCentsOsc1Menu);
   return true;
 }
 bool gotoBeatOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBeatOsc1Menu);
   return true;
 }
 bool gotoSawOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSawOsc1Menu);
   return true;
 }
 bool gotoTriOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listTriOsc1Menu);
   return true;
 }
 bool gotoPulseOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPulseOsc1Menu);
   return true;
 }
 bool gotoPWOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPWOsc1Menu);
   return true;
 }
 bool gotoPwmFreqOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmFreqOsc1Menu);
   return true;
 }
 bool gotoPwmDepthOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmDepthOsc1Menu);
   return true;
 }
 bool gotoSweepTimeOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeOsc1Menu);
   return true;
 }
 bool gotoSweepDepthOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthOsc1Menu);
   return true;
 }
 bool gotoBreathAttainOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathAttainOsc1Menu);
   return true;
 }
 bool gotoBreathDepthOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathDepthOsc1Menu);
   return true;
 }
 bool gotoBreathThresholdOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathThresholdOsc1Menu);
   return true;
 }
 bool gotoBreathCurveOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveOsc1Menu);
   return true;
 }
 bool gotoLevelOsc1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLevelOsc1Menu);
   return true;
 }
@@ -1301,110 +1331,110 @@ bool gotoLevelOsc1Menu(){
 //
 
 bool gotoOctOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listOscOsc2Menu);
   return true;
 }
 bool gotoSemiOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSemiOsc2Menu);
   return true;
 }
 bool gotoCentsOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listCentsOsc2Menu);
   return true;
 }
 bool gotoBeatOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBeatOsc2Menu);
   return true;
 }
 bool gotoSawOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSawOsc2Menu);
   return true;
 }
 bool gotoTriOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listTriOsc2Menu);
   return true;
 }
 bool gotoPulseOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPulseOsc2Menu);
   return true;
 }
 bool gotoPWOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPWOsc2Menu);
   return true;
 }
 bool gotoPwmFreqOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmFreqOsc2Menu);
   return true;
 }
 bool gotoPwmDepthOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmDepthOsc2Menu);
   return true;
 }
 bool gotoSweepTimeOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeOsc2Menu);
   return true;
 }
 bool gotoSweepDepthOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthOsc2Menu);
   return true;
 }
 bool gotoBreathAttainOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathAttainOsc2Menu);
   return true;
 }
 bool gotoBreathDepthOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathDepthOsc2Menu);
   return true;
 }
 bool gotoBreathThresholdOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathThresholdOsc2Menu);
   return true;
 }
 bool gotoBreathCurveOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveOsc2Menu);
   return true;
 }
 bool gotoLevelOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLevelOsc2Menu);
   return true;
 }
 bool gotoXFadeOsc2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listXFadeOsc2Menu);
   return true;
 }
@@ -1412,154 +1442,154 @@ bool gotoXFadeOsc2Menu(){
 
 // patchOscFilter1Menu Functions 
 bool gotoLinkOscFiltersMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLinkOscFiltersMenu);
   return true;
 }
 bool gotoModeOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listModeOscFilter1Menu);
   return true;
 }
 bool gotoFreqOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFreqOscFilter1Menu);
   return true;
 }
 bool gotoQOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listQOscFilter1Menu);
   return true;
 }
 bool gotoKeyFollowOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listKeyFollowOscFilter1Menu);
   return true;
 }
 bool gotoBreathModOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathModOscFilter1Menu);
   return true;
 }
 bool gotoBreathCurveOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveOscFilter1Menu);
   return true;
 }
 bool gotoLfoFreqOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoFreqOscFilter1Menu);
   return true;
 }
 bool gotoLfoDepthOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoDepthOscFilter1Menu);
   return true;
 }
 bool gotoLfoBreathOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoBreathOscFilter1Menu);
   return true;
 }
 bool gotoLfoThresholdOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoThresholdOscFilter1Menu);
   return true;
 }
 bool gotoSweepTimeOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeOscFilter1Menu);
   return true;
 }
 bool gotoSweepDepthOscFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthOscFilter1Menu);
   return true;
 }
 
 // patchOscFilter2Menu Functions
 bool gotoModeOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listModeOscFilter2Menu);
   return true;
 }
 bool gotoFreqOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFreqOscFilter2Menu);
   return true;
 }
 bool gotoQOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listQOscFilter2Menu);
   return true;
 }
 bool gotoKeyFollowOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listKeyFollowOscFilter2Menu);
   return true;
 }
 bool gotoBreathModOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathModOscFilter2Menu);
   return true;
 }
 bool gotoBreathCurveOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveOscFilter2Menu);
   return true;
 }
 bool gotoLfoFreqOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoFreqOscFilter2Menu);
   return true;
 }
 bool gotoLfoDepthOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoDepthOscFilter2Menu);
   return true;
 }
 bool gotoLfoBreathOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoBreathOscFilter2Menu);
   return true;
 }
 bool gotoLfoThresholdOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoThresholdOscFilter2Menu);
   return true;
 }
 bool gotoSweepTimeOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeOscFilter2Menu);
   return true;
 }
 bool gotoSweepDepthOscFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthOscFilter2Menu);
   return true;
 }
@@ -1567,199 +1597,199 @@ bool gotoSweepDepthOscFilter2Menu(){
 
 // patchNoiseFilter1Menu Functions 
 bool gotoLinkNoiseFiltersMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLinkNoiseFiltersMenu);
   return true;
 }
 bool gotoModeNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listModeNoiseFilter1Menu);
   return true;
 }
 bool gotoFreqNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFreqNoiseFilter1Menu);
   return true;
 }
 bool gotoQNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listQNoiseFilter1Menu);
   return true;
 }
 bool gotoKeyFollowNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listKeyFollowNoiseFilter1Menu);
   return true;
 }
 bool gotoBreathModNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathModNoiseFilter1Menu);
   return true;
 }
 bool gotoBreathCurveNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveNoiseFilter1Menu);
   return true;
 }
 bool gotoLfoFreqNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoFreqNoiseFilter1Menu);
   return true;
 }
 bool gotoLfoDepthNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoDepthNoiseFilter1Menu);
   return true;
 }
 bool gotoLfoBreathNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoBreathNoiseFilter1Menu);
   return true;
 }
 bool gotoLfoThresholdNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoThresholdNoiseFilter1Menu);
   return true;
 }
 bool gotoSweepTimeNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeNoiseFilter1Menu);
   return true;
 }
 bool gotoSweepDepthNoiseFilter1Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthNoiseFilter1Menu);
   return true;
 }
 
 // patchNoiseFilter2Menu Functions
 bool gotoModeNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listModeNoiseFilter2Menu);
   return true;
 }
 bool gotoFreqNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFreqNoiseFilter2Menu);
   return true;
 }
 bool gotoQNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listQNoiseFilter2Menu);
   return true;
 }
 bool gotoKeyFollowNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listKeyFollowNoiseFilter2Menu);
   return true;
 }
 bool gotoBreathModNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathModNoiseFilter2Menu);
   return true;
 }
 bool gotoBreathCurveNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveNoiseFilter2Menu);
   return true;
 }
 bool gotoLfoFreqNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoFreqNoiseFilter2Menu);
   return true;
 }
 bool gotoLfoDepthNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoDepthNoiseFilter2Menu);
   return true;
 }
 bool gotoLfoBreathNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoBreathNoiseFilter2Menu);
   return true;
 }
 bool gotoLfoThresholdNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoThresholdNoiseFilter2Menu);
   return true;
 }
 bool gotoSweepTimeNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeNoiseFilter2Menu);
   return true;
 }
 bool gotoSweepDepthNoiseFilter2Menu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthNoiseFilter2Menu);
   return true;
 }
 
 // patchNoiseMenu Functions
 bool gotoNoiseTimeMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listNoiseTimeMenu);
   return true;
 }
 bool gotoNoiseBreathMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listNoiseBreathMenu);
   return true;
 }
 bool gotoNoiseLevelMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listNoiseLevelMenu);
   return true;
 }
 
 bool gotoKeyTriggerMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listKeyTriggerMenu);
   return true;
 }
 bool gotoOctButtonLevelMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listOctButtonLevelMenu);
   return true;
 }
 bool gotoBendRangeMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBendRangeMenu);
   return true;
 }
 bool gotoBendStepMenu(){
-  myMenu.previousMenu = myMenu.currentMenu;
-  myMenu.previousItemIndex = myMenu.currentItemIndex;
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBendStepMenu);
   return true;
 }
@@ -1770,6 +1800,8 @@ bool gotoBendStepMenu(){
 
 // systemAdjMenu Menu functions
 bool gotoAuxInMenu() {
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listAuxInMenu);
@@ -1779,6 +1811,8 @@ bool gotoAuxInMenu() {
 }
 
 bool gotoOctaveMenu() {
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listOctaveMenu);
@@ -1788,6 +1822,8 @@ bool gotoOctaveMenu() {
 }
 
 bool gotoSemiMenu() {
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listSemiMenu);
@@ -1797,6 +1833,8 @@ bool gotoSemiMenu() {
 }
 
 bool gotoCentsMenu() {
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listCentsMenu);
@@ -1806,6 +1844,8 @@ bool gotoCentsMenu() {
 }
 
 bool gotoBreathCCMenu() {
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listBreathCCMenu);

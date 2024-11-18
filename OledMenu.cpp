@@ -25,7 +25,7 @@ void OledMenu::doMenu(){
   if(updateLeafValue){   // knob moved, update value and fill str_oledbuf
     if(!runFunction()) { display.print("updateLeafValue ERROR!"); return;} 
     Serial8.println(str_oledbuf);
-    display.setCursor(0,20);
+    display.setCursor(0,18);
     display.println(str_oledbuf);
     display.display();
     return; 
@@ -116,8 +116,22 @@ void OledMenu::displayMenu() {
     int topScreenIndex = (currentItemIndex/itemsPerScreen)*itemsPerScreen; //int div for truncate
     int botScreenIndex = topScreenIndex + itemsPerScreen; 
 
+    if (menuSize == 1) {
+        display.print("  ");
+        getText(outBuf, 0);
+        display.println(outBuf);
+        display.println("          ");
+        display.println("          ");
+        display.println("          ");
+        display.setCursor(0,18);
+        display.println(str_oledbuf);
+        display.display(); 
+        Serial8.println(outBuf);
+        Serial8.print(F("menuSize = "));
+        Serial8.println(menuSize);
+        return;
+    }
     for (int i = topScreenIndex; i < botScreenIndex; i++) {
-
       if (i == currentItemIndex) {
         Serial8.print("->");
         display.print("->");
@@ -127,8 +141,8 @@ void OledMenu::displayMenu() {
         display.print("  ");
       }
       // use getText method to pull text out into a buffer you can print
-      getText(outBuf, i);
       if (i < menuSize){
+          getText(outBuf, i);
           display.println(outBuf);
       } else { 
           display.println("        ");
@@ -136,6 +150,7 @@ void OledMenu::displayMenu() {
       Serial8.println(outBuf);
       display.display(); 
     }
+
     Serial8.print(F("currentItemIndex =  "));
     Serial8.println(currentItemIndex);
     for (int i = 0; i < 3; i++) {  // put some spaces before next print
