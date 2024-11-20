@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "OledMenu.h"
 #include "globals.h"
 #include "MenuItemsListsFuncs.h"
@@ -117,13 +118,14 @@ MenuItem PROGMEM patchSwapMenu[2] = {
 };
 bool patchSwapFun(){ return goUpOneMenu(); }
 
-MenuItem PROGMEM patchFxMenu[22] = {
+MenuItem PROGMEM patchFxMenu[23] = {
     { "Back    " , goUpOneMenu   }
    ,{ "FxCopy  " , gotoFxCopyMenu   }
    ,{ "FxPaste " , gotoFxPasteMenu   }
    ,{ "FxSwap  " , gotoFxSwapMenu   }
    ,{ "DlyLevel" , gotoDelayLevelMenu   }
-   ,{ "DlyTime " , gotoDelayTimeMenu   }
+   ,{ "DlyTimeL" , gotoDelayTimeLMenu   }
+   ,{ "DlyTimeR" , gotoDelayTimeRMenu   }
    ,{ "DlyFB   " , gotoDelayFeedbackMenu   }
    ,{ "DlyDamp " , gotoDelayDampMenu   }
    ,{ "RvbLevel" , gotoReverbLevelMenu   }
@@ -161,14 +163,29 @@ MenuItem PROGMEM delayLevelMenu[1] = {
     { "Dly Lev:\n " , delayLevelFun   }
 };
 bool delayLevelFun(){ return goUpOneMenu(); }
-MenuItem PROGMEM delayTimeMenu[1] = {
-    { "DlyTime:\n " , delayTimeFun   }
+MenuItem PROGMEM delayTimeLMenu[1] = {
+    { "DlyTimeL\n " , delayTimeLFun   }
 };
-bool delayTimeFun(){ 
+bool delayTimeLFun(){ 
+ if(myMenu.updateLeafValue){
+     int delayTimeTemp = current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME];
+     delayTimeTemp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME] = std::clamp(delayTimeTemp,0, 127);
+     patchToSynthVariables(&current_patch);
+     sprintf(myMenu.str_oledbuf,"  %04d    ", 10*current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME]);
+     return true;
+ }
+ Serial8.println(F("delayLevelLFun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
+MenuItem PROGMEM delayTimeRMenu[1] = {
+    { "DlyTimeR\n " , delayTimeRFun   }
+};
+bool delayTimeRFun(){ 
      if(myMenu.updateLeafValue){
          return true;
      }
-    Serial8.println(F("delayLevelFun calls goUpOneMenu"));
+    Serial8.println(F("delayLevelRFun calls goUpOneMenu"));
     return goUpOneMenu(); 
 }
 MenuItem PROGMEM delayFeedbackMenu[1] = {
@@ -783,7 +800,7 @@ MenuList listPatchResetMenu(patchResetMenu, 2);
 MenuList listPatchCopyMenu(patchCopyMenu, 2);
 MenuList listPatchPasteMenu(patchPasteMenu, 2);
 MenuList listPatchSwapMenu(patchSwapMenu, 2);
-MenuList listPatchFxMenu(patchFxMenu, 22);
+MenuList listPatchFxMenu(patchFxMenu, 23);
 MenuList listPatchOsc1Menu(patchOsc1Menu, 18);
 MenuList listPatchOsc2Menu(patchOsc2Menu, 19);
 MenuList listPatchOscFilter1Menu(patchOscFilter1Menu, 14);
@@ -801,7 +818,8 @@ MenuList listFxCopyMenu(fxCopyMenu,2);
 MenuList listFxPasteMenu(fxPasteMenu,2);
 MenuList listFxSwapMenu(fxSwapMenu,2);
 MenuList listDelayLevelMenu(delayLevelMenu,1);
-MenuList listDelayTimeMenu(delayTimeMenu,1);
+MenuList listDelayTimeLMenu(delayTimeLMenu,1);
+MenuList listDelayTimeRMenu(delayTimeRMenu,1);
 MenuList listDelayFeedbackMenu(delayFeedbackMenu,1);
 MenuList listDelayDampMenu(delayDampMenu,1);
 MenuList listReverbLevelMenu(reverbLevelMenu,1);
@@ -1118,12 +1136,20 @@ bool gotoDelayLevelMenu(){
   myMenu.setCurrentMenu(&listDelayLevelMenu);
   return true;
 }
-bool gotoDelayTimeMenu(){
-  //myMenu.previousMenu = myMenu.currentMenu;
-  //myMenu.previousItemIndex = myMenu.currentItemIndex;
+bool gotoDelayTimeLMenu(){
+  display.clearDisplay();
+  display.display(); // refresh display
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
-  myMenu.setCurrentMenu(&listDelayTimeMenu);
+  myMenu.setCurrentMenu(&listDelayTimeLMenu);
+  sprintf(myMenu.str_oledbuf,"  %04d    ", 10*current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME]);
+  display.println(myMenu.str_oledbuf);
+  return true;
+}
+bool gotoDelayTimeRMenu(){
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  myMenu.setCurrentMenu(&listDelayTimeRMenu);
   return true;
 }
 bool gotoDelayFeedbackMenu(){

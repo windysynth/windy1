@@ -1294,10 +1294,10 @@ void cacluateHeadRoom(){
     }
     HR2 = HR2*1.414; // RMS to peak
 */ 
-        LevelOscN_HeadRoom = 1.0f/1.0f;
+        LevelOscN_HeadRoom = 0.5f; //1.0f/1.0f;
         //extraAmpFactor = 8.0f*(1.0f-LevelEstimate/6.0f*
-        extraAmpFactor = 3.0f; 
-        Amp_HeadRoom = 1.0f; 
+        extraAmpFactor = 6.0; //3.0f; 
+        Amp_HeadRoom = 1.0f;
 //    }   
 }
 
@@ -1710,7 +1710,7 @@ void processMIDI(bool midi_from_host_flag)
             if(!note_is_on || !KeyTriggerSingle)
             {
                 // non-legato section uses shorter rampTimnes
-                float rampTimeShortening = 0.5;
+                float rampTimeShortening = 0.82;
                 dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);
                 dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);      
                 dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime*rampTimeShortening);
