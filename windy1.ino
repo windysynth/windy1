@@ -918,6 +918,11 @@ void loop()
         if(activeButtonOrKnob) {
             myMenu.doMenu();
             activeButtonOrKnob = false;
+        } else if(programChangeFlag){
+           patchSelect();
+           gotoPatchSelectMenu(); // to display the new patch selection
+           myMenu.displayMenu();
+           programChangeFlag = false;
         }
     }
 

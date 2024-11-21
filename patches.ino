@@ -641,4 +641,26 @@ float sweepTimeOscCurve(float sweepTime){
     return sweepTimeFilterCurve(sweepTime);
 }
 
+void patchSelect(){
+    current_patchNumber = programChangeData % NUMBER_OF_PATCHES;
+    // load the patch 
+    if (patchLoaded[current_patchNumber])
+    {
+        setCurrentPatch(current_patchNumber);
+        patchToSynthVariables(&current_patch);
+    } 
+    else 
+    {
+        loadPatchSD(current_patchNumber);
+    }
+  //  String ps( current_patch.patch_string );
+  //  ps.setCharAt( ps.indexOf(' '), '\n');
+  //  sprintf(str_oledbuf, "Patch: %03d\n%s", current_patchNumber+1, ps.c_str() );
+  //  Serial8.println(current_patch.patch_string);
+  //  if (updateEpromFlag)
+  //  {
+  //      eepromCurrentMillis = millis();
+  //      eepromPreviousMillis = eepromCurrentMillis; // reset timer every new program Change rx
+  //  }
+}
 

@@ -977,6 +977,7 @@ bool gotoPatchSelectMenu() {
   ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
   sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
   display.println(myMenu.str_oledbuf);
+  Serial8.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPatchResetMenu(){
