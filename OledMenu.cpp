@@ -16,11 +16,14 @@
  *****************************/
 
 void OledMenu::doMenu(){
-    Serial8.print(F("doMenu, menuSize = "));
+    Serial8.print("doMenu, menuSize = ");
     Serial8.println(currentMenu->getSize());
+    Serial8.print("OledMenu::runningFunction = ");
+    Serial8.println(runningFunction);
   if(currentMenu->getSize() != 1) { 
       Serial8.println("MenuClass::doMenu");
-      MenuClass::doMenu(); return; }
+      MenuClass::doMenu(); return; 
+  }
   if (runningFunction) {
       Serial8.println("runningFunction");
    runningFunction = !runFunction();
@@ -29,7 +32,8 @@ void OledMenu::doMenu(){
   updateLeafValue = updateSelection(); // leaf funcs update values
   if(updateLeafValue){   // knob moved, update value and fill str_oledbuf
     Serial8.println("updateLeafValue true");
-    if(!runFunction()) { display.print("updateLeafValue ERROR!"); return;} 
+    //if(!runFunction()) { display.print("updateLeafValue ERROR!"); return;} 
+    runningFunction = !runFunction();
     Serial8.println(str_oledbuf);
     display.setCursor(0,18);
     display.println(str_oledbuf);
@@ -40,6 +44,7 @@ void OledMenu::doMenu(){
     Serial8.println("selectionMade()");
     if (!runFunction()) { // If item function returns false then it isn't done and we need to keep running it.
       runningFunction = true;
+      Serial8.println("runningFunction true");
       return; // skip displaying the menu if we're going to run item function again.
     }
   Serial8.println("call displayMenu()");

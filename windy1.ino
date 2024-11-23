@@ -204,6 +204,9 @@ AudioEffectPlateReverb_F32       verb_F32;       //xy=1981.6666259765625,1667.66
 AudioMixer4              mix_ntcFilter2; //xy=2059.333251953125,914
 AudioFilterFIR           fir_formant;    //xy=2111.333251953125,978
 AudioMixer4              mix_Amp;        //xy=2131.333251953125,1127
+AudioEffectEnvelope      env_squelch;
+AudioEffectEnvelope      env_squelchR; //xy=2563.1497802734375,1767.050048828125
+AudioEffectEnvelope      env_squelchL; //xy=2583.14990234375,1556.050048828125
 AudioConvert_F32toI16           Float2IntR; //xy=2165.9503173828125,1731.6500244140625
 AudioConvert_F32toI16           Float2IntL; //xy=2170.9503173828125,1609.6500244140625
 AudioFilterStateVariable filter5;        //xy=2289.333251953125,1137
@@ -362,19 +365,22 @@ AudioConnection_F32          patchCord143(verb_F32, 0, Float2IntL, 0);
 AudioConnection_F32          patchCord144(verb_F32, 1, Float2IntR, 0);
 AudioConnection          patchCord145(mix_ntcFilter2, fir_formant);
 AudioConnection          patchCord146(fir_formant, 0, mix_Amp, 0);
-AudioConnection          patchCord147(mix_Amp, 0, filter5, 0);
+AudioConnection          patchCord147(mix_Amp, env_squelch);
 AudioConnection          patchCord148(Float2IntR, 0, filterPreMixLPR, 0);
 AudioConnection          patchCord149(Float2IntL, 0, filterPreMixLPL, 0);
-AudioConnection          patchCord150(filter5, 2, mix_chorus_fb, 0);
-AudioConnection          patchCord151(filter5, 2, mix_chorus_dry, 0);
-AudioConnection          patchCord152(filterPreMixLPR, 0, filterPreMixHPR, 0);
-AudioConnection          patchCord153(filterPreMixLPL, 0, filterPreMixHPL, 0);
-AudioConnection          patchCord154(filterPreMixHPR, 2, mix_lineInR, 0);
-AudioConnection          patchCord155(filterPreMixHPL, 2, mix_lineInL, 0);
-AudioConnection          patchCord156(i2s2, 0, mix_lineInL, 1);
-AudioConnection          patchCord157(i2s2, 1, mix_lineInR, 1);
-AudioConnection          patchCord158(mix_lineInL, 0, i2s1, 0);
-AudioConnection          patchCord159(mix_lineInR, 0, i2s1, 1);
+AudioConnection          patchCord150(env_squelch, 0, filter5, 0);
+AudioConnection          patchCord151(filterPreMixLPR, 0, env_squelchR, 0);
+AudioConnection          patchCord152(filterPreMixLPL, 0, env_squelchL, 0);
+AudioConnection          patchCord153(filter5, 2, mix_chorus_fb, 0);
+AudioConnection          patchCord154(filter5, 2, mix_chorus_dry, 0);
+AudioConnection          patchCord155(env_squelchR, 0, filterPreMixHPR, 0);
+AudioConnection          patchCord156(env_squelchL, 0, filterPreMixHPL, 0);
+AudioConnection          patchCord157(filterPreMixHPR, 2, mix_lineInR, 0);
+AudioConnection          patchCord158(filterPreMixHPL, 2, mix_lineInL, 0);
+AudioConnection          patchCord159(i2s2, 0, mix_lineInL, 1);
+AudioConnection          patchCord160(i2s2, 1, mix_lineInR, 1);
+AudioConnection          patchCord161(mix_lineInL, 0, i2s1, 0);
+AudioConnection          patchCord162(mix_lineInR, 0, i2s1, 1);
 
 AudioControlSGTL5000     sgtl5000_1;     //xy=346.333251953125,219
 // GUItool: end automatically generated code
@@ -426,8 +432,14 @@ menusm_t MENUSM = MENU_EXIT;
 
 bool patchFxWriteFlag = false;
 
-//const uint32_t gatherSensorInterval = 50;  // milliseconds
-const uint32_t readKnobInterval = 50;  // milliseconds
+// squelched after squelchRelease and before squelchRelease + squelchDelay
+// synth variables update after updateSynthDelay which should occur while squelched
+// squechAttack starts at updateSynthDelay + squelchDelay
+const uint32_t readKnobInterval = 50;  // ms
+const uint32_t updateSynthDelay = 70;  // ms > squelchRelease
+const float squelchRelease = 30.0f;  // ms
+const float squelchDelay = 60.0f;  // ms 
+const float squelchAttack = 30.0f;  // ms
 
 //-------------- MIDI DIN connection ----------------------
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDIs1);
@@ -611,7 +623,7 @@ void setup() {
     mix_osc2.gain(1, 1.0); // triOsc2
     mix_osc2.gain(2, 1.0);
     mix_osc2.gain(3, 0.0);
-    cacluateHeadRoom();
+    //cacluateHeadRoom();
     mix_oscLevels.gain(0, LevelOsc1*LevelOscN_HeadRoom);
     mix_oscLevels.gain(1, LevelOsc2*LevelOscN_HeadRoom);
     mix_levelNoise.gain(0, 1.0); // pass thru for now
@@ -873,7 +885,8 @@ void setup() {
 
     //patchToSynthVariables(&current_patch);
     updateSynthVariablesFlag = true;
-    printPatchValues();   
+   // printPatchValues();   
+    //PRINT_VALUES_FLAG = true;
 
     AudioInterrupts();
 
@@ -902,20 +915,39 @@ void setup() {
     myMenu.setCurrentMenu(&listTopMenu);
     Serial8.println(str_oledbuf);
     myMenu.resetButtonsAndKnobs(); // to clear spurios activity form power up
-
+    env_squelch.delay(squelchDelay);
+    env_squelch.attack(squelchAttack);
+    env_squelch.sustain(1.0f);
+    env_squelch.release(squelchRelease);
+    env_squelch.releaseNoteOn(squelchRelease);
+    env_squelch.noteOn();
+    env_squelchL.delay(squelchDelay);
+    env_squelchL.attack(squelchAttack);
+    env_squelchL.sustain(1.0f);
+    env_squelchL.release(squelchRelease);
+    env_squelchL.releaseNoteOn(squelchRelease);
+    env_squelchL.noteOn();
+    env_squelchR.delay(squelchDelay);
+    env_squelchR.attack(squelchAttack);
+    env_squelchR.sustain(1.0f);
+    env_squelchR.release(squelchRelease);
+    env_squelchR.releaseNoteOn(squelchRelease);
+    env_squelchR.noteOn();
 } // setup()
 
 void loop() 
 {   
     static unsigned long prevMilMenu = millis(); 
-    currentMillis = millis();
+    static unsigned long prevMilUpdateSynth = millis(); 
     static bool activeButtonOrKnob = false;
+    currentMillis = millis();
+    currentUITimeoutTime = currentMillis;
     if(!activeButtonOrKnob) {
         activeButtonOrKnob = myMenu.checkButtonsAndKnobs();
     }
-    if(currentMillis - prevMilMenu >= readKnobInterval) {  // check menu every 50ms 
+    if(currentMillis - prevMilMenu >= readKnobInterval) {  //every 50ms 
         prevMilMenu = currentMillis;
-        if(activeButtonOrKnob) {
+        if(activeButtonOrKnob | myMenu.reDoMenu) {
             myMenu.doMenu();
             activeButtonOrKnob = false;
         } else if(programChangeFlag){
@@ -925,8 +957,18 @@ void loop()
            programChangeFlag = false;
         }
     }
-
-    currentUITimeoutTime = currentMillis;
+    if (preUpdateSynthVariablesFlag){ // set in patchToSynthVariables()
+        env_squelch.noteOff(); //start squelch audio (release)
+        env_squelchL.noteOff(); //start squelch audio (release)
+        env_squelchR.noteOff(); //start squelch audio (release)
+        if(currentMillis - prevMilUpdateSynth >= updateSynthDelay) {
+           preUpdateSynthVariablesFlag = false; 
+           updateSynthVariablesFlag = true;
+           env_squelch.noteOn(); //start un squelch audio (attack)
+           env_squelchL.noteOn(); //start un squelch audio (attack)
+           env_squelchR.noteOn(); //start un squelch audio (attack)
+        } 
+    } else { prevMilUpdateSynth = currentMillis;} 
   
     //-------------------------------------------------------
     //  Calculate some parameters
@@ -950,7 +992,7 @@ void loop()
             mix_xfade.gain(0, 1.0);  // all Osc1
             mix_xfade.gain(1, 0);    // no Osc2 
         }
-        cacluateHeadRoom();
+        //cacluateHeadRoom();
         mix_oscLevels.gain(0, LevelOsc1*LevelOscN_HeadRoom);
         mix_oscLevels.gain(1, LevelOsc2*LevelOscN_HeadRoom);
         dc_pwOsc1.amplitude(PwOsc1); // default 50% dutycycle
@@ -1014,18 +1056,9 @@ void loop()
 
         filterPostDelayL.frequency(EffectsDelayDamp);
         filterPostDelayR.frequency(EffectsDelayDamp);
-        mix_Amp.gain(0, AmpLevel*Amp_HeadRoom); //  Amp_HeadRoom is from cacluateHeadRoom() called above
-        mix_Amp.gain(1, 1.0);  // 4000s AmpLevel doesn't control Noise Level
-        //mix_lineInL.gain(0, volf*extraAmpFactor*(1.0-mix_lineinf));
-        mix_lineInL.gain(0, volf*extraAmpFactor);
-        mix_lineInL.gain(1, volf*extraLineInAmpFactor*mix_lineinf);
-        mix_lineInL.gain(2, 0.0);
-        mix_lineInL.gain(3, 0.0);
-        //mix_lineInR.gain(0, volf*extraAmpFactor*(1.0-mix_lineinf));
-        mix_lineInR.gain(0, volf*extraAmpFactor);
-        mix_lineInR.gain(1, volf*extraLineInAmpFactor*mix_lineinf);
-        mix_lineInR.gain(2, 0.0);
-        mix_lineInR.gain(3, 0.0);
+        mix_lineInLR_gain_0 = volf*extraAmpFactor;
+        mix_lineInLR_gain_1 = volf*extraLineInAmpFactor*mix_lineinf;
+        mix_Amp_gain_0 =  AmpLevel*Amp_HeadRoom;
 
         dly_delayEffects.delay(0, EffectsDelayTimeL);
         EffectsDelayTimeR = EffectsDelayTimeL*0.85f;  //TODO: create separate menu entries for left right disparity
@@ -1035,7 +1068,8 @@ void loop()
         mix_delayLevelL.gain(1,maxDelayLevel*pow(EffectsDelayLevel, gammaDelayLevel));       //finer adjustment at low end
         mix_delayLevelR.gain(1,maxDelayLevel*pow(EffectsDelayLevel, gammaDelayLevel));       //finer adjustment at low end
         updateSynthVariablesFlag = false;
-        PRINT_VALUES_FLAG = true;
+        //PRINT_VALUES_FLAG = true;
+        PRINT_VALUES_FLAG = false;
     }
 
     //-------------------------------------------------------
@@ -1044,6 +1078,19 @@ void loop()
     //      all at the same time.  
     //-------------------------------------------------------
     AudioNoInterrupts();
+        mix_Amp.gain(0, mix_Amp_gain_0); 
+        //mix_Amp.gain(1, 1.0);  // 4000s AmpLevel doesn't control Noise Level
+        //mix_lineInL.gain(0, volf*extraAmpFactor*(1.0-mix_lineinf));
+        mix_lineInL.gain(0, mix_lineInLR_gain_0);
+        mix_lineInL.gain(1, mix_lineInLR_gain_1);
+        //mix_lineInL.gain(2, 0.0);
+        //mix_lineInL.gain(3, 0.0);
+        //mix_lineInR.gain(0, volf*extraAmpFactor*(1.0-mix_lineinf));
+        mix_lineInR.gain(0, mix_lineInLR_gain_0);
+        mix_lineInR.gain(1, mix_lineInLR_gain_1);
+        //mix_lineInR.gain(2, 0.0);
+        //mix_lineInR.gain(3, 0.0);
+
     noteNumberOsc1 = porta_step ? round(dc_portatime.read()*128.0) : dc_portatime.read()*128;
     noteNumberOsc1 = BendStep ? round( noteNumberOsc1 + BendRange * dc_pitchbend.read() )
                                      : noteNumberOsc1 + BendRange * dc_pitchbend.read();
@@ -1210,7 +1257,7 @@ void loop()
         eepromCurrentMillis = millis();
         eepromPreviousMillis = eepromCurrentMillis;
     }
-    if (updateEpromFlag)
+    if (updateEpromFlag )
     {
         eepromCurrentMillis = millis();
         if (eepromCurrentMillis - eepromPreviousMillis >= eepromUpdateInterval)
@@ -1256,55 +1303,11 @@ void loop()
 //-------------
 // HeadRoom Balance based on Q of filter 1 and 2 and filter mode on
 //------------
-void cacluateHeadRoom(){
-
-/*
-    float HR1 = 1.0f;
-    float HR2 = 1.0f;
-
-    //LinkOscFilters
-    float BW1 = FreqOscFilter1/QFactorOscFilter1;
-    float BW2 = FreqOscFilter2/QFactorOscFilter2;
-    float HBWs = (BW2+BW1)*0.5f;
-    float FreqOscProximity = (HBSs - abs(FreqOscFilter2 - FreqOscFilter2))/HBWs;
-    float QCombiningFactor = 1.0f;
-    float LevelEstimate = (SawOsc1+TriOsc1+PulseOsc1)*LevelOsc1 + (SawOsc2+TriOsc2+PulseOsc2)*LevelOsc2;
-    switch (ModeOscFilter1)
-    {
-        case LP:
-        case BP:
-        case HP:
-            HR1= QFactorOscFilter1 > 1.0f ? (1.0f - QFactorOscFilter1) : 0.0f;
-            QCombiningFactor = FreqOscProximity > 0.0f ? FreqOscProximity : 0.0f;
-            break;
-        case THRU:
-        case NTC:
-        default:
-            HR1= 0.0f;
-            break;
-    }
-
-    switch (ModeOscFilter2)
-    {
-        case LP:
-        case BP:
-        case HP:
-            HR2= QFactorOscFilter2 > 1.0f ? (1.0f - QFactorOscFilter2) : 0.0f;
-            break;
-        case THRU:
-        case NTC:
-        default:
-            HR2= 0.0f;
-            break;
-    }
-    HR2 = HR2*1.414; // RMS to peak
-*/ 
-        LevelOscN_HeadRoom = 0.5f; //1.0f/1.0f;
-        //extraAmpFactor = 8.0f*(1.0f-LevelEstimate/6.0f*
-        extraAmpFactor = 6.0; //3.0f; 
-        Amp_HeadRoom = 1.0f;
-//    }   
-}
+//void cacluateHeadRoom(){
+//    LevelOscN_HeadRoom = 0.4f; //1.0f/1.0f;
+//    extraAmpFactor = 7.5; //3.0f; 
+//    Amp_HeadRoom = 1.0f;
+//}
 
 //TODO: replace this with all float version
 //This function converts linear to expo, using gamma as the exponential amount

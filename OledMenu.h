@@ -37,6 +37,7 @@ public:
   bool longKnobButtonPressPending = false;
   bool longKnobButtonPress = false; 
   bool shortKnobButtonPress = false; 
+  bool reDoMenu = false;
   int32_t newKnob = 0;
   int updateSelection(); // checks up there is an update to selection
   int updateLeafValue = 0;

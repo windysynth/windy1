@@ -20,7 +20,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.61"};
+String verNum_str = {"0.0.62"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -47,6 +47,7 @@ float DIV127 = 1.0/127.0;
 float DIV128 = 1.0/128.0;
 float DIV64 = 1.0/64.0;
 bool updateSynthVariablesFlag = false;
+bool preUpdateSynthVariablesFlag = false;
 
 // globals for synth
 float dc_breathOscFilter1_amp = 0.0;
@@ -177,8 +178,10 @@ float limitBreathSweepOsc2 = 1.55/(octaveControlOsc2*12); // 4000s is about 1.55
 float maxMixNtcFilter = 1.0;  //0.6; 
 //float fPotValue = 0.0; 
 //float iPotValue = 0; 
-float extraAmpFactor = 3.0;
+float extraAmpFactor = 1.5*3.0f;
 float extraLineInAmpFactor = 1.0;
+float mix_lineInLR_gain_0 = volf*extraAmpFactor;
+float mix_lineInLR_gain_1 = volf*extraLineInAmpFactor*mix_lineinf;
 
 
 
@@ -200,7 +203,7 @@ patch_t current_patch = {
  {0x7f, 0x6c, 0x55, 0x16, 0x3a}
 };  // 154 bytes long
 
-const uint32_t eepromUpdateInterval = 20000;  // milliseconds
+const uint32_t eepromUpdateInterval = 120000;  // milliseconds (120,000 = 2min)
 uint32_t eepromPreviousMillis = 0;
 uint32_t eepromCurrentMillis = 0;
 bool programChangeFlag = false; // new programChange is happening
@@ -248,7 +251,7 @@ float BreathAttainOsc1 = 0.0;  	//64,14,0,127,
 float BreathCurveOsc1 = 0.7;  	//64,15,0,127,
 float BreathThreshOsc1 = 0;  	//64,16,0,127,
 float LevelOsc1 = 0;  		//64,17,0,127,
-float LevelOscN_HeadRoom = 1.0f/8.0f;  		//64,17,0,127,
+float LevelOscN_HeadRoom = 1.0f/1.5f;  		//64,17,0,127,
 float Amp_HeadRoom = 1.0f;  		//64,17,0,127,
 float OctOsc2 = 0;  	//65,0,62,66,
 float SemiOsc2 = 0;  	//65,1,52,76,
@@ -337,6 +340,7 @@ float s81_8 = 127;
 bool ChorusOn = 1;
 float VibratoAmp = 0;  	    //88,0,0,127,
 float AmpLevel = 0.5;  	    //88,1,0,127,
+float mix_Amp_gain_0 =  AmpLevel*Amp_HeadRoom;
 float OctButtonLevel = 0;  	    //88,2,0,127,
 float EffectsChorusDelay1 = 0;  //112,0,0,127,
 float EffectsChorusMod1 = 0;  	//112,1,0,127,

@@ -11,8 +11,6 @@
 extern Adafruit_SSD1306 display;
 
 extern int currentPatch;
-extern int current_patchNumber;
-extern bool patchLoaded[];
 
 extern Encoder knob;
 extern Bounce knobButton;
@@ -62,6 +60,7 @@ extern float DIV127;
 extern float DIV128;
 extern float DIV64;
 extern bool updateSynthVariablesFlag;
+extern bool preUpdateSynthVariablesFlag;
 
 // globals for synth
 extern float dc_breathOscFilter1_amp;
@@ -188,7 +187,8 @@ extern float limitBreathSweepOsc2; // 4000s is about 1.55 semitiones
 extern float maxMixNtcFilter; 
 extern float extraAmpFactor;
 extern float extraLineInAmpFactor;
-
+extern float mix_lineInLR_gain_0;
+extern float mix_lineInLR_gain_1;
 
 
 // current patch nrpn numbers
@@ -317,6 +317,7 @@ extern float s81_8;
 extern bool ChorusOn;
 extern float VibratoAmp;  	    //88,0,0,127,
 extern float AmpLevel;  	    //88,1,0,127,
+extern float mix_Amp_gain_0;
 extern float OctButtonLevel;  	    //88,2,0,127,
 extern float EffectsChorusDelay1;  //112,0,0,127,
 extern float EffectsChorusMod1;  	//112,1,0,127,

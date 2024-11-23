@@ -4,6 +4,8 @@
 #include "MenuItemsListsFuncs.h"
 #include "patches.h"
 
+extern AudioEffectEnvelope      env_squelch;
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET);
 
 /*****************************
@@ -44,7 +46,7 @@ bool volAdjustFun() {
     vol = vol < 0 ? 0 : vol >= 100 ? 100 : vol;
     volf = ((float)vol)/100.0f;
     volf = (volf*volf)*2.0f;
-    updateSynthVariablesFlag = true;
+    preUpdateSynthVariablesFlag = true; // squelch while change vol 
     sprintf(myMenu.str_oledbuf,"  %d   ", vol);
     Serial8.println(F("volAdjustFun: updated vol "));
     return true;
@@ -83,6 +85,7 @@ bool patchSelectFun() {
     ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
     sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
     Serial8.println(current_patch.patch_string);
+
     if (updateEpromFlag)
     {
         eepromCurrentMillis = millis();
