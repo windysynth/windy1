@@ -20,7 +20,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.62"};
+String verNum_str = {"0.0.63"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -181,7 +181,7 @@ float maxMixNtcFilter = 1.0;  //0.6;
 float extraAmpFactor = 1.5*3.0f;
 float extraLineInAmpFactor = 1.0;
 float mix_lineInLR_gain_0 = volf*extraAmpFactor;
-float mix_lineInLR_gain_1 = volf*extraLineInAmpFactor*mix_lineinf;
+float mix_lineInLR_gain_1 = extraLineInAmpFactor*mix_lineinf;
 
 
 

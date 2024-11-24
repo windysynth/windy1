@@ -46,7 +46,7 @@ bool volAdjustFun() {
     vol = vol < 0 ? 0 : vol >= 100 ? 100 : vol;
     volf = ((float)vol)/100.0f;
     volf = (volf*volf)*2.0f;
-    preUpdateSynthVariablesFlag = true; // squelch while change vol 
+    //preUpdateSynthVariablesFlag = true; // squelch while change vol 
     sprintf(myMenu.str_oledbuf,"  %d   ", vol);
     Serial8.println(F("volAdjustFun: updated vol "));
     return true;
@@ -778,11 +778,29 @@ MenuItem PROGMEM systemAdjMenu[6] = {
 MenuItem PROGMEM auxInMenu[1] = {
     { "Aux In: \n ", auxInFun    }
 };
-bool auxInFun() { return goUpOneMenu(); }
+bool auxInFun() { 
+     if(myMenu.updateLeafValue){
+    mix_linein += myMenu.updateLeafValue;
+    mix_linein = mix_linein < 0 ? 0 : mix_linein >= 100 ? 100 : mix_linein;
+    mix_lineinf = ((float)mix_linein)/100.0f;
+    mix_lineinf = (mix_lineinf*mix_lineinf)*2.0f;
+    //preUpdateSynthVariablesFlag = true; // squelch while change vol 
+    sprintf(myMenu.str_oledbuf,"  %d   ", mix_linein);
+    Serial8.println(F("mixLineIn: updated mix_linein "));    
+    return true; 
+ }
+  display.clearDisplay(); // erase display
+  display.display(); // refresh display
+  Serial8.println(F("volAdjustFun: goto TopMenu"));
+  //myMenu.setCurrentMenu(&listTopMenu);
+  return goUpOneMenu(); 
+}
 MenuItem PROGMEM octaveMenu[1] = {
     { "Octave: \n ", octaveFun    }
 };
-bool octaveFun() { return goUpOneMenu(); }
+bool octaveFun() { 
+    return goUpOneMenu(); 
+}
 MenuItem PROGMEM semiMenu[1] = {
     { "Semiton:\n ", semiFun    }
 };

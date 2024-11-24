@@ -858,12 +858,12 @@ void setup() {
 
     //mix_lineInL.gain(0, volf*extraAmpFactor*(1.0-mix_lineinf));
     mix_lineInL.gain(0, volf*extraAmpFactor);
-    mix_lineInL.gain(1, volf*extraLineInAmpFactor*mix_lineinf);
+    mix_lineInL.gain(1, mix_lineinf*extraLineInAmpFactor);
     mix_lineInL.gain(2, 0.0);
     mix_lineInL.gain(3, 0.0);
     //mix_lineInR.gain(0, volf*extraAmpFactor*(1.0-mix_lineinf));
     mix_lineInR.gain(0, volf*extraAmpFactor);
-    mix_lineInR.gain(1, volf*extraLineInAmpFactor*mix_lineinf);
+    mix_lineInR.gain(1, mix_lineinf*extraLineInAmpFactor);
     mix_lineInR.gain(2, 0.0);
     mix_lineInR.gain(3, 0.0);
 
@@ -1056,8 +1056,6 @@ void loop()
 
         filterPostDelayL.frequency(EffectsDelayDamp);
         filterPostDelayR.frequency(EffectsDelayDamp);
-        mix_lineInLR_gain_0 = volf*extraAmpFactor;
-        mix_lineInLR_gain_1 = volf*extraLineInAmpFactor*mix_lineinf;
         mix_Amp_gain_0 =  AmpLevel*Amp_HeadRoom;
 
         dly_delayEffects.delay(0, EffectsDelayTimeL);
@@ -1071,6 +1069,9 @@ void loop()
         //PRINT_VALUES_FLAG = true;
         PRINT_VALUES_FLAG = false;
     }
+        // no reason to wait for these 
+        mix_lineInLR_gain_0 = volf*extraAmpFactor;
+        mix_lineInLR_gain_1 = mix_lineinf*extraLineInAmpFactor;
 
     //-------------------------------------------------------
     //  Update Realtime Audio System
