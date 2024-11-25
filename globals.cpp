@@ -20,7 +20,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.64"};
+String verNum_str = {"0.0.65"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -150,7 +150,7 @@ float octaveControlFilter2 = 8.0;
 float octaveControlFilter3 = 8.0;
 float octaveControlFilter4 = 8.0;
 float octaveControlFilter5 = 0.0;
-float offsetNoteKeyfollow = 72.0;  // 84 = C6, 72 = C5, 60 = C4
+float offsetNoteKeyfollow = 60.0;  // 84 = C6, 72 = C5, 60 = C4
 float offsetNoteKeyfollowNoise = 60.0;  // 84 = C6, 72 = C5, 60 = C4
 float minPreNoiseNoteNumbr = 60.0;  // 84 = C6, 72 = C5, 60 = C4  4000s noise stops changing below about C4
 const uint32_t updatedAudioSystemInterval = 1;  // milliseconds
