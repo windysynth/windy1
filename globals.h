@@ -8,6 +8,18 @@
 #include "OledMenu.h"
 #include "patches.h"
 
+#define CC_MODULATION_WHEEL               1
+#define CC_BREATH                         2
+#define CC_FOOT_PEDAL                     4
+#define CC_PORTA_TIME                     5
+#define CC_VOLUME                         7
+#define CC_BALANCE                        8
+#define CC_PAN                            10
+#define CC_EXPRESSION                     11
+#define CC_NRPN_DATA_ENTRY                6
+#define CC_NRPN_LSB                       98
+#define CC_NRPN_MSB                       99
+
 extern Adafruit_SSD1306 display;
 
 extern int currentPatch;
@@ -115,8 +127,9 @@ extern float Transposef;
 extern int32_t Octave;  	// octaves  +/- 2 
 extern int eeprom_Octave;
 extern float Octavef;  
-extern int32_t breath_cc;  // can be 1, 2, 7 or 11 for cc01, cc02, etc. (default cc02)
+extern int32_t breath_cc;  // can be 1 to 11 (except 06) for cc01, cc02, etc. (default cc02)
 extern int eeprom_breath_cc;
+extern std::vector<int32_t> breath_cc_choices[];
 
 // synth variable limits and references
 extern float maxPwmLfoFreq;         // 4000s is 10 Hz at 100%

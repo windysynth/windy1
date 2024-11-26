@@ -1,10 +1,11 @@
-// globals.h
+// MenuItemsListsFuncs.h
 //
 //#pragma once
 #include <stdint.h>
 #include <string>
 #include "OledMenu.h"
 #include "patches.h"
+
 
 extern Adafruit_SSD1306 display;
 

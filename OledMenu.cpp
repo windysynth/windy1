@@ -36,6 +36,10 @@ void OledMenu::doMenu(){
     runningFunction = !runFunction();
     Serial8.println(str_oledbuf);
     display.setCursor(0,18);
+    display.println("          ");
+    display.println("          ");
+    display.println("          ");
+    display.setCursor(0,18);
     display.println(str_oledbuf);
     display.display();
     return; 

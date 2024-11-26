@@ -1,3 +1,5 @@
+// MenuItemsListsFuncs.cpp
+//
 #include <algorithm>
 #include "OledMenu.h"
 #include "globals.h"
@@ -47,7 +49,7 @@ bool volAdjustFun() {
     volf = ((float)vol)/100.0f;
     volf = (volf*volf)*2.0f;
     //preUpdateSynthVariablesFlag = true; // squelch while change vol 
-    sprintf(myMenu.str_oledbuf,"  %d   ", vol);
+    sprintf(myMenu.str_oledbuf,"  %ld   ", vol);
     Serial8.println(F("volAdjustFun: updated vol "));
     return true;
  }
@@ -779,40 +781,92 @@ MenuItem PROGMEM auxInMenu[1] = {
     { "Aux In: \n ", auxInFun    }
 };
 bool auxInFun() { 
-     if(myMenu.updateLeafValue){
+  if(myMenu.updateLeafValue){
     mix_linein += myMenu.updateLeafValue;
     mix_linein = mix_linein < 0 ? 0 : mix_linein >= 100 ? 100 : mix_linein;
     mix_lineinf = ((float)mix_linein)/100.0f;
     mix_lineinf = (mix_lineinf*mix_lineinf)*2.0f;
-    //preUpdateSynthVariablesFlag = true; // squelch while change vol 
-    sprintf(myMenu.str_oledbuf,"  %d   ", mix_linein);
+    sprintf(myMenu.str_oledbuf,"  %ld   ", mix_linein);
     Serial8.println(F("mixLineIn: updated mix_linein "));    
     return true; 
  }
   display.clearDisplay(); // erase display
   display.display(); // refresh display
-  Serial8.println(F("volAdjustFun: goto TopMenu"));
-  //myMenu.setCurrentMenu(&listTopMenu);
+  Serial8.println(F("auxInFun: goUpOneMenu"));
   return goUpOneMenu(); 
 }
 MenuItem PROGMEM octaveMenu[1] = {
     { "Octave: \n ", octaveFun    }
 };
 bool octaveFun() { 
-    return goUpOneMenu(); 
+  if(myMenu.updateLeafValue){
+    Octave += myMenu.updateLeafValue;
+    Octave = std::clamp((int)Octave,-2, 2);
+    Octavef = ((float)Octave*12.0);
+    sprintf(myMenu.str_oledbuf,"  %ld   ", Octave);
+    Serial8.println(F("octaveFun: update Octave "));    
+    return true; 
+ }
+  display.clearDisplay(); // erase display
+  display.display(); // refresh display
+  Serial8.println(F("octaveFun: goUpOneMenu"));
+  return goUpOneMenu(); 
 }
 MenuItem PROGMEM semiMenu[1] = {
     { "Semiton:\n ", semiFun    }
 };
-bool semiFun() { return goUpOneMenu(); }
+bool semiFun() { 
+  if(myMenu.updateLeafValue){
+    Transpose += myMenu.updateLeafValue;
+    Transpose = std::clamp((int)Transpose,-12, 12);
+    Transposef = ((float)Transpose);
+    sprintf(myMenu.str_oledbuf,"  %ld   ", Transpose);
+    Serial8.println(F("semiFun: update Transpose "));    
+    return true; 
+  }
+  display.clearDisplay(); // erase display
+  display.display(); // refresh display
+  Serial8.println(F("semiFun: goUpOneMenu"));
+  return goUpOneMenu(); 
+}
 MenuItem PROGMEM centsMenu[1] = {
     { "Cents:  \n ", centsFun    }
 };
-bool centsFun() { return goUpOneMenu(); }
+bool centsFun() { 
+  if(myMenu.updateLeafValue){
+    FineTuneCents += myMenu.updateLeafValue;
+    FineTuneCents = std::clamp((int)FineTuneCents,-100, 100);
+    FineTuneCentsf =  ((float)FineTuneCents)/100.0f;
+    sprintf(myMenu.str_oledbuf,"  %ld   ", FineTuneCents);
+    Serial8.println(F("centsFun: update FineTuneCents "));    
+    return true; 
+  }
+  display.clearDisplay(); // erase display
+  display.display(); // refresh display
+  Serial8.println(F("centsFun: goUpOneMenu"));
+  return goUpOneMenu(); 
+}
 MenuItem PROGMEM breathCCMenu[1] = {
     { "BrethCC:\n ", breathCCFun    }
 };
-bool breathCCFun() { return goUpOneMenu(); }
+bool breathCCFun() { 
+  if(myMenu.updateLeafValue){
+    // always skip cc 06 (used with RPNs/NRPNs)
+    breath_cc += myMenu.updateLeafValue>0 ? 
+            (breath_cc == 5 ? 2 : 1) 
+            : myMenu.updateLeafValue<0 ? 
+            (breath_cc == 7 ? -2 : -1)
+            : 0;
+    breath_cc = std::clamp((int)breath_cc,1, 11);
+    sprintf(myMenu.str_oledbuf,"  %ld   ", breath_cc);
+    Serial8.println(F("breathCCFun: update breath_cc "));    
+    return true; 
+  } 
+  display.clearDisplay(); // erase display
+  display.display(); // refresh display
+  Serial8.println(F("breathCCFun: goUpOneMenu"));    
+  return goUpOneMenu(); 
+}
 
 MenuList listTopMenu(topMenu, 18);
 MenuList listVolAdjustMenu(volAdjustMenu, 1);
@@ -986,7 +1040,7 @@ bool gotoVolAdjMenu() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listVolAdjustMenu);
-  sprintf(myMenu.str_oledbuf,"  %d   ", vol);
+  sprintf(myMenu.str_oledbuf,"  %ld   ", vol);
   display.println(myMenu.str_oledbuf);
   return true;
 }
@@ -1853,7 +1907,7 @@ bool gotoAuxInMenu() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listAuxInMenu);
-  sprintf(myMenu.str_oledbuf,"  %d   ", mix_linein);
+  sprintf(myMenu.str_oledbuf,"  %ld   ", mix_linein);
   display.println(myMenu.str_oledbuf);
   return true;
 }
@@ -1864,7 +1918,7 @@ bool gotoOctaveMenu() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listOctaveMenu);
-  sprintf(myMenu.str_oledbuf,"  %d   ", Octave);
+  sprintf(myMenu.str_oledbuf,"  %ld   ", Octave);
   display.println(myMenu.str_oledbuf);
   return true;
 }
@@ -1875,7 +1929,7 @@ bool gotoSemiMenu() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listSemiMenu);
-  sprintf(myMenu.str_oledbuf,"  %d   ", Transpose);
+  sprintf(myMenu.str_oledbuf,"  %ld   ", Transpose);
   display.println(myMenu.str_oledbuf);
   return true;
 }
@@ -1886,7 +1940,7 @@ bool gotoCentsMenu() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listCentsMenu);
-  sprintf(myMenu.str_oledbuf,"  %d   ", FineTuneCents);
+  sprintf(myMenu.str_oledbuf,"  %ld   ", FineTuneCents);
   display.println(myMenu.str_oledbuf);
   return true;
 }
@@ -1898,7 +1952,7 @@ bool gotoBreathCCMenu() {
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listBreathCCMenu);
   //TODO: handle Channel Aftertouch
-  sprintf(myMenu.str_oledbuf,"  %d   ", breath_cc);
+  sprintf(myMenu.str_oledbuf,"  %ld   ", breath_cc);
   display.println(myMenu.str_oledbuf);
   return true;
 }

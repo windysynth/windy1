@@ -1,3 +1,5 @@
+// globals.cpp
+
 #include <SD.h>
 #include "OledMenu.h"
 #include "globals.h"
@@ -20,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.65"};
+String verNum_str = {"0.0.67"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -117,11 +119,17 @@ float sweepTimeNoiseFilterGamma = 4.0;       // TODO: adjust this to match 4000s
 float maxSweepDepthFilter = 1.0;   // 7/8 = 0.875 (because new max filter modulation is 8 octaves) TODO: set this to match 4000s
 float maxSweepDepthOscFilter = 0.5;  	//72,9,0,127,
 
+//float WAVESHAPER_ARRAY[] = {-16.0/16.0, -15.0/16.0, -14.0/16, -13.0/16.0, -12.0/16.0,-11.0/16.0, 
+//                            -10.0/16.0, -9.0/16.0, -8.0/16.0, -7.0/16.0, -6.0/16.0, -5.0/16.0, 
+//                            -4.0/16.0, -3.0/16.0, -2.0/16.0, -1.0/16.0, 0.0, 1.0/16.0, 2.0/16.0, 
+//                            3.0/16.0, 4.0/16.0, 5.0/16.0, 6.0/16.0, 7.0/16.0, 8.0/16.0, 9.0/16.0, 
+//                            10.0/16.0, 11.0/16.0, 12.0/16.0, 13.0/16.0, 13.5/16.0, 13.75/16.0, 14.0/16.0};
 float WAVESHAPER_ARRAY[] = {-16.0/16.0, -15.0/16.0, -14.0/16, -13.0/16.0, -12.0/16.0,-11.0/16.0, 
                             -10.0/16.0, -9.0/16.0, -8.0/16.0, -7.0/16.0, -6.0/16.0, -5.0/16.0, 
                             -4.0/16.0, -3.0/16.0, -2.0/16.0, -1.0/16.0, 0.0, 1.0/16.0, 2.0/16.0, 
                             3.0/16.0, 4.0/16.0, 5.0/16.0, 6.0/16.0, 7.0/16.0, 8.0/16.0, 9.0/16.0, 
-                            10.0/16.0, 11.0/16.0, 12.0/16.0, 13.0/16.0, 13.5/16.0, 13.75/16.0, 14.0/16.0};
+                            10.0/16.0, 11.0/16.0, 12.0/16.0, 13.0/16.0, 14.0/16.0, 15.0/16.0, 16.0/16.0};
+
 
 float maxLfoFreqFilter1 = 100.0;
 float maxLfoFreqFilter2 = 100.0;

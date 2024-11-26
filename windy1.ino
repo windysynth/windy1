@@ -46,14 +46,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //  out of the filter if you don't make this hack.
 //  https://forum.pjrc.com/threads/67358-AudioFilterStateVariable-unwanted-noise
 
-#define CC_MODULATION_WHEEL               1
-#define CC_BREATH                         2
-#define CC_VOLUME                         7
-#define CC_EXPRESSION                     11
-#define CC_PORTA_TIME                     5
-#define CC_NRPN_DATA_ENTRY                6
-#define CC_NRPN_LSB                       98
-#define CC_NRPN_MSB                       99
 
 //------------some define statements --------------------
 // #define FREQQ (440)
@@ -1098,22 +1090,23 @@ void loop()
     noteNumberOsc1 = noteNumberOsc1 + OctOsc1*12.0
                     + SemiOsc1+FineOsc1 + FineTuneCentsf + Transposef + Octavef;
     //noteNumberFilter1 = dc_portatimef.read()*128 + OctOsc1*12.0 + SemiOsc1+FineOsc1;
-    noteNumberFilter1 = dc_portatimef.read()*128 + SemiOsc1+FineOsc1;
+    //noteNumberFilter1 = dc_portatimef.read()*128 + SemiOsc1+FineOsc1;
+    noteNumberFilter1 = dc_portatimef.read()*128 + FineTuneCentsf + Transposef + Octavef;
     noteNumberOsc2 = porta_step ? round(dc_portatime.read()*128.0) : dc_portatime.read()*128;
     noteNumberOsc2 = BendStep ? round( noteNumberOsc2 + BendRange * dc_pitchbend.read() )
                                      : noteNumberOsc2 + BendRange * dc_pitchbend.read();
     noteNumberOsc2 = noteNumberOsc2 + OctOsc2*12.0
                     + SemiOsc2+FineOsc2 + FineTuneCentsf + Transposef + Octavef;
     //noteNumberFilter2 = dc_portatimef.read()*128 + OctOsc2*12.0 + SemiOsc2+FineOsc2;
-    noteNumberFilter2 = dc_portatimef.read()*128 + SemiOsc2+FineOsc2;
+    //noteNumberFilter2 = dc_portatimef.read()*128 + SemiOsc2+FineOsc2;
     noteFreqOsc1 = 440.0 * pow(2, (noteNumberOsc1-69.0)/12 );  // 69 is note number for A4=440Hz
     noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2-69.0)/12 );  // 69 is note number for A4=440Hz
     noteFreqFilter5 = 440.0 * pow(2, (min(60,min(noteNumberOsc1,noteNumberOsc2))-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
     //noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
-    keyfollowFilter1 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter1/144.0); //72 is C5   
-    keyfollowFilter2 = pow(2, (noteNumberFilter2-offsetNoteKeyfollow)*KeyFollowOscFilter2/144.0); //72 is C5 
-    keyfollowFilter3 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowNoiseFilter3/144.0); //72 is C5
-    keyfollowFilter4 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowNoiseFilter4/144.0); //72 is C5 
+    keyfollowFilter1 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter1/144.0); //60 is C4   
+    keyfollowFilter2 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter2/144.0); //60 is C4   
+    keyfollowFilter3 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowNoiseFilter3/144.0); //60 is C4   
+    keyfollowFilter4 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowNoiseFilter4/144.0); //60 is C4   
     keyfollowFilterPreNoise = pow(2, ( (noteNumberFilter1 < minPreNoiseNoteNumbr ? minPreNoiseNoteNumbr : noteNumberFilter1)- offsetNoteKeyfollowNoise )
                                 *KeyFollowPreNoiseFilter/144.0); //72 is C5 
     wfmod_sawOsc1.frequency(noteFreqOsc1);
@@ -1588,7 +1581,8 @@ void processMIDI(bool midi_from_host_flag)
             break;
         case midi_ho.AfterTouchPoly: //0xA0
             if (midi_from_host_flag)
-                MIDIs1.sendPolyPressure(data1,data2,channel);
+                MIDIs1.sendAfterTouch(data1,data2,channel); 
+                //MIDIs1.sendPolyPressure(data1,data2,channel); // deprecated, so use the overloaded one
         case midi_ho.AfterTouchChannel: //0xD0
             if (midi_from_host_flag)
                 MIDIs1.sendAfterTouch(data1,channel); // TODO: add AT as method of breath control
@@ -1598,7 +1592,12 @@ void processMIDI(bool midi_from_host_flag)
             switch (data1){
                 case CC_MODULATION_WHEEL:
                 case CC_BREATH: 
+                case 3: 
+                case CC_FOOT_PEDAL: 
                 case CC_VOLUME:
+                case CC_BALANCE: 
+                case 9: 
+                case CC_PAN:
                 case CC_EXPRESSION:
                     if (data1 != (uint8_t)breath_cc )
                     {
