@@ -1326,7 +1326,8 @@ float gen_osc_gamma(float input) {
 
 float gen_filter_gamma(float input) {
        float x = 1.0-input; 
-       float gamma = pow( x, 1.0)*2.0; 
+       //float gamma = pow( x, 1.0)*2.0; 
+       float gamma = pow( x, 1.0f-x*0.5f)*2.0f;
     return gamma;
 }
 
@@ -1381,7 +1382,9 @@ void changeFilterMode(void)
                 mix_ntcFilter1.gain(0,maxMixNtcFilter);  // pass thru
                 mix_ntcFilter1.gain(1,0.0);  // LP 
                 mix_ntcFilter1.gain(2,0.0);  // BP
-                mix_ntcFilter1.gain(3,0.0);  // HP break; case LP:
+                mix_ntcFilter1.gain(3,0.0);  // HP 
+                break; 
+            case LP:
                 mix_ntcFilter1.gain(0,0.0);  // pass thru
                 mix_ntcFilter1.gain(1,maxMixNtcFilter);  // LP 
                 mix_ntcFilter1.gain(2,0.0);  // BP

@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.67"};
+String verNum_str = {"0.0.69"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -186,7 +186,7 @@ float limitBreathSweepOsc2 = 1.55/(octaveControlOsc2*12); // 4000s is about 1.55
 float maxMixNtcFilter = 1.0;  //0.6; 
 //float fPotValue = 0.0; 
 //float iPotValue = 0; 
-float extraAmpFactor = 1.5*3.0f;
+float extraAmpFactor = 2.2*3.0f;  // 1/LevelOscN_HeadRoom*3.0f
 float extraLineInAmpFactor = 1.0;
 float mix_lineInLR_gain_0 = volf*extraAmpFactor;
 float mix_lineInLR_gain_1 = extraLineInAmpFactor*mix_lineinf;
@@ -259,7 +259,7 @@ float BreathAttainOsc1 = 0.0;  	//64,14,0,127,
 float BreathCurveOsc1 = 0.7;  	//64,15,0,127,
 float BreathThreshOsc1 = 0;  	//64,16,0,127,
 float LevelOsc1 = 0;  		//64,17,0,127,
-float LevelOscN_HeadRoom = 1.0f/1.5f;  		//64,17,0,127,
+float LevelOscN_HeadRoom = 1.0f/2.2f;  //extraAmpFactor //64,17,0,127,
 float Amp_HeadRoom = 1.0f;  		//64,17,0,127,
 float OctOsc2 = 0;  	//65,0,62,66,
 float SemiOsc2 = 0;  	//65,1,52,76,
