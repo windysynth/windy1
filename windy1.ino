@@ -1134,15 +1134,15 @@ void loop()
                         ? keyfollowFilterPreNoise*FreqPreNoiseFilter : maxFilterFreq;
     filter1.frequency(clippedFreqFilter1);  
     filter1.resonance(QFactorOscFilter1);   // Q factor
-    mix_fcModFilter1.gain(0, BreathModOscFilter1*1.25f); 
-    mix_fcModFilter1.gain(3, modOffsetFilter1*1.25f); 
+    mix_fcModFilter1.gain(0, BreathModOscFilter1*FreqOscFilter1BModFactor); 
+    mix_fcModFilter1.gain(3, modOffsetFilter1*FreqOscFilter1BModFactor); // modOffsetFilter1 = 1 in globals
     dc_modOffsetOscFilter1.amplitude(-BreathModOscFilter1);  // subtract off BM, 
     if (LinkOscFilters) 
     {
         filter2.frequency(clippedFreqFilter1);
         filter2.resonance(QFactorOscFilter1);   // Q factor
-        mix_fcModFilter2.gain(0,  BreathModOscFilter1*1.25f); 
-        mix_fcModFilter2.gain(3, modOffsetFilter1*1.25f); 
+        mix_fcModFilter2.gain(0,  BreathModOscFilter1*FreqOscFilter1BModFactor); 
+        mix_fcModFilter2.gain(3, modOffsetFilter1*FreqOscFilter1BModFactor); 
         ModeOscFilter2 = ModeOscFilter1;    
         dc_modOffsetOscFilter2.amplitude(-BreathModOscFilter1);
     }
@@ -1150,21 +1150,21 @@ void loop()
     {
         filter2.frequency(clippedFreqFilter2);
         filter2.resonance(QFactorOscFilter2);   // Q factor
-        mix_fcModFilter2.gain(0,  BreathModOscFilter2*1.25f); 
-        mix_fcModFilter2.gain(3, modOffsetFilter2*1.25f); 
+        mix_fcModFilter2.gain(0,  BreathModOscFilter2*FreqOscFilter2BModFactor); 
+        mix_fcModFilter2.gain(3, modOffsetFilter2*FreqOscFilter2BModFactor); 
         dc_modOffsetOscFilter2.amplitude(-BreathModOscFilter2);
     }
     filter3.frequency(clippedFreqFilter3);  
     filter3.resonance(QFactorNoiseFilter3);   // Q factor
-    mix_fcModFilter3.gain(0,  BreathModNoiseFilter3*1.0f); 
-    mix_fcModFilter3.gain(3, modOffsetFilter3*1.0f); 
+    mix_fcModFilter3.gain(0,  BreathModNoiseFilter3*FreqNoiseFilter3BModFactor); 
+    mix_fcModFilter3.gain(3, modOffsetFilter3*FreqNoiseFilter3BModFactor); 
     dc_modOffsetNoiseFilter3.amplitude(-BreathModNoiseFilter3);
     if (LinkNoiseFilters)
     {
         filter4.frequency(clippedFreqFilter3);
         filter4.resonance(QFactorNoiseFilter3);   // Q factor
-        mix_fcModFilter4.gain(0,  BreathModNoiseFilter3*1.0f); 
-        mix_fcModFilter4.gain(3, modOffsetFilter3*1.0f); 
+        mix_fcModFilter4.gain(0,  BreathModNoiseFilter3*FreqNoiseFilter3BModFactor); 
+        mix_fcModFilter4.gain(3, modOffsetFilter3*FreqNoiseFilter3BModFactor); 
         ModeNoiseFilter4 = ModeNoiseFilter3;    
         dc_modOffsetNoiseFilter4.amplitude(-BreathModNoiseFilter3);
     }
@@ -1172,8 +1172,8 @@ void loop()
     {
         filter4.frequency(clippedFreqFilter4);
         filter4.resonance(QFactorNoiseFilter4);   // Q factor
-        mix_fcModFilter4.gain(0,  BreathModNoiseFilter4*1.0f); 
-        mix_fcModFilter4.gain(3, modOffsetFilter4*1.0f); 
+        mix_fcModFilter4.gain(0,  BreathModNoiseFilter4*FreqNoiseFilter4BModFactor); 
+        mix_fcModFilter4.gain(3, modOffsetFilter4*FreqNoiseFilter4BModFactor); 
         dc_modOffsetNoiseFilter4.amplitude(-BreathModNoiseFilter4);
     }
     filterPreNoise.frequency(clippedFreqFilterPreNoise); 
@@ -1327,7 +1327,13 @@ float gen_osc_gamma(float input) {
 float gen_filter_gamma(float input) {
        float x = 1.0-input; 
        //float gamma = pow( x, 1.0)*2.0; 
-       float gamma = pow( x, 1.0f-x*0.5f)*2.0f;
+       //float gamma = pow( x, 1.0f-x*0.5f)*2.0f;
+       float gamma;
+//       if(input >= 64.0f/127.0f){
+//         gamma = 4.0f*pow(x,2.0f)-8.0f*input+4.0f; 
+//       } else {
+         gamma = pow( x, 1.0)*2.0;  
+//       }
     return gamma;
 }
 

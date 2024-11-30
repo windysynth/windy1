@@ -263,6 +263,7 @@ extern float BreathThreshOsc2;  	//65,16,0,127,
 extern float LevelOsc2;  	//65,17,0,127,
 extern filterMode_t ModeOscFilter1;  	//72,0,0,4,//LP HP BP NTC OFF
 extern float FreqOscFilter1 ;    // C6  	//72,1,36,124,//Midi Note 36 to 124
+extern float FreqOscFilter1BModFactor; // Freq slider Note numeber 36 to 124
 extern float QFactorOscFilter1;  	//72,2,5,127,"// 5=0.5, 127=12.7"
 extern float KeyFollowOscFilter1;  	//72,3,52,88,// -12 to +24 num semi tones
 extern float BreathModOscFilter1;  	//72,4,0,127,
@@ -275,6 +276,7 @@ extern float SweepTimeOscFilter1;  	//72,10,0,127,
 extern float BreathCurveOscFilter1;  	//72,11,0,127,  TODO: hook this up
 extern filterMode_t ModeOscFilter2;  	//73,0,0,4,//LP HP BP NTC OFF
 extern float FreqOscFilter2;    // C6  	//73,1,36,124,//Midi Note 36 to 124
+extern float FreqOscFilter2BModFactor; // Freq slider Note numeber 36 to 124
 extern float QFactorOscFilter2;  	//73,2,5,127,"// 5=0.5, 127=12.7"
 extern float KeyFollowOscFilter2;  	//73,3,52,88,// -12 to +24 num semi tones
 extern float BreathModOscFilter2;  	//73,4,0,127,
@@ -287,6 +289,7 @@ extern float SweepTimeOscFilter2;  	//73,10,0,127,
 extern float BreathCurveOscFilter2;  	//73,11,0,127, TODO: hook this up
 extern filterMode_t ModeNoiseFilter3;  	//74,0,0,4,//LP HP BP NTC OFF
 extern float FreqNoiseFilter3;    // C6  	//74,1,36,124,//Midi Note 36 to 124
+extern float FreqNoiseFilter3BModFactor; // Freq slider Note numeber 36 to 124
 extern float QFactorNoiseFilter3;  	//74,2,5,127,"// 5=0.5, 127=12.7"
 extern float KeyFollowNoiseFilter3;  	//74,3,52,88,// -12 to +24 num semi tones
 extern float BreathModNoiseFilter3;  	//74,4,0,127,
@@ -299,6 +302,7 @@ extern float SweepTimeNoiseFilter3;  	//74,10,0,127,
 extern float BreathCurveNoiseFilter3;  	//74,11,0,127, TODO: hook this up
 extern filterMode_t ModeNoiseFilter4;  	//75,0,0,4,//LP HP BP NTC OFF
 extern float FreqNoiseFilter4;    // C6  	//75,1,36,124,//Midi Note 36 to 124
+extern float FreqNoiseFilter4BModFactor; // Freq slider Note numeber 36 to 124
 extern float QFactorNoiseFilter4;  	//75,2,5,127,"// 5=0.5, 127=12.7"
 extern float QFactorFilter5;  	//75,2,5,127,"// 5=0.5, 127=12.7"
 extern float KeyFollowNoiseFilter4;  	//75,3,52,88,// -12 to +24 num semi tones

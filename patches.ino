@@ -50,7 +50,9 @@ void patchToSynthVariables(patch_t *patch) {
     LevelOsc2 = (float)patch->nrpn_msb_osc2[CCLEVELOSC2]*DIV127;  	//65,17,0,127,
     ModeOscFilter1 = (filterMode_t)patch->nrpn_msb_osc_filt1[CCMODEOSCFILTER1];  	//72,0,0,4,//LP HP BP NTC OFF
     // 69 is note number for A4=440Hz ;  	
-    FreqOscFilter1 = 440.0*pow(2, ((float)patch->nrpn_msb_osc_filt1[CCFREQOSCFILTER1]-69.0)/12 );  //72,1,36,124,note# 36 to 124
+    float FreqOscFilter1NN = (float)patch->nrpn_msb_osc_filt1[CCFREQOSCFILTER1];  //72,1,36,124,note# 36(c2) to 124(e9)
+    FreqOscFilter1BModFactor  = FreqOscFilter1NN/96.0f; 
+    FreqOscFilter1 = 440.0*pow(2, (FreqOscFilter1NN-69.0)/12 );  //72,1,36,124,note# 36(c2) to 124(e9)
     QFactorOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCQFACTOROSCFILTER1]/10.0;  	//72,2,5,127,"// 5=0.5, 127=12.7"
     KeyFollowOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCKEYFOLLOWOSCFILTER1]-64.0); //72,3,52,88,// -12 to +24 num semi tones
     BreathModOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCBREATHMODOSCFILTER1]*DIV127;  	//72,4,0,127,
@@ -62,7 +64,9 @@ void patchToSynthVariables(patch_t *patch) {
     SweepTimeOscFilter1 = sweepTimeFilterCurve((float)patch->nrpn_msb_osc_filt1[CCSWEEPTIMEOSCFILTER1]*DIV127);  	//72,10,0,127,
     BreathCurveOscFilter1 = gen_filter_gamma(((float)patch->nrpn_msb_osc_filt1[CCBREATHCURVEOSCFILTER1])*DIV127);  	//72,11,0,127,
     ModeOscFilter2 = (filterMode_t)patch->nrpn_msb_osc_filt2[CCMODEOSCFILTER2];  	//73,0,0,4,//LP HP BP NTC OFF
-    FreqOscFilter2 = 440.0*pow(2, ((float)patch->nrpn_msb_osc_filt2[CCFREQOSCFILTER2]-69.0)/12 ); //73,1,36,124,//Midi Note 36 to 124
+    float FreqOscFilter2NN = (float)patch->nrpn_msb_osc_filt2[CCFREQOSCFILTER2];  //72,1,36,124,note# 36(c2) to 124(e9)
+    FreqOscFilter2BModFactor  = FreqOscFilter2NN/96.0f; 
+    FreqOscFilter2 = 440.0*pow(2, (FreqOscFilter2NN-69.0)/12 );  //72,1,36,124,note# 36(c2) to 124(e9)
     QFactorOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCQFACTOROSCFILTER2]/10.0;  	//73,2,5,127,"// 5=0.5, 127=12.7"
     KeyFollowOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCKEYFOLLOWOSCFILTER2]-64.0);//73,3,52,88,// -12 to +24 num semi tones
     BreathModOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCBREATHMODOSCFILTER2]*DIV127;  	//73,4,0,127,
@@ -74,7 +78,9 @@ void patchToSynthVariables(patch_t *patch) {
     SweepTimeOscFilter2 = sweepTimeFilterCurve((float)patch->nrpn_msb_osc_filt2[CCSWEEPTIMEOSCFILTER2]*DIV127);  	//73,10,0,127,
     BreathCurveOscFilter2 = gen_filter_gamma(((float)patch->nrpn_msb_osc_filt2[CCBREATHCURVEOSCFILTER2])*DIV127);  	//73,11,0,127,
     ModeNoiseFilter3 = (filterMode_t)patch->nrpn_msb_noise_filt3[CCMODENOISEFILTER3];  	//74,0,0,4,//LP HP BP NTC OFF
-    FreqNoiseFilter3 = 440.0*pow(2, ((float)patch->nrpn_msb_noise_filt3[CCFREQNOISEFILTER3]-69.0)/12 );//74,1,36,124,//Note# 36 to 124
+    float FreqNoiseFilter3NN = (float)patch->nrpn_msb_noise_filt3[CCFREQNOISEFILTER3];  //72,1,36,124,note# 36(c2) to 124(e9)
+    FreqNoiseFilter3BModFactor  = FreqNoiseFilter3NN/96.0f; 
+    FreqNoiseFilter3 = 440.0*pow(2, (FreqNoiseFilter3NN-69.0)/12 );  //72,1,36,124,note# 36(c2) to 124(e9)
     QFactorNoiseFilter3 = (float)patch->nrpn_msb_noise_filt3[CCQFACTORNOISEFILTER3]/10.0;  	//74,2,5,127,"// 5=0.5, 127=12.7"
     KeyFollowNoiseFilter3 = ((float)patch->nrpn_msb_noise_filt3[CCKEYFOLLOWNOISEFILTER3]-64.0);//74,3,52,88,// -12 to +24 num semitones
     BreathModNoiseFilter3 = (float)patch->nrpn_msb_noise_filt3[CCBREATHMODNOISEFILTER3]*DIV127;  	//74,4,0,127,
@@ -86,7 +92,9 @@ void patchToSynthVariables(patch_t *patch) {
     SweepTimeNoiseFilter3 = sweepTimeFilterCurve((float)patch->nrpn_msb_noise_filt3[CCSWEEPTIMENOISEFILTER3]*DIV127);  	//74,10,0,127,
     BreathCurveNoiseFilter3 = gen_filter_gamma(((float)patch->nrpn_msb_noise_filt3[CCBREATHCURVENOISEFILTER3])*DIV127);  	//74,11,0,127,
     ModeNoiseFilter4 = (filterMode_t)patch->nrpn_msb_noise_filt4[CCMODENOISEFILTER4];  	//75,0,0,4,//LP HP BP NTC OFF
-    FreqNoiseFilter4 = 440.0*pow(2, ((float)patch->nrpn_msb_noise_filt4[CCFREQNOISEFILTER4]-69.0)/12 ); //75,1,36,124,//Note# 36 to 124
+    float FreqNoiseFilter4NN = (float)patch->nrpn_msb_noise_filt4[CCFREQNOISEFILTER4];  //72,1,36,124,note# 36(c2) to 124(e9)
+    FreqNoiseFilter4BModFactor  = FreqNoiseFilter4NN/96.0f; 
+    FreqNoiseFilter4 = 440.0*pow(2, (FreqNoiseFilter4NN-69.0)/12 );  //72,1,36,124,note# 36(c2) to 124(e9)
     QFactorNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCQFACTORNOISEFILTER4]/10.0;  	//75,2,5,127,"// 5=0.5, 127=12.7"
     KeyFollowNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCKEYFOLLOWNOISEFILTER4]-64.0);//75,3,52,88,// -12 to +24 num semitones
     BreathModNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCBREATHMODNOISEFILTER4]*DIV127;  	//75,4,0,127,

@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.69"};
+String verNum_str = {"0.0.72"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -117,7 +117,7 @@ float sweepTimeOscFilterGamma = 4.0;       // TODO: adjust this to match 4000s
 float maxSweepTimeNoiseFilter = 750.0;
 float sweepTimeNoiseFilterGamma = 4.0;       // TODO: adjust this to match 4000s
 float maxSweepDepthFilter = 1.0;   // 7/8 = 0.875 (because new max filter modulation is 8 octaves) TODO: set this to match 4000s
-float maxSweepDepthOscFilter = 0.5;  	//72,9,0,127,
+float maxSweepDepthOscFilter = 0.70;  	//72,9,0,127,
 
 //float WAVESHAPER_ARRAY[] = {-16.0/16.0, -15.0/16.0, -14.0/16, -13.0/16.0, -12.0/16.0,-11.0/16.0, 
 //                            -10.0/16.0, -9.0/16.0, -8.0/16.0, -7.0/16.0, -6.0/16.0, -5.0/16.0, 
@@ -157,7 +157,7 @@ float octaveControlFilter1 = 8.0;
 float octaveControlFilter2 = 8.0;
 float octaveControlFilter3 = 8.0;
 float octaveControlFilter4 = 8.0;
-float octaveControlFilter5 = 0.0;
+float octaveControlFilter5 = 8.0;
 float offsetNoteKeyfollow = 60.0;  // 84 = C6, 72 = C5, 60 = C4
 float offsetNoteKeyfollowNoise = 60.0;  // 84 = C6, 72 = C5, 60 = C4
 float minPreNoiseNoteNumbr = 60.0;  // 84 = C6, 72 = C5, 60 = C4  4000s noise stops changing below about C4
@@ -165,7 +165,7 @@ const uint32_t updatedAudioSystemInterval = 1;  // milliseconds
 float freqOscFilterOctaveOffset  = 0.0;    // use 3 to divide FreqOscFilterN by 2^3 to allow modulation to go from -1 to +3/7 
 //float fOFOFactor = 1.0; 
 float maxFilterFreq = 20000; //12000.0; 
-float minFilterFreq = 65.4; // min note number 36
+float minFilterFreq = 65.4; // min note number 36 (C2)
 float minFilterPreNoiseFreq = 261.63; // middle C (C4)
 float maxDelayDamp = 3000.0; //TODO: find out correct value
 float maxDelayLevel = 0.15; //TODO: find out correct value
@@ -281,6 +281,7 @@ float BreathThreshOsc2 = 0.0;  	//65,16,0,127,
 float LevelOsc2 = 0;  	//65,17,0,127,
 filterMode_t ModeOscFilter1 = LP;  	//72,0,0,4,//LP HP BP NTC OFF
 float FreqOscFilter1  = 1046.5;    // C6  	//72,1,36,124,//Midi Note 36 to 124
+float FreqOscFilter1BModFactor  = 84.0; // Note number of Freq slider 36 to 124
 float QFactorOscFilter1 = 0.707;  	//72,2,5,127,"// 5=0.5, 127=12.7"
 float KeyFollowOscFilter1 = 12;  	//72,3,52,88,// -12 to +24 num semi tones
 float BreathModOscFilter1 = 0;  	//72,4,0,127,
@@ -293,6 +294,7 @@ float SweepTimeOscFilter1 = 0;  	//72,10,0,127,
 float BreathCurveOscFilter1 = 1.0;  	//72,11,0,127,  TODO: hook this up
 filterMode_t ModeOscFilter2 = LP;  	//73,0,0,4,//LP HP BP NTC OFF
 float FreqOscFilter2 = 1046.5;    // C6  	//73,1,36,124,//Midi Note 36 to 124
+float FreqOscFilter2BModFactor  = 84.0; // Note number of Freq slider 36 to 124
 float QFactorOscFilter2 = 0.707;  	//73,2,5,127,"// 5=0.5, 127=12.7"
 float KeyFollowOscFilter2 = 12;  	//73,3,52,88,// -12 to +24 num semi tones
 float BreathModOscFilter2 = 0;  	//73,4,0,127,
@@ -305,6 +307,7 @@ float SweepTimeOscFilter2 = 0;  	//73,10,0,127,
 float BreathCurveOscFilter2 = 1.0;  	//73,11,0,127, TODO: hook this up
 filterMode_t ModeNoiseFilter3 = LP;  	//74,0,0,4,//LP HP BP NTC OFF
 float FreqNoiseFilter3 = 1046.5;    // C6  	//74,1,36,124,//Midi Note 36 to 124
+float FreqNoiseFilter3BModFactor  = 84.0; // Note number of Freq slider 36 to 124
 float QFactorNoiseFilter3 = 1.0;  	//74,2,5,127,"// 5=0.5, 127=12.7"
 float KeyFollowNoiseFilter3 = 12;  	//74,3,52,88,// -12 to +24 num semi tones
 float BreathModNoiseFilter3 = 0;  	//74,4,0,127,
@@ -317,6 +320,7 @@ float SweepTimeNoiseFilter3 = 0;  	//74,10,0,127,
 float BreathCurveNoiseFilter3 = 1.0;  	//74,11,0,127, TODO: hook this up
 filterMode_t ModeNoiseFilter4 = LP;  	//75,0,0,4,//LP HP BP NTC OFF
 float FreqNoiseFilter4 = 1046.5;    // C6  	//75,1,36,124,//Midi Note 36 to 124
+float FreqNoiseFilter4BModFactor  = 84.0; // Note number of Freq slider 36 to 124
 float QFactorNoiseFilter4 = 2.5;  	//75,2,5,127,"// 5=0.5, 127=12.7"
 float QFactorFilter5 = .707;  	//75,2,5,127,"// 5=0.5, 127=12.7"
 float KeyFollowNoiseFilter4 = 12;  	//75,3,52,88,// -12 to +24 num semi tones
