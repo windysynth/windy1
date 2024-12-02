@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.72"};
+String verNum_str = {"0.0.73"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -281,7 +281,7 @@ float BreathThreshOsc2 = 0.0;  	//65,16,0,127,
 float LevelOsc2 = 0;  	//65,17,0,127,
 filterMode_t ModeOscFilter1 = LP;  	//72,0,0,4,//LP HP BP NTC OFF
 float FreqOscFilter1  = 1046.5;    // C6  	//72,1,36,124,//Midi Note 36 to 124
-float FreqOscFilter1BModFactor  = 84.0; // Note number of Freq slider 36 to 124
+float FreqOscFilter1BModFactor  = 1.0; // Freq slider 36 to 124 (when slider = 96 (c7), BModFactor is 1.0) 
 float QFactorOscFilter1 = 0.707;  	//72,2,5,127,"// 5=0.5, 127=12.7"
 float KeyFollowOscFilter1 = 12;  	//72,3,52,88,// -12 to +24 num semi tones
 float BreathModOscFilter1 = 0;  	//72,4,0,127,
@@ -292,9 +292,10 @@ float LfoThreshOscFilter1 = 0;  	//72,8,0,127,
 float SweepDepthOscFilter1 = 0;  	//72,9,0,127,
 float SweepTimeOscFilter1 = 0;  	//72,10,0,127,
 float BreathCurveOscFilter1 = 1.0;  	//72,11,0,127,  TODO: hook this up
+FilterCurveLines BreathOscFiltCurveLines1 = {0.0f, 1.0f, 1.0f};
 filterMode_t ModeOscFilter2 = LP;  	//73,0,0,4,//LP HP BP NTC OFF
 float FreqOscFilter2 = 1046.5;    // C6  	//73,1,36,124,//Midi Note 36 to 124
-float FreqOscFilter2BModFactor  = 84.0; // Note number of Freq slider 36 to 124
+float FreqOscFilter2BModFactor  = 1.0; // Note number of Freq slider 36 to 124
 float QFactorOscFilter2 = 0.707;  	//73,2,5,127,"// 5=0.5, 127=12.7"
 float KeyFollowOscFilter2 = 12;  	//73,3,52,88,// -12 to +24 num semi tones
 float BreathModOscFilter2 = 0;  	//73,4,0,127,
@@ -305,9 +306,10 @@ float LfoThreshOscFilter2 = 0;  	//73,8,0,127,
 float SweepDepthOscFilter2 = 0;  	//73,9,0,127,
 float SweepTimeOscFilter2 = 0;  	//73,10,0,127,
 float BreathCurveOscFilter2 = 1.0;  	//73,11,0,127, TODO: hook this up
+FilterCurveLines BreathOscFiltCurveLines2 = {0.0f, 1.0f, 1.0f};
 filterMode_t ModeNoiseFilter3 = LP;  	//74,0,0,4,//LP HP BP NTC OFF
 float FreqNoiseFilter3 = 1046.5;    // C6  	//74,1,36,124,//Midi Note 36 to 124
-float FreqNoiseFilter3BModFactor  = 84.0; // Note number of Freq slider 36 to 124
+float FreqNoiseFilter3BModFactor  = 1.0; // Note number of Freq slider 36 to 124
 float QFactorNoiseFilter3 = 1.0;  	//74,2,5,127,"// 5=0.5, 127=12.7"
 float KeyFollowNoiseFilter3 = 12;  	//74,3,52,88,// -12 to +24 num semi tones
 float BreathModNoiseFilter3 = 0;  	//74,4,0,127,
@@ -318,9 +320,10 @@ float LfoThreshNoiseFilter3 = 0;  	//74,8,0,127,
 float SweepDepthNoiseFilter3 = 0;  	//74,9,0,127,
 float SweepTimeNoiseFilter3 = 0;  	//74,10,0,127,
 float BreathCurveNoiseFilter3 = 1.0;  	//74,11,0,127, TODO: hook this up
+FilterCurveLines BreathNoiseFiltCurveLines3 = {0.0f, 1.0f, 1.0f};
 filterMode_t ModeNoiseFilter4 = LP;  	//75,0,0,4,//LP HP BP NTC OFF
 float FreqNoiseFilter4 = 1046.5;    // C6  	//75,1,36,124,//Midi Note 36 to 124
-float FreqNoiseFilter4BModFactor  = 84.0; // Note number of Freq slider 36 to 124
+float FreqNoiseFilter4BModFactor  = 1.0; // Note number of Freq slider 36 to 124
 float QFactorNoiseFilter4 = 2.5;  	//75,2,5,127,"// 5=0.5, 127=12.7"
 float QFactorFilter5 = .707;  	//75,2,5,127,"// 5=0.5, 127=12.7"
 float KeyFollowNoiseFilter4 = 12;  	//75,3,52,88,// -12 to +24 num semi tones
@@ -333,6 +336,7 @@ float LfoThreshNoiseFilter4 = 0;  	//75,8,0,127,
 float SweepDepthNoiseFilter4 = 0;  	//75,9,0,127,
 float SweepTimeNoiseFilter4 = 0;  	//75,10,0,127,
 float BreathCurveNoiseFilter4 = 1.0;  	//75,11,0,127, TODO: hook this up
+FilterCurveLines BreathNoiseFiltCurveLines4 = {0.0f, 1.0f, 1.0f};
 float KeyFollowPreNoiseFilter = 5;  // TODO: match 4000s
 float keyfollowFilterPreNoise = 1.0; 
 float FreqPreNoiseFilter = 3000.0; // TODO: match 4000s

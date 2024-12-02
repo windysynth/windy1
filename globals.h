@@ -274,6 +274,12 @@ extern float LfoThreshOscFilter1;  	//72,8,0,127,
 extern float SweepDepthOscFilter1;  	//72,9,0,127,
 extern float SweepTimeOscFilter1;  	//72,10,0,127,
 extern float BreathCurveOscFilter1;  	//72,11,0,127,  TODO: hook this up
+struct FilterCurveLines {
+    float midIntercept;
+    float loSlope;
+    float hiSlope;
+};
+extern FilterCurveLines BreathOscFiltCurveLines1;
 extern filterMode_t ModeOscFilter2;  	//73,0,0,4,//LP HP BP NTC OFF
 extern float FreqOscFilter2;    // C6  	//73,1,36,124,//Midi Note 36 to 124
 extern float FreqOscFilter2BModFactor; // Freq slider Note numeber 36 to 124
@@ -287,6 +293,7 @@ extern float LfoThreshOscFilter2;  	//73,8,0,127,
 extern float SweepDepthOscFilter2;  	//73,9,0,127,
 extern float SweepTimeOscFilter2;  	//73,10,0,127,
 extern float BreathCurveOscFilter2;  	//73,11,0,127, TODO: hook this up
+extern FilterCurveLines BreathOscFiltCurveLines2;
 extern filterMode_t ModeNoiseFilter3;  	//74,0,0,4,//LP HP BP NTC OFF
 extern float FreqNoiseFilter3;    // C6  	//74,1,36,124,//Midi Note 36 to 124
 extern float FreqNoiseFilter3BModFactor; // Freq slider Note numeber 36 to 124
@@ -300,6 +307,7 @@ extern float LfoThreshNoiseFilter3;  	//74,8,0,127,
 extern float SweepDepthNoiseFilter3;  	//74,9,0,127,
 extern float SweepTimeNoiseFilter3;  	//74,10,0,127,
 extern float BreathCurveNoiseFilter3;  	//74,11,0,127, TODO: hook this up
+extern FilterCurveLines BreathNoiseFiltCurveLines3;
 extern filterMode_t ModeNoiseFilter4;  	//75,0,0,4,//LP HP BP NTC OFF
 extern float FreqNoiseFilter4;    // C6  	//75,1,36,124,//Midi Note 36 to 124
 extern float FreqNoiseFilter4BModFactor; // Freq slider Note numeber 36 to 124
@@ -315,6 +323,7 @@ extern float LfoThreshNoiseFilter4;  	//75,8,0,127,
 extern float SweepDepthNoiseFilter4;  	//75,9,0,127,
 extern float SweepTimeNoiseFilter4;  	//75,10,0,127,
 extern float BreathCurveNoiseFilter4;  	//75,11,0,127, TODO: hook this up
+extern FilterCurveLines BreathNoiseFiltCurveLines4;
 extern float KeyFollowPreNoiseFilter;  // TODO: match 4000s
 extern float keyfollowFilterPreNoise; 
 extern float FreqPreNoiseFilter; // TODO: match 4000s
