@@ -130,7 +130,7 @@
 # arduino hex output files
 ######
 !*.hex
-
+!*.7z
 
 ####
 # ingore these
