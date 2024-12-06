@@ -1338,10 +1338,10 @@ float gen_filter_gamma(float input) {
 }
 
 
-FilterCurveLines gen_filter_curve_lines(float input) {
+CurveLines gen_filter_curve_lines(float input) {
     // generate piece-wise linear curve from:
     // loSlope, midIntercept (slope = 1), hiSlope
-    FilterCurveLines fcl = {0.0f, 1.0f, 1.0f}; // {midIntercept, loSlope, hiSlope}
+    CurveLines fcl = {0.0f, 1.0f, 1.0f}; // {midIntercept, loSlope, hiSlope}
     if (input >= 0.5f){
         fcl.midIntercept = 2.0f*input-1.0f;
         fcl.loSlope = 0.01f*exp(9.21f*input);
@@ -1354,9 +1354,33 @@ FilterCurveLines gen_filter_curve_lines(float input) {
     return fcl;
 }
 
-float piecewise_curve_func(float x, FilterCurveLines fcl){
+CurveLines gen_osc_curve_lines(float input) {
+    // generate piece-wise linear curve from:
+    // loSlope, midIntercept (slope = 1), hiSlope
+   // CurveLines fcl = {0.0f, 1.0f, 1.0f}; // {midIntercept, loSlope, hiSlope}
+    float skewed_input = input >= 0.6 ? 5.0f/4.0f*(input-1.0f)+1.0f : 5.0f/6.0f*input;
+    return gen_filter_curve_lines(skewed_input);
+/*
+    if (input >= 0.6f){
+        fcl.midIntercept = 2.0f*input-1.0f;
+        //fcl.midIntercept = 2.5f*input-1.5f;
+        fcl.loSlope = 0.01f*exp(9.21f*input);
+        fcl.hiSlope = 63.5f*exp(-8.3f*input);
+    } else {
+        skew = 5.0f/4.0f;
+        fcl.midIntercept = input - 0.5f;
+        //fcl.midIntercept = 1.5f*input - 0.9f;
+        fcl.loSlope = 0.2f*exp(3.219f*input);
+        fcl.hiSlope = 10.0f*exp(-4.6f*input);
+    }
+    return fcl;
+*/
+}
+
+
+float piecewise_curve_func(float x, CurveLines fcl){
     // m*x+b for lo mid and high
-    if ( fcl.midIntercept == 0.0f ) { return x;}
+    //if ( fcl.midIntercept == 0.0f ) { return x;}
     float loLine  = x*fcl.loSlope; 
     float midLine = x + fcl.midIntercept; 
     float hiLine  = fcl.hiSlope*(x - 1.0f) + 1.0f;
@@ -1662,7 +1686,8 @@ void processMIDI(bool midi_from_host_flag)
                         dc_breathOscFilter2_amp = piecewise_curve_func(data2f, BreathOscFiltCurveLines2);
                         dc_breathNoiseFilter3_amp = piecewise_curve_func(data2f, BreathNoiseFiltCurveLines3);
                         dc_breathNoiseFilter4_amp = piecewise_curve_func(data2f, BreathNoiseFiltCurveLines4);
-                        dc_breathNoise_amp = gamma_func(data2f,NoiseBreathCurve);
+                        //dc_breathNoise_amp = gamma_func(data2f,NoiseBreathCurve);
+                        dc_breathNoise_amp = piecewise_curve_func(data2f,NoiseBreathCurveLines);
                         if(BreathAttainOsc1 > 0.0)
                             dc_breathSweepOsc1.amplitude(BreathDepthOsc1*(1.0-limit(data2f/BreathAttainOsc1,1.0,-1.0)),
                                                         dc_breathSweepOscN_rampTime); // smoothing
@@ -1676,8 +1701,10 @@ void processMIDI(bool midi_from_host_flag)
 
                         if(note_is_on)
                         {
-                            dc_breathThreshOsc1_amp = gamma_func(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
-                            dc_breathThreshOsc2_amp = gamma_func(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
+                            //dc_breathThreshOsc1_amp = gamma_func(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
+                            //dc_breathThreshOsc2_amp = gamma_func(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
+                            dc_breathThreshOsc1_amp = piecewise_curve_func(thresh( data2f,BreathThreshOsc1), BreathOscCurveLines1);
+                            dc_breathThreshOsc2_amp = piecewise_curve_func(thresh( data2f,BreathThreshOsc2), BreathOscCurveLines2);
                             dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
                             dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
                             dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime);
@@ -1725,8 +1752,10 @@ void processMIDI(bool midi_from_host_flag)
             data2f = ((float)data2)* DIV127;
             if (lastBreathf <= 0.0f){ lastBreathf = data2f; } 
          // /* don't treat Note on Velocity as a Breath value
-            dc_breathThreshOsc1_amp = gamma_func(thresh( lastBreathf,BreathThreshOsc1), BreathCurveOsc1);
-            dc_breathThreshOsc2_amp = gamma_func(thresh( lastBreathf,BreathThreshOsc2), BreathCurveOsc2);
+            //dc_breathThreshOsc1_amp = gamma_func(thresh( lastBreathf,BreathThreshOsc1), BreathCurveOsc1);
+            //dc_breathThreshOsc2_amp = gamma_func(thresh( lastBreathf,BreathThreshOsc2), BreathCurveOsc2);
+            dc_breathThreshOsc1_amp = piecewise_curve_func(thresh( lastBreathf,BreathThreshOsc1), BreathOscCurveLines1);
+            dc_breathThreshOsc2_amp = piecewise_curve_func(thresh( lastBreathf,BreathThreshOsc2), BreathOscCurveLines2);
             dc_breathLfoFilter1_amp = lfoThresh(lastBreathf,LfoThreshOscFilter1,LfoDepthOscFilter1,LfoBreathOscFilter1);
             dc_breathLfoFilter2_amp = lfoThresh(lastBreathf,LfoThreshOscFilter2,LfoDepthOscFilter2,LfoBreathOscFilter2);
             dc_breathLfoFilter3_amp = lfoThresh(lastBreathf,LfoThreshNoiseFilter3,LfoDepthNoiseFilter3,LfoBreathNoiseFilter3);
@@ -1743,7 +1772,8 @@ void processMIDI(bool midi_from_host_flag)
             dc_breathOscFilter2_amp = piecewise_curve_func(lastBreathf, BreathOscFiltCurveLines2);
             dc_breathNoiseFilter3_amp = piecewise_curve_func(lastBreathf, BreathNoiseFiltCurveLines3);
             dc_breathNoiseFilter4_amp = piecewise_curve_func(lastBreathf, BreathNoiseFiltCurveLines4);
-            dc_breathNoise_amp = gamma_func(lastBreathf,NoiseBreathCurve);
+            // dc_breathNoise_amp = gamma_func(lastBreathf,NoiseBreathCurve);
+            dc_breathNoise_amp = piecewise_curve_func(lastBreathf,NoiseBreathCurveLines);
           //  */
             fMidiNoteNorm = ((float)data1)/128.0;
             fMidiNoteNorm_diff = abs( (float)(data1 - currentMidiNote));

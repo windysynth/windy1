@@ -28,7 +28,8 @@ void patchToSynthVariables(patch_t *patch) {
     SweepTimeOsc1 = sweepTimeOscCurve( (float)patch->nrpn_msb_osc1[CCSWEEPTIMEOSC1]*DIV127);  	//64,12,0,127,
     BreathDepthOsc1 = ((float)patch->nrpn_msb_osc1[CCBREATHDEPTHOSC1]-64.0)/64.0;  	//64,13,0,127,
     BreathAttainOsc1 = (float)patch->nrpn_msb_osc1[CCBREATHATTAINOSC1]*DIV127;  	//64,14,0,127,
-    BreathCurveOsc1 = gen_osc_gamma(((float)patch->nrpn_msb_osc1[CCBREATHCURVEOSC1])*DIV127);  	//64,15,0,127,
+    //BreathCurveOsc1 = gen_osc_gamma(((float)patch->nrpn_msb_osc1[CCBREATHCURVEOSC1])*DIV127);  	//64,15,0,127,
+    BreathOscCurveLines1 = gen_osc_curve_lines(((float)patch->nrpn_msb_osc1[CCBREATHCURVEOSC1])*DIV127);  	//64,15,0,127,
     BreathThreshOsc1 = (float)patch->nrpn_msb_osc1[CCBREATHTHRESHOSC1]*DIV127;  	//64,16,0,127,
     LevelOsc1 = (float)patch->nrpn_msb_osc1[CCLEVELOSC1]*DIV127;  		//64,17,0,127,
     OctOsc2 = (float)patch->nrpn_msb_osc2[CCOCTOSC2]-64.0;      //65,0,62,66,
@@ -45,7 +46,8 @@ void patchToSynthVariables(patch_t *patch) {
     SweepTimeOsc2 = sweepTimeOscCurve((float)patch->nrpn_msb_osc2[CCSWEEPTIMEOSC2]*DIV127);  	//65,12,0,127,
     BreathDepthOsc2 = ((float)patch->nrpn_msb_osc2[CCBREATHDEPTHOSC2]-64.0)/64.0;  	//65,13,0,127,
     BreathAttainOsc2 = (float)patch->nrpn_msb_osc2[CCBREATHATTAINOSC2]*DIV127;  	//65,14,0,127,
-    BreathCurveOsc2 = gen_osc_gamma(((float)patch->nrpn_msb_osc2[CCBREATHCURVEOSC2])*DIV127);  	//65,15,0,127,
+    //BreathCurveOsc2 = gen_osc_gamma(((float)patch->nrpn_msb_osc2[CCBREATHCURVEOSC2])*DIV127);  	//65,15,0,127,
+    BreathOscCurveLines1 = gen_osc_curve_lines(((float)patch->nrpn_msb_osc2[CCBREATHCURVEOSC2])*DIV127);  	//65,15,0,127,
     BreathThreshOsc2 = (float)patch->nrpn_msb_osc2[CCBREATHTHRESHOSC2]*DIV127;  	//65,16,0,127,
     LevelOsc2 = (float)patch->nrpn_msb_osc2[CCLEVELOSC2]*DIV127;  	//65,17,0,127,
     ModeOscFilter1 = (filterMode_t)patch->nrpn_msb_osc_filt1[CCMODEOSCFILTER1];  	//72,0,0,4,//LP HP BP NTC OFF
@@ -110,7 +112,8 @@ void patchToSynthVariables(patch_t *patch) {
     //BreathCurveNoiseFilter4 = gen_filter_gamma(((float)patch->nrpn_msb_noise_filt4[CCBREATHCURVENOISEFILTER4])*DIV127);  	//75,11,0,127,
     BreathNoiseFiltCurveLines4 = gen_filter_curve_lines(((float)patch->nrpn_msb_noise_filt4[CCBREATHCURVENOISEFILTER4])*DIV127); //75,11,0,127,
     NoiseTime = noiseTimeCurve((float)patch->nrpn_msb_noise[CCNOISETIME]*DIV127);  	//80,0,0,127,
-    NoiseBreathCurve = gen_noise_gamma(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV127);  	//80,1,0,127,
+    //NoiseBreathCurve = gen_noise_gamma(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV127);  	//80,1,0,127,
+    NoiseBreathCurveLines = gen_osc_curve_lines(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV127);  	//80,1,0,127,
     NoiseLevel = pow((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,.35)*maxNoiseLevel;  	//80,2,0,127,
     BendRange = (float)patch->nrpn_msb_common1[CCBENDRANGE];  	//81,0,0,12,// num semitones
     BendStep = (bool)patch->nrpn_msb_common1[CCBENDSTEP];  	//81,1,0,1,//0=off 1=on

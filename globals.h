@@ -238,7 +238,13 @@ extern float SweepDepthOsc1;  	//64,11,0,127,
 extern float SweepTimeOsc1;  	//64,12,0,127,
 extern float BreathDepthOsc1;  	//64,13,0,127, <64 start flat, >64 start sharp, -1.0 to +1.0
 extern float BreathAttainOsc1;  	//64,14,0,127,
+struct CurveLines {
+    float midIntercept;
+    float loSlope;
+    float hiSlope;
+};
 extern float BreathCurveOsc1;  	//64,15,0,127,
+extern CurveLines BreathOscCurveLines1;
 extern float BreathThreshOsc1;  	//64,16,0,127,
 extern float LevelOsc1;  		//64,17,0,127,
 extern float LevelOscN_HeadRoom;  		//64,17,0,127,
@@ -259,6 +265,7 @@ extern float SweepTimeOsc2;  	//65,12,0,127,
 extern float BreathDepthOsc2;  	//65,13,0,127,
 extern float BreathAttainOsc2;  	//65,14,0,127,
 extern float BreathCurveOsc2;  	//65,15,0,127, +63, -64, so 1+(x-64)*DIV64
+extern CurveLines BreathOscCurveLines2;
 extern float BreathThreshOsc2;  	//65,16,0,127,
 extern float LevelOsc2;  	//65,17,0,127,
 extern filterMode_t ModeOscFilter1;  	//72,0,0,4,//LP HP BP NTC OFF
@@ -274,12 +281,7 @@ extern float LfoThreshOscFilter1;  	//72,8,0,127,
 extern float SweepDepthOscFilter1;  	//72,9,0,127,
 extern float SweepTimeOscFilter1;  	//72,10,0,127,
 extern float BreathCurveOscFilter1;  	//72,11,0,127,  TODO: hook this up
-struct FilterCurveLines {
-    float midIntercept;
-    float loSlope;
-    float hiSlope;
-};
-extern FilterCurveLines BreathOscFiltCurveLines1;
+extern CurveLines BreathOscFiltCurveLines1;
 extern filterMode_t ModeOscFilter2;  	//73,0,0,4,//LP HP BP NTC OFF
 extern float FreqOscFilter2;    // C6  	//73,1,36,124,//Midi Note 36 to 124
 extern float FreqOscFilter2BModFactor; // Freq slider Note numeber 36 to 124
@@ -293,7 +295,7 @@ extern float LfoThreshOscFilter2;  	//73,8,0,127,
 extern float SweepDepthOscFilter2;  	//73,9,0,127,
 extern float SweepTimeOscFilter2;  	//73,10,0,127,
 extern float BreathCurveOscFilter2;  	//73,11,0,127, TODO: hook this up
-extern FilterCurveLines BreathOscFiltCurveLines2;
+extern CurveLines BreathOscFiltCurveLines2;
 extern filterMode_t ModeNoiseFilter3;  	//74,0,0,4,//LP HP BP NTC OFF
 extern float FreqNoiseFilter3;    // C6  	//74,1,36,124,//Midi Note 36 to 124
 extern float FreqNoiseFilter3BModFactor; // Freq slider Note numeber 36 to 124
@@ -307,7 +309,7 @@ extern float LfoThreshNoiseFilter3;  	//74,8,0,127,
 extern float SweepDepthNoiseFilter3;  	//74,9,0,127,
 extern float SweepTimeNoiseFilter3;  	//74,10,0,127,
 extern float BreathCurveNoiseFilter3;  	//74,11,0,127, TODO: hook this up
-extern FilterCurveLines BreathNoiseFiltCurveLines3;
+extern CurveLines BreathNoiseFiltCurveLines3;
 extern filterMode_t ModeNoiseFilter4;  	//75,0,0,4,//LP HP BP NTC OFF
 extern float FreqNoiseFilter4;    // C6  	//75,1,36,124,//Midi Note 36 to 124
 extern float FreqNoiseFilter4BModFactor; // Freq slider Note numeber 36 to 124
@@ -323,13 +325,14 @@ extern float LfoThreshNoiseFilter4;  	//75,8,0,127,
 extern float SweepDepthNoiseFilter4;  	//75,9,0,127,
 extern float SweepTimeNoiseFilter4;  	//75,10,0,127,
 extern float BreathCurveNoiseFilter4;  	//75,11,0,127, TODO: hook this up
-extern FilterCurveLines BreathNoiseFiltCurveLines4;
+extern CurveLines BreathNoiseFiltCurveLines4;
 extern float KeyFollowPreNoiseFilter;  // TODO: match 4000s
 extern float keyfollowFilterPreNoise; 
 extern float FreqPreNoiseFilter; // TODO: match 4000s
 extern float NoiseTime;  	//80,0,0,127,
 extern float TimeNoiseAmp;  	//80,0,0,127,
 extern float NoiseBreathCurve;  	//80,1,0,127,
+extern CurveLines NoiseBreathCurveLines;
 extern float NoiseLevel;  	//80,2,0,127,
 extern float BendRange;  	//81,0,0,12,// num semitones
 extern bool BendStep;  	//81,1,0,1,//0=off 1=on
