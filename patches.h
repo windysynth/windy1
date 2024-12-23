@@ -194,6 +194,123 @@ typedef struct __attribute__((packed)) Patch{
     uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH];   // 5
 } patch_t;
 
+void patchToOctOsc1(patch_t *patch); //64,0,62,66,
+void patchToSemiOsc1(patch_t *patch); //64,1,52,76,
+void patchToFineOsc1(patch_t *patch); //64,2,14,114, -50 to +50 cents
+void patchToBeatOsc1(patch_t *patch);  	//64,3,0,127,
+void patchToSawOsc1(patch_t *patch); 	//64,5,0,127,
+void patchToTriOsc1(patch_t *patch);	//64,6,0,127,
+void patchToPulseOsc1(patch_t *patch); //64,7,0,127,
+void patchToPwOsc1(patch_t *patch); //64,8,0,127,  GUI 0 = 50%
+void patchToPwmFreqOsc1(patch_t *patch);  	//64,9,0,127,
+void patchToPwmDepthOsc1(patch_t *patch); //64,10,0,127,  
+void patchToSweepDepthOsc1(patch_t *patch); //64,11,0,127,
+void patchToSweepTimeOsc1(patch_t *patch); //64,12,0,127,
+void patchToBreathDepthOsc1(patch_t *patch);	//64,13,0,127,
+void patchToBreathAttainOsc1(patch_t *patch); //64,14,0,127,
+void patchToBreathOscCurveLines1(patch_t *patch);	//64,15,0,127,
+void patchToBreathThreshOsc1(patch_t *patch); //64,16,0,127,
+void patchToLevelOsc1(patch_t *patch); //64,17,0,127,
+void patchToOctOsc2(patch_t *patch);  //65,0,62,66,
+void patchToSemiOsc2(patch_t *patch); //64,1,52,76,
+void patchToFineOsc2(patch_t *patch); //64,2,14,114, -50 to +50 cents
+void patchToBeatOsc2(patch_t *patch);  	//64,3,0,127,
+void patchToSawOsc2(patch_t *patch); 	//64,5,0,127,
+void patchToTriOsc2(patch_t *patch);	//64,6,0,127,
+void patchToPulseOsc2(patch_t *patch); //64,7,0,127,
+void patchToPwOsc2(patch_t *patch); //64,8,0,127,  GUI 0 = 50%
+void patchToPwmFreqOsc2(patch_t *patch);  	//64,9,0,127,
+void patchToPwmDepthOsc2(patch_t *patch); //64,10,0,127,  
+void patchToSweepDepthOsc2(patch_t *patch); //64,11,0,127,
+void patchToSweepTimeOsc2(patch_t *patch); //64,12,0,127,
+void patchToBreathDepthOsc2(patch_t *patch);	//64,13,0,127,
+void patchToBreathAttainOsc2(patch_t *patch); //64,14,0,127,
+void patchToBreathOscCurveLines2(patch_t *patch);	//64,15,0,127,
+void patchToBreathThreshOsc2(patch_t *patch); //64,16,0,127,
+void patchToLevelOsc2(patch_t *patch); //64,17,0,127,
+void patchToModeOscFilter1(patch_t *patch); //72,0,0,4,//LP HP BP NTC OFF
+void patchToFreqOscFilter1(patch_t *patch);
+void patchToQFactorOscFilter1(patch_t *patch);	//72,2,5,127,"// 5=0.5, 127=12.7"
+void patchToKeyFollowOscFilter1(patch_t *patch); //72,3,52,88,// -12 to +24 num semi tones
+void patchToBreathModOscFilter1(patch_t *patch);	//72,4,0,127,
+void patchToLfoFreqOscFilter1(patch_t *patch);	//72,5,0,127,
+void patchToLfoDepthOscFilter1(patch_t *patch); 	//72,6,0,127,
+void patchToLfoBreathOscFilter1(patch_t *patch);  	//72,7,0,127,
+void patchToLfoThreshOscFilter1(patch_t *patch);	//72,8,0,127,
+void patchToSweepDepthOscFilter1(patch_t *patch);	//72,9,0,127,
+void patchToSweepTimeOscFilter1(patch_t *patch); //72,10,0,127,
+void patchToBreathOscFiltCurveLines1(patch_t *patch);  //72,11,0,127;
+void patchToModeOscFilter2(patch_t *patch); //73,0,0,4,//LP HP BP NTC OFF
+void patchToFreqOscFilter2(patch_t *patch);
+void patchToQFactorOscFilter2(patch_t *patch);	//72,2,5,127,"// 5=0.5, 127=12.7"
+void patchToKeyFollowOscFilter2(patch_t *patch); //72,3,52,88,// -12 to +24 num semi tones
+void patchToBreathModOscFilter2(patch_t *patch);	//72,4,0,127,
+void patchToLfoFreqOscFilter2(patch_t *patch);	//72,5,0,127,
+void patchToLfoDepthOscFilter2(patch_t *patch); 	//72,6,0,127,
+void patchToLfoBreathOscFilter2(patch_t *patch);  	//72,7,0,127,
+void patchToLfoThreshOscFilter2(patch_t *patch);	//72,8,0,127,
+void patchToSweepDepthOscFilter2(patch_t *patch);	//72,9,0,127,
+void patchToSweepTimeOscFilter2(patch_t *patch); //72,10,0,127,
+void patchToBreathOscFiltCurveLines2(patch_t *patch);  //72,11,0,127,
+void patchToModeNoiseFilter3(patch_t *patch); //74,0,0,4,//LP HP BP NTC OFF
+void patchToFreqNoiseFilter3(patch_t *patch);
+void patchToQFactorNoiseFilter3(patch_t *patch); //74,2,5,127,"// 5=0.5, 127=12.7"
+void patchToKeyFollowNoiseFilter3(patch_t *patch); //74,3,52,88,// -12 to +24 num semitones
+void patchToBreathModNoiseFilter3(patch_t *patch);	//74,4,0,127,
+void patchToLfoFreqNoiseFilter3(patch_t *patch);  	//74,5,0,127,
+void patchToLfoDepthNoiseFilter3(patch_t *patch);  	//74,6,0,127,
+void patchToLfoBreathNoiseFilter3(patch_t *patch);  	//74,7,0,127,
+void patchToLfoThreshNoiseFilter3(patch_t *patch);  	//74,8,0,127,
+void patchToSweepDepthNoiseFilter3(patch_t *patch);  	//74,9,0,127,
+void patchToSweepTimeNoiseFilter3(patch_t *patch);  	//74,10,0,127,
+void patchToBreathNoiseFiltCurveLines3(patch_t *patch);
+void patchToModeNoiseFilter4(patch_t *patch); //74,0,0,4,//LP HP BP NTC OFF
+void patchToFreqNoiseFilter4(patch_t *patch); 
+void patchToQFactorNoiseFilter4(patch_t *patch); //74,2,5,127,"// 5=0.5, 127=12.7"
+void patchToKeyFollowNoiseFilter4(patch_t *patch); //74,3,52,88,// -12 to +24 num semitones
+void patchToBreathModNoiseFilter4(patch_t *patch);	//74,4,0,127,
+void patchToLfoFreqNoiseFilter4(patch_t *patch);  	//74,5,0,127,
+void patchToLfoDepthNoiseFilter4(patch_t *patch);  	//74,6,0,127,
+void patchToLfoBreathNoiseFilter4(patch_t *patch);  	//74,7,0,127,
+void patchToLfoThreshNoiseFilter4(patch_t *patch);  	//74,8,0,127,
+void patchToSweepDepthNoiseFilter4(patch_t *patch);  	//74,9,0,127,
+void patchToSweepTimeNoiseFilter4(patch_t *patch);  	//74,10,0,127,
+void patchToBreathNoiseFiltCurveLines4(patch_t *patch);  //74,11,0,127,
+void patchToNoiseTime(patch_t *patch); //80,0,0,127,
+void patchToNoiseBreathCurveLines(patch_t *patch); //80,1,0,127,
+void patchToNoiseLevel(patch_t *patch);	//80,2,0,127,
+void patchToBendRange(patch_t *patch); //81,0,0,12,// num semitones
+void patchToBendStep(patch_t *patch);  	//81,1,0,1,//0=off 1=on
+void patchToLinkOscFilters(patch_t *patch); //81,3,1,2,//1=Link on 2= Link off
+void patchToLinkNoiseFilters(patch_t *patch); //81,4,1,2,
+void patchToFormant(patch_t *patch); //81,5,0,2,//0=off 1=W.Wind 2=String
+void patchToXFade(patch_t *patch); //81,6,0,1,//0=off 1=on
+void patchToKeyTriggerSingle(patch_t *patch); //81,7,0,1,//0=Multi 1=Single
+void patchTos81_8(patch_t *patch); //81,8,0,1,// ? 
+void patchToChorusOn(patch_t *patch);  //81,9,0,1,// Chorus on off
+void patchToVibratoAmp(patch_t *patch); //88,0,0,127, (bite tremelo amount)
+void patchToAmpLevel(patch_t *patch); //88,1,0,127,
+void patchToOctButtonLevel(patch_t *patch); //88,2,0,127,
+void patchToEffectsChorusDelay1(patch_t *patch);   
+void patchToEffectsChorusMod1(patch_t *patch); //112,1,0,127, (-50% to +50%)
+void patchToEffectsChorusWet1(patch_t *patch); //112,2,0,127, neg vals are phase inverted
+void patchToEffectsChorusDelay2(patch_t *patch); //112,3,0,127,
+void patchToEffectsChorusMod2(patch_t *patch); //112,4,0,127,
+void patchToEffectsChorusWet2(patch_t *patch); //112,5,0,127,
+void patchToEffectsChorusFeedback(patch_t *patch); //112,6,0,127,
+void patchToEffectsChorusLfoFreq(patch_t *patch); //112,7,0,127,
+void patchToEffectsChorusDryLevel(patch_t *patch); //112,8,0,127,
+void patchToEffectsDelayTimeL(patch_t *patch);	//113,0,0,127, 0 to 1270 ms
+void patchToEffectsDelayFeedback(patch_t *patch); //113,1,0,127,
+void patchToEffectsDelayDamp(patch_t *patch); //113,2,0,127,
+void patchToEffectsDelayLevel(patch_t *patch);  //113,3,0,127,
+void patchToEffectsDelaySpare(patch_t *patch); //113,3,0,127,
+void patchToEffectsReverbSpare(patch_t *patch); //114,1,0,127,
+void patchToEffectsReverbLevel(patch_t *patch); //114,1,0,127,
+void patchToEffectsReverbDenseEarly(patch_t *patch); //114,2,0,127, (using this for roomsize)
+void patchToEffectsReverbTime(patch_t *patch); //114,3,10,50,//1000 to 5000 ms
+void patchToEffectsReverbDamp(patch_t *patch);  	//114,4,54,74,//-10 to +10
+
 void patchToSynthVariables(patch_t *patch);
 void printCurveMidiData();
 void printPatchValues();

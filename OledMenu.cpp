@@ -137,6 +137,7 @@ void OledMenu::displayMenu() {
         display.print("  ");
         getText(outBuf, 0);
         display.println(outBuf);
+        display.setCursor(0,18);
         display.println("          ");
         display.println("          ");
         display.println("          ");

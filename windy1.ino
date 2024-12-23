@@ -1678,10 +1678,6 @@ void processMIDI(bool midi_from_host_flag)
                         dc_breathLfoFilter2.amplitude(dc_breathLfoFilter2_amp,dc_breathLfoFilter_rampTime);
                         dc_breathLfoFilter3.amplitude(dc_breathLfoFilter3_amp,dc_breathLfoFilter_rampTime);
                         dc_breathLfoFilter4.amplitude(dc_breathLfoFilter4_amp,dc_breathLfoFilter_rampTime);
-                        //dc_breathOscFilter1_amp = gamma_func(data2f, BreathCurveOscFilter1);
-                        //dc_breathOscFilter2_amp = gamma_func(data2f, BreathCurveOscFilter2);
-                        //dc_breathNoiseFilter3_amp = gamma_func(data2f, BreathCurveNoiseFilter3);
-                        //dc_breathNoiseFilter4_amp = gamma_func(data2f, BreathCurveNoiseFilter4);
                         dc_breathOscFilter1_amp = piecewise_curve_func(data2f, BreathOscFiltCurveLines1);
                         dc_breathOscFilter2_amp = piecewise_curve_func(data2f, BreathOscFiltCurveLines2);
                         dc_breathNoiseFilter3_amp = piecewise_curve_func(data2f, BreathNoiseFiltCurveLines3);
@@ -1704,29 +1700,52 @@ void processMIDI(bool midi_from_host_flag)
                             //dc_breathThreshOsc1_amp = gamma_func(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
                             //dc_breathThreshOsc2_amp = gamma_func(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
                             dc_breathThreshOsc1_amp = piecewise_curve_func(thresh( data2f,BreathThreshOsc1), BreathOscCurveLines1);
+                            float dynoFactor = 40.0f;
+                            float dynoIntercept = 100.0f;
+                            float rampTimeDynOscOn1 = limit((dc_breathThreshOsc1_amp-lastBreathf)
+                                                        *dynoIntercept,dynoFactor,dc_breathThreshOscN_rampTime); 
                             dc_breathThreshOsc2_amp = piecewise_curve_func(thresh( data2f,BreathThreshOsc2), BreathOscCurveLines2);
-                            dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
-                            dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
+                            float rampTimeDynOscOn2 = limit((dc_breathThreshOsc2_amp-lastBreathf)
+                                                        *dynoIntercept,dynoFactor,dc_breathThreshOscN_rampTime); 
+                            //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
+                            //dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
+                            dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOscOn1);
+                            dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOscOn2);      
                             dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime);
                             dc_breathOscFilter2.amplitude(dc_breathOscFilter2_amp,dc_breathFilterN_rampTime);
                             dc_breathNoiseFilter3.amplitude(dc_breathNoiseFilter3_amp,dc_breathFilterN_rampTime);
                             dc_breathNoiseFilter4.amplitude(dc_breathNoiseFilter4_amp,dc_breathFilterN_rampTime);
                             if( NoiseLevel > 0 )
                             {
-                                dc_breathNoise.amplitude(dc_breathNoise_amp,dc_breathNoise_rampTime);
+                                float dynoFactor = 40.0f;
+                                float dynoIntercept = 100.0f;
+                                float rampTimeDynNoiseOn = limit((dc_breathNoise_amp-lastBreathf)
+                                                            *dynoIntercept,dynoFactor,dc_breathThreshOscN_rampTime); 
+                                //dc_breathNoise.amplitude(dc_breathNoise_amp,dc_breathNoise_rampTime);
+                                dc_breathNoise.amplitude(dc_breathNoise_amp,rampTimeDynNoiseOn);
                             }
                         }
                         else
                         {
                             dc_breathThreshOsc1_amp = 0;
                             dc_breathThreshOsc2_amp = 0;
-                            dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
-                            dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
+                            // TODO: make rampOffTime slower for BC higher values
+                            float dynoFactor = 40.0f;
+                            float dynoIntercept = 100.0f;
+                            float rampTimeDynOscOn1 = limit((lastBreathf-dc_breathThreshOsc1_amp)
+                                                    *dynoIntercept,dynoFactor,dc_breathOff_rampTime); 
+                            dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOscOn1);
+                            float rampTimeDynOscOn2 = limit((lastBreathf-dc_breathThreshOsc1_amp)
+                                                    *dynoIntercept,dynoFactor,dc_breathOff_rampTime); 
+                            dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOscOn2);      
                             dc_breathOscFilter1.amplitude(0,dc_breathOff_rampTime);
                             dc_breathOscFilter2.amplitude(0,dc_breathOff_rampTime);
                             dc_breathNoiseFilter3.amplitude(0,dc_breathOff_rampTime);
                             dc_breathNoiseFilter4.amplitude(0,dc_breathOff_rampTime);
-                            dc_breathNoise.amplitude(0,dc_breathOff_rampTime);
+                            float rampTimeDynNoiseOn = limit((lastBreathf-dc_breathNoise_amp)
+                                                        *dynoIntercept,dynoFactor,dc_breathThreshOscN_rampTime); 
+                            //dc_breathNoise.amplitude(0,dc_breathOff_rampTime);
+                            dc_breathNoise.amplitude(0,rampTimeDynNoiseOn);
                         }
                         break;
                     }
@@ -1751,9 +1770,7 @@ void processMIDI(bool midi_from_host_flag)
           //  TODO: create amplitude transition between legato notes
             data2f = ((float)data2)* DIV127;
             if (lastBreathf <= 0.0f){ lastBreathf = data2f; } 
-         // /* don't treat Note on Velocity as a Breath value
-            //dc_breathThreshOsc1_amp = gamma_func(thresh( lastBreathf,BreathThreshOsc1), BreathCurveOsc1);
-            //dc_breathThreshOsc2_amp = gamma_func(thresh( lastBreathf,BreathThreshOsc2), BreathCurveOsc2);
+            //  Only treat Note on Velocity as a Breath value if lastBreathf was zero
             dc_breathThreshOsc1_amp = piecewise_curve_func(thresh( lastBreathf,BreathThreshOsc1), BreathOscCurveLines1);
             dc_breathThreshOsc2_amp = piecewise_curve_func(thresh( lastBreathf,BreathThreshOsc2), BreathOscCurveLines2);
             dc_breathLfoFilter1_amp = lfoThresh(lastBreathf,LfoThreshOscFilter1,LfoDepthOscFilter1,LfoBreathOscFilter1);
@@ -1764,17 +1781,11 @@ void processMIDI(bool midi_from_host_flag)
             dc_breathLfoFilter2.amplitude(dc_breathLfoFilter2_amp,dc_breathLfoFilter_rampTime);
             dc_breathLfoFilter3.amplitude(dc_breathLfoFilter3_amp,dc_breathLfoFilter_rampTime);
             dc_breathLfoFilter4.amplitude(dc_breathLfoFilter4_amp,dc_breathLfoFilter_rampTime);
-            //dc_breathOscFilter1_amp = gamma_func(lastBreathf, BreathCurveOscFilter1);
-            //dc_breathOscFilter2_amp = gamma_func(lastBreathf, BreathCurveOscFilter2);
-            //dc_breathNoiseFilter3_amp = gamma_func(lastBreathf, BreathCurveNoiseFilter3);
-            //dc_breathNoiseFilter4_amp = gamma_func(lastBreathf, BreathCurveNoiseFilter4);
             dc_breathOscFilter1_amp = piecewise_curve_func(lastBreathf, BreathOscFiltCurveLines1);
             dc_breathOscFilter2_amp = piecewise_curve_func(lastBreathf, BreathOscFiltCurveLines2);
             dc_breathNoiseFilter3_amp = piecewise_curve_func(lastBreathf, BreathNoiseFiltCurveLines3);
             dc_breathNoiseFilter4_amp = piecewise_curve_func(lastBreathf, BreathNoiseFiltCurveLines4);
-            // dc_breathNoise_amp = gamma_func(lastBreathf,NoiseBreathCurve);
             dc_breathNoise_amp = piecewise_curve_func(lastBreathf,NoiseBreathCurveLines);
-          //  */
             fMidiNoteNorm = ((float)data1)/128.0;
             fMidiNoteNorm_diff = abs( (float)(data1 - currentMidiNote));
             if(note_is_on) // legato 
@@ -1795,14 +1806,30 @@ void processMIDI(bool midi_from_host_flag)
             if(!note_is_on || !KeyTriggerSingle)
             {
                 // non-legato section uses shorter rampTimnes
-                float rampTimeShortening = 0.82;
-                dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);
-                dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);      
+                float rampTimeShortening = 0.82; 
+                float dynoFactor = 40.0f;
+                float dynoIntercept = 100.0f;
+                // lower values of lastBreath get extended rampTime for breathThreshOsc<N>.amplitiude
+                // (1.0-lastBreathf)*rampTimeExtensionFactor;
+                //float rampTimeDynOscN = limit((dc_breathThreshOsc1_amp-lastBreathf)*dynoIntercept,dc_breathThreshOscN_rampTime,dynoFactor); 
+                float rampTimeDynOsc1 = limit((dc_breathThreshOsc1_amp-lastBreathf)*dynoIntercept,dynoFactor,dc_breathThreshOscN_rampTime); 
+                float rampTimeDynOsc2 = limit((dc_breathThreshOsc2_amp-lastBreathf)*dynoIntercept,dynoFactor,dc_breathThreshOscN_rampTime); 
+                //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);
+                //dc_breathThreshOsc2.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);
+                dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOsc1);      
+                dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOsc2);      
                 dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime*rampTimeShortening);
                 dc_breathOscFilter2.amplitude(dc_breathOscFilter2_amp,dc_breathFilterN_rampTime*rampTimeShortening);
                 dc_breathNoiseFilter3.amplitude(dc_breathNoiseFilter3_amp,dc_breathFilterN_rampTime*rampTimeShortening);
                 dc_breathNoiseFilter4.amplitude(dc_breathNoiseFilter4_amp,dc_breathFilterN_rampTime*rampTimeShortening);
-                if( NoiseLevel > 0) { dc_breathNoise.amplitude(dc_breathNoise_amp,dc_breathNoise_rampTime*rampTimeShortening); }
+                if( NoiseLevel > 0) { 
+                    float dynoFactor = 40.0f;
+                    float dynoIntercept = 100.0f;
+                    float rampTimeDynNoiseOn = limit((dc_breathNoise_amp-lastBreathf)
+                                              *dynoIntercept,dynoFactor,dc_breathThreshOscN_rampTime); 
+                    //dc_breathNoise.amplitude(dc_breathNoise_amp,dc_breathNoise_rampTime*rampTimeShortening); 
+                    dc_breathNoise.amplitude(dc_breathNoise_amp,rampTimeDynNoiseOn); 
+                }
                 if(BreathAttainOsc1 > 0.0) {
                     dc_breathSweepOsc1.amplitude(BreathDepthOsc1*(1.0-limit(lastBreathf/BreathAttainOsc1,1.0,-1.0)),
                                                 dc_breathSweepOscN_rampTime*rampTimeShortening); 

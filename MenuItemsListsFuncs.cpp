@@ -54,7 +54,7 @@ bool volAdjustFun() {
     return true;
  }
   display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  //display.display(); // refresh display
   Serial8.println(F("volAdjustFun: goto TopMenu"));
   //myMenu.setCurrentMenu(&listTopMenu);
   gotoTopMenu();
@@ -96,7 +96,7 @@ bool patchSelectFun() {
     return true;
  }
   display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  //display.display(); // refresh display
   Serial8.println(F("patchSelectFun: goto TopMenu"));
   //myMenu.setCurrentMenu(&listTopMenu);
   gotoTopMenu();
@@ -176,7 +176,9 @@ bool delayTimeLFun(){
      int delayTimeTemp = current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME];
      delayTimeTemp += myMenu.updateLeafValue;
      current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME] = std::clamp(delayTimeTemp,0, 127);
-     patchToSynthVariables(&current_patch);
+     patchToEffectsDelayTimeL(&current_patch);
+     //preUpdateSynthVariablesFlag = true;
+     updateSynthVariablesFlag = true;
      sprintf(myMenu.str_oledbuf,"  %04d    ", 10*current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME]);
      return true;
  }
@@ -282,71 +284,292 @@ MenuItem PROGMEM patchOsc1Menu[18] = {
 MenuItem PROGMEM octOsc1Menu[1] = {
     { "OctOsc1:\n " , octOsc1Fun   }  // TODO: 
 };
-bool octOsc1Fun(){ return goUpOneMenu(); }
+bool octOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int octOsc1Temp = current_patch.nrpn_msb_osc1[CCOCTOSC1];
+     octOsc1Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCOCTOSC1] = std::clamp(octOsc1Temp,62, 66); // -2 to +2
+     patchToOctOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCOCTOSC1]-64);
+     return true;
+ }
+ Serial8.println(F("octOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM semiOsc1Menu[1] = {
     { "SemiOs1:\n " , semiOsc1Fun   }
 };
-bool semiOsc1Fun(){ return goUpOneMenu(); }
+bool semiOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int semiOsc1Temp = current_patch.nrpn_msb_osc1[CCSEMIOSC1];
+     semiOsc1Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCSEMIOSC1] = std::clamp(semiOsc1Temp, 52, 76); // -12 to +12
+     patchToSemiOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSEMIOSC1]-64);
+     return true;
+ }
+ Serial8.println(F("semiOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM centsOsc1Menu[1] = {
     { "CentOs1:\n " , centsOsc1Fun   }
 };
-bool centsOsc1Fun(){ return goUpOneMenu(); }
+bool centsOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int centsOsc1Temp = current_patch.nrpn_msb_osc1[CCFINEOSC1];
+     centsOsc1Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCFINEOSC1] = std::clamp(centsOsc1Temp,14, 114);
+     patchToFineOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCFINEOSC1]-64);
+     return true;
+ }
+ Serial8.println(F("centsOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM beatOsc1Menu[1] = {
     { "BeatOs1:\n " , beatOsc1Fun   }
 };
-bool beatOsc1Fun(){ return goUpOneMenu(); }
+bool beatOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int beatOsc1Temp = current_patch.nrpn_msb_osc1[CCBEATOSC1];
+     beatOsc1Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCBEATOSC1] = std::clamp(beatOsc1Temp,0, 127);
+     patchToBeatOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBEATOSC1]-64);
+     return true;
+ }
+ Serial8.println(F("centsOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM sawOsc1Menu[1] = {
     { "SawOsc1:\n " , sawOsc1Fun   }
 };
-bool sawOsc1Fun(){ return goUpOneMenu(); }
+bool sawOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int sawOsc1Temp = current_patch.nrpn_msb_osc1[CCSAWOSC1];
+     sawOsc1Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCSAWOSC1] = std::clamp(sawOsc1Temp,0, 127);
+     patchToSawOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSAWOSC1]);
+     return true;
+ }
+ Serial8.println(F("sawOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM triOsc1Menu[1] = {
     { "TriOsc1:\n " , triOsc1Fun   }
 };
-bool triOsc1Fun(){ return goUpOneMenu(); }
+bool triOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int triOsc1Temp = current_patch.nrpn_msb_osc1[CCTRIOSC1];
+     triOsc1Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCTRIOSC1] = std::clamp(triOsc1Temp,0, 127);
+     patchToTriOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCTRIOSC1]);
+     return true;
+ }
+ Serial8.println(F("triOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM pulesOsc1Menu[1] = {
     { "PlsOsc1:\n " , pulseOsc1Fun   }
 };
-bool pulseOsc1Fun(){ return goUpOneMenu(); }
+bool pulseOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int pulseOsc1Temp = current_patch.nrpn_msb_osc1[CCPULSEOSC1];
+     pulseOsc1Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCPULSEOSC1] = std::clamp(pulseOsc1Temp,0, 127);
+     patchToPulseOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPULSEOSC1]);
+     return true;
+ }
+ Serial8.println(F("pulseOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM PWOsc1Menu[1] = {
     { "PW Osc1:\n " , PWOsc1Fun   }
 };
-bool PWOsc1Fun(){ return goUpOneMenu(); }
+bool PWOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc1[CCPWOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCPWOSC1] = std::clamp(Temp,0, 127);
+     patchToPwOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWOSC1]);
+     return true;
+ }
+ Serial8.println(F("PWOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM pwmFreqOsc1Menu[1] = {
     { "PwmFOs1:\n " , pwmFreqOsc1Fun   }
 };
-bool pwmFreqOsc1Fun(){ return goUpOneMenu(); }
+bool pwmFreqOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc1[CCPWMFREQOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCPWMFREQOSC1] = std::clamp(Temp,0, 127);
+     patchToPwmFreqOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWMFREQOSC1]);
+     return true;
+ }
+ Serial8.println(F("pwmFreqOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM pwmDepthOsc1Menu[1] = {
     { "PwmDOs1:\n " , pwmDepthOsc1Fun   }
 };
-bool pwmDepthOsc1Fun(){ return goUpOneMenu(); }
+bool pwmDepthOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc1[CCPWMDEPTHOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCPWMDEPTHOSC1] = std::clamp(Temp,0, 127);
+     patchToPwmDepthOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWMDEPTHOSC1]);
+     return true;
+ }
+ Serial8.println(F("pwmFreqOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM sweepTimeOsc1Menu[1] = {
     { "SwpTOs1:\n " , sweepTimeOsc1Fun   }
 };
-bool sweepTimeOsc1Fun(){ return goUpOneMenu(); }
+bool sweepTimeOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc1[CCSWEEPTIMEOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCSWEEPTIMEOSC1] = std::clamp(Temp,0, 127);
+     patchToSweepTimeOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSWEEPTIMEOSC1]);
+     return true;
+ }
+ Serial8.println(F("sweepTimeOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM sweepDepthOsc1Menu[1] = {
     { "SwpDOs1:\n " , sweepDepthOsc1Fun   }
 };
-bool sweepDepthOsc1Fun(){ return goUpOneMenu(); }
+bool sweepDepthOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc1[CCSWEEPDEPTHOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCSWEEPDEPTHOSC1] = std::clamp(Temp,0, 127);
+     patchToSweepDepthOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSWEEPDEPTHOSC1]-64);
+     return true;
+ }
+ Serial8.println(F("sweepdepthOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM breathAttainOsc1Menu[1] = {
     { "BAtnOs1:\n " , breathAttainOsc1Fun   }
 };
-bool breathAttainOsc1Fun(){ return goUpOneMenu(); }
+bool breathAttainOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc1[CCBREATHATTAINOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCBREATHATTAINOSC1] = std::clamp(Temp,0, 127);
+     patchToBreathAttainOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHATTAINOSC1]);
+     return true;
+ }
+ Serial8.println(F("breathAttainOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM breathDepthOsc1Menu[1] = {
     { "BDptOs1:\n " , breathDepthOsc1Fun   }
 };
-bool breathDepthOsc1Fun(){ return goUpOneMenu(); }
+bool breathDepthOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc1[CCBREATHDEPTHOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCBREATHDEPTHOSC1] = std::clamp(Temp,0, 127);
+     patchToBreathDepthOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHDEPTHOSC1]-64);
+     return true;
+ }
+ Serial8.println(F("breathDepthOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM breathThresholdOsc1Menu[1] = {
     { "BthrOs1:\n " , breathThresholdOsc1Fun   }
 };
-bool breathThresholdOsc1Fun(){ return goUpOneMenu(); }
+bool breathThresholdOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc1[CCBREATHTHRESHOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCBREATHTHRESHOSC1] = std::clamp(Temp,0, 127);
+     patchToBreathThreshOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHTHRESHOSC1]);
+     return true;
+ }
+ Serial8.println(F("breathAttainOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM breathCurveOsc1Menu[1] = {
     { "BCrvOs1:\n " , breathCurveOsc1Fun   }
 };
-bool breathCurveOsc1Fun(){ return goUpOneMenu(); }
+bool breathCurveOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc1[CCBREATHCURVEOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCBREATHCURVEOSC1] = std::clamp(Temp,0, 127);
+     patchToBreathOscCurveLines1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHCURVEOSC1]);
+     return true;
+ }
+ Serial8.println(F("breathAttainOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM levelOsc1Menu[1] = {
     { "LevOsc1:\n " , levelOsc1Fun   }
 };
-bool levelOsc1Fun(){ return goUpOneMenu(); }
+bool levelOsc1Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc1[CCLEVELOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc1[CCLEVELOSC1] = std::clamp(Temp,0, 127);
+     patchToLevelOsc1(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCLEVELOSC1]);
+     return true;
+ }
+ Serial8.println(F("breathAttainOsc1Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 
 MenuItem PROGMEM patchOsc2Menu[19] = {
     { "Back    " , goUpOneMenu   }
@@ -373,75 +596,306 @@ MenuItem PROGMEM patchOsc2Menu[19] = {
 MenuItem PROGMEM octOsc2Menu[1] = {
     { "OctOsc2:\n " , octOsc2Fun   }
 };
-bool octOsc2Fun(){ return goUpOneMenu(); }
+bool octOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int octOsc2Temp = current_patch.nrpn_msb_osc2[CCOCTOSC2];
+     octOsc2Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCOCTOSC2] = std::clamp(octOsc2Temp,62, 66); // -2 to +2
+     patchToOctOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCOCTOSC2]-64);
+     return true;
+ }
+ Serial8.println(F("octOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM semiOsc2Menu[1] = {
     { "SemiOs2:\n " , semiOsc2Fun   }
 };
-bool semiOsc2Fun(){ return goUpOneMenu(); }
+bool semiOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int semiOsc2Temp = current_patch.nrpn_msb_osc2[CCSEMIOSC2];
+     semiOsc2Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCSEMIOSC2] = std::clamp(semiOsc2Temp, 52, 76); // -12 to +12
+     patchToSemiOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSEMIOSC2]-64);
+     return true;
+ }
+ Serial8.println(F("semiOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM centsOsc2Menu[1] = {
     { "CentOs2:\n " , centsOsc2Fun   }
 };
-bool centsOsc2Fun(){ return goUpOneMenu(); }
+bool centsOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int centsOsc2Temp = current_patch.nrpn_msb_osc2[CCFINEOSC2];
+     centsOsc2Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCFINEOSC2] = std::clamp(centsOsc2Temp,14, 114);
+     patchToFineOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCFINEOSC2]-64);
+     return true;
+ }
+ Serial8.println(F("centsOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM beatOsc2Menu[1] = {
     { "BeatOs2:\n " , beatOsc2Fun   }
 };
-bool beatOsc2Fun(){ return goUpOneMenu(); }
+bool beatOsc2Fun(){
+     int beatOsc2Temp = current_patch.nrpn_msb_osc2[CCBEATOSC2];
+     beatOsc2Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCBEATOSC2] = std::clamp(beatOsc2Temp,0, 127);
+     patchToSawOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBEATOSC2]-64);
+     return true;
+ }
 MenuItem PROGMEM sawOsc2Menu[1] = {
     { "SawOsc2:\n " , sawOsc2Fun   }
 };
-bool sawOsc2Fun(){ return goUpOneMenu(); }
+bool sawOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int sawOsc2Temp = current_patch.nrpn_msb_osc2[CCSAWOSC2];
+     sawOsc2Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCSAWOSC2] = std::clamp(sawOsc2Temp,0, 127);
+     patchToSawOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSAWOSC2]);
+     return true;
+ }
+ Serial8.println(F("sawOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM triOsc2Menu[1] = {
     { "TriOsc2:\n " , triOsc2Fun   }
 };
-bool triOsc2Fun(){ return goUpOneMenu(); }
+bool triOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int triOsc2Temp = current_patch.nrpn_msb_osc2[CCTRIOSC2];
+     triOsc2Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCTRIOSC2] = std::clamp(triOsc2Temp,0, 127);
+     patchToTriOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCTRIOSC2]);
+     return true;
+ }
+ Serial8.println(F("triOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM pulesOsc2Menu[1] = {
     { "PlsOsc2:\n " , pulseOsc2Fun   }
 };
-bool pulseOsc2Fun(){ return goUpOneMenu(); }
+bool pulseOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int pulseOsc2Temp = current_patch.nrpn_msb_osc2[CCPULSEOSC2];
+     pulseOsc2Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCPULSEOSC2] = std::clamp(pulseOsc2Temp,0, 127);
+     patchToPulseOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPULSEOSC2]);
+     return true;
+ }
+ Serial8.println(F("pulseOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM PWOsc2Menu[1] = {
     { "PW Osc2:\n " , PWOsc2Fun   }
 };
-bool PWOsc2Fun(){ return goUpOneMenu(); }
+bool PWOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc2[CCPWOSC1];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCPWOSC2] = std::clamp(Temp,0, 127);
+     patchToPwOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWOSC2]);
+     return true;
+ }
+ Serial8.println(F("PWOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM pwmFreqOsc2Menu[1] = {
     { "PwmFOs2:\n " , pwmFreqOsc2Fun   }
 };
-bool pwmFreqOsc2Fun(){ return goUpOneMenu(); }
+bool pwmFreqOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc2[CCPWMFREQOSC2];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCPWMFREQOSC2] = std::clamp(Temp,0, 127);
+     patchToPwmFreqOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWMFREQOSC2]);
+     return true;
+ }
+ Serial8.println(F("pwmFreqOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM pwmDepthOsc2Menu[1] = {
     { "PwmDOs2:\n " , pwmDepthOsc2Fun   }
 };
-bool pwmDepthOsc2Fun(){ return goUpOneMenu(); }
+bool pwmDepthOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc2[CCPWMDEPTHOSC2];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCPWMDEPTHOSC2] = std::clamp(Temp,0, 127);
+     patchToPwmDepthOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWMDEPTHOSC2]);
+     return true;
+ }
+ Serial8.println(F("pwmFreqOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM sweepTimeOsc2Menu[1] = {
     { "SwpTOs2:\n " , sweepTimeOsc2Fun   }
 };
-bool sweepTimeOsc2Fun(){ return goUpOneMenu(); }
+bool sweepTimeOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc2[CCSWEEPTIMEOSC2];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCSWEEPTIMEOSC2] = std::clamp(Temp,0, 127);
+     patchToSweepTimeOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSWEEPTIMEOSC2]);
+     return true;
+ }
+ Serial8.println(F("sweepTimeOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM sweepDepthOsc2Menu[1] = {
     { "SwpDOs2:\n " , sweepDepthOsc2Fun   }
 };
-bool sweepDepthOsc2Fun(){ return goUpOneMenu(); }
+bool sweepDepthOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc2[CCSWEEPDEPTHOSC2];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCSWEEPDEPTHOSC1] = std::clamp(Temp,0, 127);
+     patchToSweepDepthOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSWEEPDEPTHOSC2]-64);
+     return true;
+ }
+ Serial8.println(F("sweepdepthOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM breathAttainOsc2Menu[1] = {
     { "BAtnOs2:\n " , breathAttainOsc2Fun   }
 };
-bool breathAttainOsc2Fun(){ return goUpOneMenu(); }
+bool breathAttainOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc2[CCBREATHATTAINOSC2];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCBREATHATTAINOSC2] = std::clamp(Temp,0, 127);
+     patchToBreathAttainOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHATTAINOSC2]);
+     return true;
+ }
+ Serial8.println(F("breathAttainOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM breathDepthOsc2Menu[1] = {
-    { "BDptOs1:\n " , breathDepthOsc2Fun   }
+    { "BDptOs2:\n " , breathDepthOsc2Fun   }
 };
-bool breathDepthOsc2Fun(){ return goUpOneMenu(); }
+bool breathDepthOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc2[CCBREATHDEPTHOSC2];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCBREATHDEPTHOSC2] = std::clamp(Temp,0, 127);
+     patchToBreathDepthOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHDEPTHOSC2]-64);
+     return true;
+ }
+ Serial8.println(F("breathDepthOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM breathThresholdOsc2Menu[1] = {
     { "BthrOs2:\n " , breathThresholdOsc2Fun   }
 };
-bool breathThresholdOsc2Fun(){ return goUpOneMenu(); }
+bool breathThresholdOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc2[CCBREATHTHRESHOSC2];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCBREATHTHRESHOSC2] = std::clamp(Temp,0, 127);
+     patchToBreathThreshOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHTHRESHOSC2]);
+     return true;
+ }
+ Serial8.println(F("breathAttainOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM breathCurveOsc2Menu[1] = {
     { "BCrvOs2:\n " , breathCurveOsc2Fun   }
 };
-bool breathCurveOsc2Fun(){ return goUpOneMenu(); }
+bool breathCurveOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc2[CCBREATHCURVEOSC2];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCBREATHCURVEOSC2] = std::clamp(Temp,0, 127);
+     patchToBreathOscCurveLines2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHCURVEOSC2]);
+     return true;
+ }
+ Serial8.println(F("breathAttainOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM levelOsc2Menu[1] = {
     { "LevOsc2:\n " , levelOsc2Fun   }
 };
-bool levelOsc2Fun(){ return goUpOneMenu(); }
+bool levelOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_osc2[CCLEVELOSC2];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_osc2[CCLEVELOSC2] = std::clamp(Temp,0, 127);
+     patchToLevelOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCLEVELOSC2]);
+     return true;
+ }
+ Serial8.println(F("breathAttainOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM xFadeOsc2Menu[1] = {
     { "XFadOs2:\n " , xFadeOsc2Fun   }
 };
-bool xFadeOsc2Fun(){ return goUpOneMenu(); }
+bool xFadeOsc2Fun(){
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_common1[CCXFADE];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_common1[CCXFADE] = std::clamp(Temp,0, 1);
+     patchToLevelOsc2(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     sprintf(myMenu.str_oledbuf,"   %s    ", 
+         current_patch.nrpn_msb_common1[CCXFADE]? " On": "Off");
+     return true;
+ }
+ Serial8.println(F("xFadeOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 
 MenuItem PROGMEM patchOscFilter1Menu[14] = { 
     { "Back    " , goUpOneMenu   }
@@ -1038,7 +1492,7 @@ MenuList listBreathCCMenu(breathCCMenu, 1);
 
 bool gotoVolAdjMenu() {
   display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  //display.display(); // refresh display
   myMenu.setCurrentMenu(&listVolAdjustMenu);
   sprintf(myMenu.str_oledbuf,"  %ld   ", vol);
   display.println(myMenu.str_oledbuf);
@@ -1046,10 +1500,10 @@ bool gotoVolAdjMenu() {
 }
 bool gotoPatchSelectMenu() {
   display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  //display.display(); // refresh display
   myMenu.setCurrentMenu(&listPatchSelectMenu);
   String ps( current_patch.patch_string );
-  ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+  ps.setCharAt( ps.indexOf(' '), '\n'); 
   sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
   display.println(myMenu.str_oledbuf);
   Serial8.println(myMenu.str_oledbuf);
@@ -1213,12 +1667,12 @@ bool gotoDelayLevelMenu(){
   return true;
 }
 bool gotoDelayTimeLMenu(){
-  display.clearDisplay();
-  display.display(); // refresh display
+  //display.display(); // refresh display
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayTimeLMenu);
   sprintf(myMenu.str_oledbuf,"  %04d    ", 10*current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME]);
+  display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
 }
@@ -1330,102 +1784,153 @@ bool gotoOctOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listOscOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCOCTOSC1]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoSemiOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSemiOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSEMIOSC1]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoCentsOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listCentsOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCFINEOSC1]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoBeatOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBeatOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBEATOSC1]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoSawOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSawOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSAWOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoTriOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listTriOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCTRIOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPulseOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPulseOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPULSEOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPWOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPWOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPwmFreqOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmFreqOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWMFREQOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPwmDepthOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmDepthOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWMDEPTHOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoSweepTimeOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSWEEPTIMEOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoSweepDepthOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSWEEPDEPTHOSC1]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoBreathAttainOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathAttainOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHATTAINOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoBreathDepthOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathDepthOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHDEPTHOSC1]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoBreathThresholdOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathThresholdOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHTHRESHOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoBreathCurveOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHCURVEOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoLevelOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLevelOsc1Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCLEVELOSC1]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 
@@ -1436,108 +1941,163 @@ bool gotoOctOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listOscOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCOCTOSC2]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoSemiOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSemiOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSEMIOSC2]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoCentsOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listCentsOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCFINEOSC2]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoBeatOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBeatOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBEATOSC2]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoSawOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSawOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSAWOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoTriOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listTriOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCTRIOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPulseOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPulseOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPULSEOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPWOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPWOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPwmFreqOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmFreqOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWMFREQOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPwmDepthOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmDepthOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWMDEPTHOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoSweepTimeOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSWEEPTIMEOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoSweepDepthOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSWEEPDEPTHOSC2]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoBreathAttainOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathAttainOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHATTAINOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoBreathDepthOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathDepthOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHDEPTHOSC2]-64);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoBreathThresholdOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathThresholdOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHTHRESHOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoBreathCurveOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHCURVEOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoLevelOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLevelOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCLEVELOSC2]);
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoXFadeOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listXFadeOsc2Menu);
+  sprintf(myMenu.str_oledbuf,"   %s    ", 
+          current_patch.nrpn_msb_common1[CCXFADE]? " On": "Off");
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 
