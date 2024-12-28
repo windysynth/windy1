@@ -112,6 +112,7 @@ extern float fMidiNoteNorm_diff;
 extern float data2f;
 extern float data1f;
 extern float lastBreathf;
+extern float previousBreathf;
 extern int32_t vol;
 extern int eeprom_vol;
 extern float volf;
@@ -188,6 +189,7 @@ extern float gammaDelayFeedback; //TODO: find out correct value
 extern float maxTimeNoise;  // 1000 ms
 extern float TimeNoiseGamma;  
 extern float maxNoiseLevel;  
+extern float logPotYmidLevelNoise;
 extern float minGamma;
 extern float maxGamma;
 extern float maxReverbLevel;
@@ -228,6 +230,7 @@ extern float SemiOsc1;     //64,1,52,76, -12 to +12
 extern float FineOsc1;  	//64,2,14,114, -50cents/100 to +50cents/100
 extern float BeatOsc1;  	//64,3,0,127, 0 to 1.0
 extern float SawOsc1;  	//64,5,0,127, 0 to 1.0
+extern float logPotYmidWaveN;
 extern float TriOsc1;  	//64,6,0,127, 0 to 1.0
 extern float PulseOsc1;  	//64,7,0,127, 0 to 1.0
 extern float PwOffsetOsc1;  	//64,8,0,127, 0 to 1.0
@@ -248,6 +251,7 @@ extern CurveLines BreathOscCurveLines1;
 extern float BreathThreshOsc1;  	//64,16,0,127,
 extern float LevelOsc1;  		//64,17,0,127,
 extern float LevelOscN_HeadRoom;  		//64,17,0,127,
+extern float logPotYmidLevelOscN;
 extern float Amp_HeadRoom;  		//64,17,0,127,
 extern float OctOsc2;  	//65,0,62,66,
 extern float SemiOsc2;  	//65,1,52,76,

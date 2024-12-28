@@ -16,9 +16,9 @@ void patchToOctOsc1(patch_t *patch) {OctOsc1 = (float)patch->nrpn_msb_osc1[CCOCT
 void patchToSemiOsc1(patch_t *patch) {SemiOsc1 = (float)patch->nrpn_msb_osc1[CCSEMIOSC1]-64.0;} //64,1,52,76,
 void patchToFineOsc1(patch_t *patch) {FineOsc1 = ((float)patch->nrpn_msb_osc1[CCFINEOSC1]-64.0)/100.0;} //64,2,14,114, -50 to +50 cents
 void patchToBeatOsc1(patch_t *patch) {BeatOsc1 = ((float)patch->nrpn_msb_osc1[CCBEATOSC1]-64.0)/64.0;}  	//64,3,0,127,
-void patchToSawOsc1(patch_t *patch) {SawOsc1 = (float)patch->nrpn_msb_osc1[CCSAWOSC1]*DIV127;} 	//64,5,0,127,
-void patchToTriOsc1(patch_t *patch) {TriOsc1 = (float)patch->nrpn_msb_osc1[CCTRIOSC1]*DIV127;}	//64,6,0,127,
-void patchToPulseOsc1(patch_t *patch) {PulseOsc1 = (float)patch->nrpn_msb_osc1[CCPULSEOSC1]*DIV127;} //64,7,0,127,
+void patchToSawOsc1(patch_t *patch) {SawOsc1 = log_pot_curve( (float)patch->nrpn_msb_osc1[CCSAWOSC1]*DIV127, logPotYmidWaveN);} 	//64,5,0,127,
+void patchToTriOsc1(patch_t *patch) {TriOsc1 = log_pot_curve( (float)patch->nrpn_msb_osc1[CCTRIOSC1]*DIV127, logPotYmidWaveN);}	//64,6,0,127,
+void patchToPulseOsc1(patch_t *patch) {PulseOsc1 = log_pot_curve( (float)patch->nrpn_msb_osc1[CCPULSEOSC1]*DIV127, logPotYmidWaveN);} //64,7,0,127,
 void patchToPwOsc1(patch_t *patch) {PwOsc1 = (float)patch->nrpn_msb_osc1[CCPWOSC1]*DIV127+PwOffsetOsc1;} //64,8,0,127,  GUI 0 = 50%
 void patchToPwmFreqOsc1(patch_t *patch) {PwmFreqOsc1 = (float)patch->nrpn_msb_osc1[CCPWMFREQOSC1]*DIV127*maxPwmLfoFreq;}  	//64,9,0,127,
 void patchToPwmDepthOsc1(patch_t *patch) {PwmDepthOsc1 = (float)patch->nrpn_msb_osc1[CCPWMDEPTHOSC1]*DIV127;} //64,10,0,127,  
@@ -29,14 +29,14 @@ void patchToBreathAttainOsc1(patch_t *patch) {BreathAttainOsc1 = (float)patch->n
     //BreathCurveOsc1 = gen_osc_gamma(((float)patch->nrpn_msb_osc1[CCBREATHCURVEOSC1])*DIV127);  	//64,15,0,127,
 void patchToBreathOscCurveLines1(patch_t *patch) {BreathOscCurveLines1 = gen_osc_curve_lines(((float)patch->nrpn_msb_osc1[CCBREATHCURVEOSC1])*DIV127);}	//64,15,0,127,
 void patchToBreathThreshOsc1(patch_t *patch) {BreathThreshOsc1 = (float)patch->nrpn_msb_osc1[CCBREATHTHRESHOSC1]*DIV127;} //64,16,0,127,
-void patchToLevelOsc1(patch_t *patch) {LevelOsc1 = (float)patch->nrpn_msb_osc1[CCLEVELOSC1]*DIV127;} //64,17,0,127,
+void patchToLevelOsc1(patch_t *patch) {LevelOsc1 = log_pot_curve( (float)patch->nrpn_msb_osc1[CCLEVELOSC1]*DIV127, logPotYmidLevelOscN) ;} //64,17,0,127,
 void patchToOctOsc2(patch_t *patch) {OctOsc2 = (float)patch->nrpn_msb_osc2[CCOCTOSC2]-64.0;}  //65,0,62,66,
 void patchToSemiOsc2(patch_t *patch) {SemiOsc2 = (float)patch->nrpn_msb_osc2[CCSEMIOSC2]-64.0;} //64,1,52,76,
 void patchToFineOsc2(patch_t *patch) {FineOsc2 = ((float)patch->nrpn_msb_osc2[CCFINEOSC2]-64.0)/100.0;} //64,2,14,114, -50 to +50 cents
 void patchToBeatOsc2(patch_t *patch) {BeatOsc2 = ((float)patch->nrpn_msb_osc2[CCBEATOSC2]-64.0)/64.0;}  	//64,3,0,127,
-void patchToSawOsc2(patch_t *patch) {SawOsc2 = (float)patch->nrpn_msb_osc2[CCSAWOSC2]*DIV127;} 	//64,5,0,127,
-void patchToTriOsc2(patch_t *patch) {TriOsc2 = (float)patch->nrpn_msb_osc2[CCTRIOSC2]*DIV127;}	//64,6,0,127,
-void patchToPulseOsc2(patch_t *patch) {PulseOsc2 = (float)patch->nrpn_msb_osc2[CCPULSEOSC2]*DIV127;} //64,7,0,127,
+void patchToSawOsc2(patch_t *patch) {SawOsc2 = log_pot_curve( (float)patch->nrpn_msb_osc2[CCSAWOSC2]*DIV127, logPotYmidWaveN);} 	//64,5,0,127,
+void patchToTriOsc2(patch_t *patch) {TriOsc2 = log_pot_curve( (float)patch->nrpn_msb_osc2[CCTRIOSC2]*DIV127, logPotYmidWaveN);}	//64,6,0,127,
+void patchToPulseOsc2(patch_t *patch) {PulseOsc2 = log_pot_curve( (float)patch->nrpn_msb_osc2[CCPULSEOSC2]*DIV127, logPotYmidWaveN);} //64,7,0,127,
 void patchToPwOsc2(patch_t *patch) {PwOsc2 = (float)patch->nrpn_msb_osc2[CCPWOSC2]*DIV127+PwOffsetOsc2;} //64,8,0,127,  GUI 0 = 50%
 void patchToPwmFreqOsc2(patch_t *patch) {PwmFreqOsc2 = (float)patch->nrpn_msb_osc2[CCPWMFREQOSC2]*DIV127*maxPwmLfoFreq;}  	//64,9,0,127,
 void patchToPwmDepthOsc2(patch_t *patch) {PwmDepthOsc2 = (float)patch->nrpn_msb_osc2[CCPWMDEPTHOSC2]*DIV127;} //64,10,0,127,  
@@ -47,7 +47,7 @@ void patchToBreathAttainOsc2(patch_t *patch) {BreathAttainOsc2 = (float)patch->n
     //BreathCurveOsc2 = gen_osc_gamma(((float)patch->nrpn_msb_osc2[CCBREATHCURVEOSC2])*DIV127);  	//64,15,0,127,
 void patchToBreathOscCurveLines2(patch_t *patch) {BreathOscCurveLines2 = gen_osc_curve_lines(((float)patch->nrpn_msb_osc2[CCBREATHCURVEOSC2])*DIV127);}	//64,15,0,127,
 void patchToBreathThreshOsc2(patch_t *patch) {BreathThreshOsc2 = (float)patch->nrpn_msb_osc2[CCBREATHTHRESHOSC2]*DIV127;} //64,16,0,127,
-void patchToLevelOsc2(patch_t *patch) {LevelOsc2 = (float)patch->nrpn_msb_osc2[CCLEVELOSC2]*DIV127;} //64,17,0,127,
+void patchToLevelOsc2(patch_t *patch) {LevelOsc2 = log_pot_curve( (float)patch->nrpn_msb_osc2[CCLEVELOSC2]*DIV127, logPotYmidLevelOscN);} //64,17,0,127,
 void patchToModeOscFilter1(patch_t *patch) {ModeOscFilter1 = (filterMode_t)patch->nrpn_msb_osc_filt1[CCMODEOSCFILTER1];} //72,0,0,4,//LP HP BP NTC OFF
 void patchToFreqOscFilter1(patch_t *patch) {
     // 69 is note number for A4=440Hz ;  	
@@ -129,7 +129,8 @@ void patchToBreathNoiseFiltCurveLines4(patch_t *patch) {
 void patchToNoiseTime(patch_t *patch) {NoiseTime = noiseTimeCurve((float)patch->nrpn_msb_noise[CCNOISETIME]*DIV127);} //80,0,0,127,
     //NoiseBreathCurve = gen_noise_gamma(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV127);  	//80,1,0,127,
 void patchToNoiseBreathCurveLines(patch_t *patch) {NoiseBreathCurveLines = gen_osc_curve_lines(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV127);} //80,1,0,127,
-void patchToNoiseLevel(patch_t *patch) {NoiseLevel = pow((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,.35)*maxNoiseLevel;}	//80,2,0,127,
+//void patchToNoiseLevel(patch_t *patch) {NoiseLevel = pow((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,.35)*maxNoiseLevel;}	//80,2,0,127,
+void patchToNoiseLevel(patch_t *patch) {NoiseLevel = log_pot_curve((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,logPotYmidLevelNoise)*maxNoiseLevel;}	//80,2,0,127,
 void patchToBendRange(patch_t *patch) {BendRange = (float)patch->nrpn_msb_common1[CCBENDRANGE];} //81,0,0,12,// num semitones
 void patchToBendStep(patch_t *patch) {BendStep = (bool)patch->nrpn_msb_common1[CCBENDSTEP];}  	//81,1,0,1,//0=off 1=on
 void patchToVibratoPitch(patch_t *patch) {VibratoPitch = (float)patch->nrpn_msb_common1[CCVIBRATOPITCH]*DIV127;} //81,2,0,127,  (this isn't necessary since bite sensor pb and plate pb are the same).
