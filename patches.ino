@@ -157,7 +157,8 @@ void patchToEffectsChorusWet2(patch_t *patch) {EffectsChorusWet2 = ((float)patch
 void patchToEffectsChorusFeedback(patch_t *patch) {EffectsChorusFeedback = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK]-64.0)/64.0;} //112,6,0,127,
 void patchToEffectsChorusLfoFreq(patch_t *patch) {EffectsChorusLfoFreq = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ]/10.0;} //112,7,0,127,
 void patchToEffectsChorusDryLevel(patch_t *patch) {EffectsChorusDryLevel = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL]*DIV127;} //112,8,0,127,
-void patchToEffectsDelayTimeL(patch_t *patch) {EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*10.0;}	//113,0,0,127, 0 to 1270 ms
+//void patchToEffectsDelayTimeL(patch_t *patch) {EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*10.0;}	//113,0,0,127, 0 to 1270 ms
+void patchToEffectsDelayTimeL(patch_t *patch) {EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*DIV127;}	//113,0,0,127, 1.0 = 1270 ms
 void patchToEffectsDelayFeedback(patch_t *patch) {EffectsDelayFeedback = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]*DIV127;} //113,1,0,127,
 void patchToEffectsDelayDamp(patch_t *patch) {EffectsDelayDamp = maxDelayDamp*pow(2, -( (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP])/24.0 );} //113,2,0,127,
 void patchToEffectsDelayLevel(patch_t *patch) {EffectsDelayLevel = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYLEVEL]*DIV127;}  //113,3,0,127,

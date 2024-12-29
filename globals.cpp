@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.78"};
+String verNum_str = {"0.0.80"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -188,9 +188,9 @@ float limitBreathSweepOsc2 = 1.55/(octaveControlOsc2*12); // 4000s is about 1.55
 float maxMixNtcFilter = 1.0;  //0.6; 
 //float fPotValue = 0.0; 
 //float iPotValue = 0; 
-float extraAmpFactor = 2.2*3.0f;  // 1/LevelOscN_HeadRoom*3.0f
+float extraAmpFactor = 3.0f/LevelOscN_HeadRoom;  // 1/LevelOscN_HeadRoom*3.0f
 float extraLineInAmpFactor = 1.0;
-float mix_lineInLR_gain_0 = volf*extraAmpFactor;
+float mix_lineInLR_gain_0 = volf;
 float mix_lineInLR_gain_1 = extraLineInAmpFactor*mix_lineinf;
 
 
@@ -386,7 +386,7 @@ float EffectsReverbDenseEarly = 0;  	//114,2,0,127,
 float EffectsReverbTime = 0;  	//114,3,10,50,//1.0 to 5.0 sec
 float EffectsReverbDamp = 0;  	//114,4,54,74,//-10 to +10
 float EffectsChorusFBHeadroom = 0.8; // to reduce levels of chorus fb mixer to keep from clipping
-float EffectsChorusDryHeadroom = 0.8; // to reduce levels of chorus dry mixer to keep from clipping
+float EffectsChorusDryHeadroom = 0.1; //0.8; // to reduce levels of chorus dry mixer to keep from clipping
 
 // Number of samples in each delay line
 // AUDIO_BLOCK_SAMPLES = 128
