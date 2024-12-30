@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.80"};
+String verNum_str = {"0.0.81"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -58,7 +58,7 @@ float dc_breathNoiseFilter3_amp = 0.0;
 float dc_breathNoiseFilter4_amp = 0.0;
 float dc_breathFilterN_rampTime = 8.0;
 float dc_breathNoise_amp = 0.0;
-float dc_breathNoise_rampTime = 4.0;
+float dc_breathNoise_rampTime =  4.0;
 float dc_breathThreshOsc1_amp = 0.0;
 float dc_breathThreshOsc2_amp = 0.0;
 float dc_breathSweepOscN_rampTime = 4.0;
@@ -379,7 +379,7 @@ float EffectsDelayTimeR= 0;  	//113,0,0,127,
 float EffectsDelayFeedback = 0; //113,1,0,127,
 float EffectsDelayDamp = 10000;  	//113,2,0,127,
 float EffectsDelayLevel = 0;  	//113,3,0,127,
-float EffectsDelaySpare = 1.0;  	//113,3,0,127,
+float EffectsDelayPong = 0.0;  	//113,3,0,127,
 float EffectsReverbSpare = 1.0;  	//114,1,0,127,
 float EffectsReverbLevel = 0;  	//114,1,0,127,
 float EffectsReverbDenseEarly = 0;  	//114,2,0,127,

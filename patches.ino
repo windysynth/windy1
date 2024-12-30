@@ -161,11 +161,12 @@ void patchToEffectsChorusDryLevel(patch_t *patch) {EffectsChorusDryLevel = (floa
 void patchToEffectsDelayTimeL(patch_t *patch) {EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*DIV127;}	//113,0,0,127, 1.0 = 1270 ms
 void patchToEffectsDelayFeedback(patch_t *patch) {EffectsDelayFeedback = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]*DIV127;} //113,1,0,127,
 void patchToEffectsDelayDamp(patch_t *patch) {EffectsDelayDamp = maxDelayDamp*pow(2, -( (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP])/24.0 );} //113,2,0,127,
-void patchToEffectsDelayLevel(patch_t *patch) {EffectsDelayLevel = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYLEVEL]*DIV127;}  //113,3,0,127,
-void patchToEffectsDelaySpare(patch_t *patch) {EffectsDelaySpare = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYSPARE]*DIV127;} //113,3,0,127,
+void patchToEffectsDelayLevel(patch_t *patch) {EffectsDelayLevel = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYLEVEL]*DIV127*0.5;}  //113,3,0,127,
+void patchToEffectsDelayPong(patch_t *patch) {EffectsDelayPong = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYSPARE]*DIV127;} //113,3,0,127,
 void patchToEffectsReverbSpare(patch_t *patch) {EffectsReverbSpare = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBSPARE]*DIV127;} //114,1,0,127,
 void patchToEffectsReverbLevel(patch_t *patch) {EffectsReverbLevel = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBLEVEL]*DIV127*maxReverbLevel;} //114,1,0,127,
 void patchToEffectsReverbDenseEarly(patch_t *patch) {EffectsReverbDenseEarly = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDENSEEARLY]*DIV127*maxDenseEarly;} //114,2,0,127, (using this for roomsize)
+// EffectsReverbTime is from 1000ms to 5000ms, but the Plate reverb takes 0.0 to 1.0 as inputs, 0.1 to 0.6 is approximately 1sec to 5sec.
 void patchToEffectsReverbTime(patch_t *patch) {EffectsReverbTime = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBTIME]/100.0f+0.1f;} //114,3,10,50,//1000 to 5000 ms
 void patchToEffectsReverbDamp(patch_t *patch) {EffectsReverbDamp = ((float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDAMP]-54)/20.0;}  	//114,4,54,74,//-10 to +10
 
@@ -284,7 +285,7 @@ void patchToSynthVariables(patch_t *patch) {
     patchToEffectsDelayFeedback(patch ); //113,1,0,127,
     patchToEffectsDelayDamp(patch ); //113,2,0,127,
     patchToEffectsDelayLevel(patch );  //113,3,0,127,
-    patchToEffectsDelaySpare(patch ); //113,3,0,127,
+    patchToEffectsDelayPong(patch ); //113,3,0,127,
     patchToEffectsReverbSpare(patch ); //114,1,0,127,
     patchToEffectsReverbLevel(patch ); //114,1,0,127,
     patchToEffectsReverbDenseEarly(patch ); //114,2,0,127, (using this for roomsize)
@@ -539,7 +540,7 @@ void printPatchValues()
     Serial8.println(str_buf1);
     sprintf(str_buf1, "EffectsDelayLevel: %5.3f", EffectsDelayLevel);  	
     Serial8.println(str_buf1);
-    sprintf(str_buf1, "EffectsDelaySpare: %5.3f", EffectsDelaySpare);  	
+    sprintf(str_buf1, "EffectsDelayPong: %5.3f", EffectsDelayPong);  	
     Serial8.println(str_buf1);
     sprintf(str_buf1, "EffectsReverbSpare: %5.3f", EffectsReverbSpare);  	
     Serial8.println(str_buf1);

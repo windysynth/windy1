@@ -196,6 +196,8 @@ AudioEffectPlateReverb_F32       verb_F32;       //xy=1981.6666259765625,1667.66
 AudioEffectDelayStereo_F32       delay_F32 = AudioEffectDelayStereo_F32( (uint32_t)200, false);       //xy=1981.6666259765625,1667.6666870117188
 AudioEffectGain_F32     amp_extraGainR_F32;
 AudioEffectGain_F32     amp_extraGainL_F32;
+AudioMixer4_F32         mix_pongL_F32;
+AudioMixer4_F32         mix_pongR_F32;
 AudioMixer4              mix_ntcFilter2; //xy=2059.333251953125,914
 AudioFilterFIR           fir_formant;    //xy=2111.333251953125,978
 AudioMixer4              mix_Amp;        //xy=2131.333251953125,1127
@@ -364,8 +366,12 @@ AudioConnection          patchCord141(filter2, 2, mix_ntcFilter2, 3);
 AudioConnection          patchCord142(mix_ntcFilter4, 0, mix_Amp, 1);
 AudioConnection_F32          patchCord163(verb_F32, 1, amp_extraGainR_F32, 0);
 AudioConnection_F32          patchCord164(verb_F32, 0, amp_extraGainL_F32, 0);
-AudioConnection_F32          patchCord143(amp_extraGainR_F32, 0, Float2IntR, 0);
-AudioConnection_F32          patchCord144(amp_extraGainL_F32, 0, Float2IntL, 0);
+AudioConnection_F32          patchCord143(amp_extraGainR_F32, 0, mix_pongL_F32, 1);
+AudioConnection_F32          patchCord144(amp_extraGainL_F32, 0, mix_pongL_F32, 0);
+AudioConnection_F32          patchCord167(amp_extraGainR_F32, 0, mix_pongR_F32, 1);
+AudioConnection_F32          patchCord168(amp_extraGainL_F32, 0, mix_pongR_F32, 0);
+AudioConnection_F32          patchCord169(mix_pongR_F32, 0, Float2IntR, 0);
+AudioConnection_F32          patchCord170(mix_pongL_F32, 0, Float2IntL, 0);
 AudioConnection          patchCord145(mix_ntcFilter2, fir_formant);
 AudioConnection          patchCord146(fir_formant, 0, mix_Amp, 0);
 AudioConnection          patchCord147(mix_Amp, env_squelch);
@@ -881,6 +887,10 @@ void setup() {
 
     amp_extraGainR_F32.setGain(extraAmpFactor);
     amp_extraGainL_F32.setGain(extraAmpFactor);
+    mix_pongL_F32.gain(0,0.5f*EffectsDelayPong + 0.5f); 
+    mix_pongL_F32.gain(1,-0.5f*EffectsDelayPong + 0.5f);
+    mix_pongR_F32.gain(0,-0.5f*EffectsDelayPong + 0.5f);
+    mix_pongR_F32.gain(1,0.5f*EffectsDelayPong + 0.5f);
     
     //mix_lineInL.gain(0, volf(1.0-mix_lineinf));
     mix_lineInL.gain(0, volf);
@@ -1120,6 +1130,11 @@ void loop()
         mix_lineInR.gain(1, mix_lineInLR_gain_1);
         //mix_lineInR.gain(2, 0.0);
         //mix_lineInR.gain(3, 0.0);
+    
+    mix_pongL_F32.gain(0,0.5f*EffectsDelayPong + 0.5f); 
+    mix_pongL_F32.gain(1,-0.5f*EffectsDelayPong + 0.5f);
+    mix_pongR_F32.gain(0,-0.5f*EffectsDelayPong + 0.5f);
+    mix_pongR_F32.gain(1,0.5f*EffectsDelayPong + 0.5f);
 
     noteNumberOsc1 = porta_step ? round(dc_portatime.read()*128.0) : dc_portatime.read()*128;
     noteNumberOsc1 = BendStep ? round( noteNumberOsc1 + BendRange * dc_pitchbend.read() )
@@ -1752,10 +1767,10 @@ void processMIDI(bool midi_from_host_flag)
                             dc_breathThreshOsc2_amp = piecewise_curve_func(thresh( data2f,BreathThreshOsc2), BreathOscCurveLines2);
                             float rampTimeDynOscOn2 = limit((dc_breathThreshOsc2_amp-lastBreathf)
                                                         *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
-                            //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
-                            //dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
-                            dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOscOn1);
-                            dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOscOn2);      
+                            dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
+                            dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
+                            //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOscOn1);
+                            //dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOscOn2);      
                             dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime);
                             dc_breathOscFilter2.amplitude(dc_breathOscFilter2_amp,dc_breathFilterN_rampTime);
                             dc_breathNoiseFilter3.amplitude(dc_breathNoiseFilter3_amp,dc_breathFilterN_rampTime);
@@ -1766,11 +1781,11 @@ void processMIDI(bool midi_from_host_flag)
                                 float dynoIntercept = 90.0f;
                                 float rampTimeDynNoiseOn = limit((dc_breathNoise_amp-lastBreathf)
                                                             *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
-                                //dc_breathNoise.amplitude(dc_breathNoise_amp,dc_breathNoise_rampTime);
-                                dc_breathNoise.amplitude(dc_breathNoise_amp,rampTimeDynNoiseOn);
+                                dc_breathNoise.amplitude(dc_breathNoise_amp,dc_breathNoise_rampTime);
+                                //dc_breathNoise.amplitude(dc_breathNoise_amp,rampTimeDynNoiseOn);
                             }
                         }
-                        else
+                        else // note is off
                         {
                             dc_breathThreshOsc1_amp = 0;
                             dc_breathThreshOsc2_amp = 0;
@@ -1816,9 +1831,10 @@ void processMIDI(bool midi_from_host_flag)
             if (midi_from_host_flag)
                 MIDIs1.sendNoteOn(data1,data2,channel);
           //  TODO: create amplitude transition between legato notes
+            if (data2 == 0) { noteOffFun(); break; }
             data2f = ((float)data2)* DIV127;
             if (lastBreathf <= 0.0f){ 
-                previousBreathf = lastBreathf;
+                previousBreathf = 0.0f;
                 lastBreathf = data2f; 
             } 
             //  Only treat Note on Velocity as a Breath value if lastBreathf was zero
@@ -1865,10 +1881,10 @@ void processMIDI(bool midi_from_host_flag)
                 //float rampTimeDynOscN = limit((dc_breathThreshOsc1_amp-lastBreathf)*dynoIntercept,dc_breathThreshOscN_rampTime,dynoMax); 
                 float rampTimeDynOsc1 = limit((dc_breathThreshOsc1_amp-lastBreathf)*dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
                 float rampTimeDynOsc2 = limit((dc_breathThreshOsc2_amp-lastBreathf)*dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
-                //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);
-                //dc_breathThreshOsc2.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);
-                dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOsc1);      
-                dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOsc2);      
+                dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);
+                dc_breathThreshOsc2.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);
+                //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOsc1);      
+                //dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOsc2);      
                 dc_breathOscFilter1.amplitude(dc_breathOscFilter1_amp,dc_breathFilterN_rampTime*rampTimeShortening);
                 dc_breathOscFilter2.amplitude(dc_breathOscFilter2_amp,dc_breathFilterN_rampTime*rampTimeShortening);
                 dc_breathNoiseFilter3.amplitude(dc_breathNoiseFilter3_amp,dc_breathFilterN_rampTime*rampTimeShortening);
@@ -1878,8 +1894,8 @@ void processMIDI(bool midi_from_host_flag)
                     float dynoIntercept = 90.0f;
                     float rampTimeDynNoiseOn = limit((dc_breathNoise_amp-lastBreathf)
                                               *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
-                    //dc_breathNoise.amplitude(dc_breathNoise_amp,dc_breathNoise_rampTime*rampTimeShortening); 
-                    dc_breathNoise.amplitude(dc_breathNoise_amp,rampTimeDynNoiseOn); 
+                    dc_breathNoise.amplitude(dc_breathNoise_amp,dc_breathNoise_rampTime*rampTimeShortening); 
+                    //dc_breathNoise.amplitude(dc_breathNoise_amp,rampTimeDynNoiseOn); 
                 }
                 if(BreathAttainOsc1 > 0.0) {
                     dc_breathSweepOsc1.amplitude(BreathDepthOsc1*(1.0-limit(lastBreathf/BreathAttainOsc1,1.0,-1.0)),
@@ -1917,84 +1933,33 @@ void processMIDI(bool midi_from_host_flag)
                 {
                     dc_timeNoise.amplitude(0.0);
                 }
-                if(SweepDepthOscFilter1 > 0.0)
-                {   
-                    // the sign signal now is aplitude as well, so the sq_swpfltN always runs between 1.0 and 0
-                    dc_sweepDepthFilterSign1.amplitude(SweepDepthOscFilter1);
-                    dc_sweepDepthFilter1.amplitude(1.0);
-                    dc_sweepDepthFilter1.amplitude(0,SweepTimeOscFilter1);
-                    if(LinkOscFilters)
-                    {
-                        dc_sweepDepthFilterSign2.amplitude(SweepDepthOscFilter1);
-                        dc_sweepDepthFilter2.amplitude(1.0);
-                        dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter1);
-                    }
-                }
-                else if(SweepDepthOscFilter1 < 0.0)
+                // the sign signal now is aplitude as well, so the sq_swpfltN always runs between 1.0 and 0
+                dc_sweepDepthFilterSign1.amplitude(SweepDepthOscFilter1);
+                dc_sweepDepthFilter1.amplitude(1.0);
+                dc_sweepDepthFilter1.amplitude(0,SweepTimeOscFilter1);
+                if(LinkOscFilters)
                 {
-                    dc_sweepDepthFilterSign1.amplitude(-SweepDepthOscFilter1);
-                    dc_sweepDepthFilter1.amplitude(1.0);
-                    dc_sweepDepthFilter1.amplitude(0,SweepTimeOscFilter1);
-                    if(LinkOscFilters)
-                    {
-                        dc_sweepDepthFilterSign2.amplitude(-SweepDepthOscFilter1);
-                        dc_sweepDepthFilter2.amplitude(1.0);
-                        dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter1);
-                    }
+                    dc_sweepDepthFilterSign2.amplitude(SweepDepthOscFilter1);
+                    dc_sweepDepthFilter2.amplitude(1.0);
+                    dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter1);
+                } else {
+                    dc_sweepDepthFilterSign2.amplitude(SweepDepthOscFilter2);
+                    dc_sweepDepthFilter2.amplitude(1.0);
+                    dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter2);
                 }
-                if(!LinkOscFilters)
+
+                dc_sweepDepthFilterSign3.amplitude(SweepDepthNoiseFilter3);
+                dc_sweepDepthFilter3.amplitude(1.0);
+                dc_sweepDepthFilter3.amplitude(0,SweepTimeNoiseFilter3);
+                if(LinkNoiseFilters)
                 {
-                    if(SweepDepthOscFilter2 >0.0)
-                    {
-                        dc_sweepDepthFilterSign2.amplitude(SweepDepthOscFilter2);
-                        dc_sweepDepthFilter2.amplitude(1.0);
-                        dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter2);
-                    }
-                    else if(SweepDepthOscFilter2 < 0.0)
-                    {
-                        dc_sweepDepthFilterSign2.amplitude(-SweepDepthOscFilter2);
-                        dc_sweepDepthFilter2.amplitude(1.0);
-                        dc_sweepDepthFilter2.amplitude(0,SweepTimeOscFilter2);
-                    }
-                }
-                if(SweepDepthNoiseFilter3 >0.0)
-                {
-                    dc_sweepDepthFilterSign3.amplitude(SweepDepthNoiseFilter3);
-                    dc_sweepDepthFilter3.amplitude(1.0);
-                    dc_sweepDepthFilter3.amplitude(0,SweepTimeNoiseFilter3);
-                    if(LinkNoiseFilters)
-                    {
-                        dc_sweepDepthFilterSign4.amplitude(SweepDepthNoiseFilter3);
-                        dc_sweepDepthFilter4.amplitude(1.0);
-                        dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter3);
-                    }
-                }
-                else if(SweepDepthNoiseFilter3 < 0.0)
-                {
-                    dc_sweepDepthFilterSign3.amplitude(-SweepDepthNoiseFilter3);
-                    dc_sweepDepthFilter3.amplitude(1.0);
-                    dc_sweepDepthFilter3.amplitude(0,SweepTimeNoiseFilter3);
-                    if(LinkNoiseFilters)
-                    {
-                        dc_sweepDepthFilterSign4.amplitude(-SweepDepthNoiseFilter3);
-                        dc_sweepDepthFilter4.amplitude(1.0);
-                        dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter3);
-                    }
-                }
-                if(!LinkNoiseFilters)
-                {
-                    if(SweepDepthNoiseFilter4 > 0.0)
-                    {
-                        dc_sweepDepthFilterSign4.amplitude(SweepDepthNoiseFilter4);
-                        dc_sweepDepthFilter4.amplitude(1.0);
-                        dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter4);
-                    }
-                    else if(SweepDepthNoiseFilter4 < 0.0)
-                    {
-                        dc_sweepDepthFilterSign4.amplitude(-SweepDepthNoiseFilter4);
-                        dc_sweepDepthFilter4.amplitude(1.0);
-                        dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter4);
-                    }
+                    dc_sweepDepthFilterSign4.amplitude(SweepDepthNoiseFilter3);
+                    dc_sweepDepthFilter4.amplitude(1.0);
+                    dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter3);
+                } else {
+                    dc_sweepDepthFilterSign4.amplitude(SweepDepthNoiseFilter4);
+                    dc_sweepDepthFilter4.amplitude(1.0);
+                    dc_sweepDepthFilter4.amplitude(0,SweepTimeNoiseFilter4);
                 }
             }
             else
@@ -2029,36 +1994,7 @@ void processMIDI(bool midi_from_host_flag)
         case midi_ho.NoteOff:  //(type==0x80)
             if (midi_from_host_flag)
                 MIDIs1.sendNoteOff(data1,data2,channel);
-            if(data1==currentMidiNote)
-            {
-                note_is_on = false;
-                fMidiNoteNorm = ((float)data1)/128.0;
-                dc_portatime.amplitude(fMidiNoteNorm); // 
-                dc_portatimef.amplitude(fMidiNoteNorm,portatimef_t); // 
-
-                // in case no breath signal comes after NoteOff
-                dc_breathThreshOsc1_amp = 0;
-                dc_breathThreshOsc2_amp = 0;
-                dc_breathNoise_amp = 0;
-
-                float dynoMax = 35.0f;
-                float dynoIntercept = 75.0f;
-                float rampTimeDynOscOff = limit((previousBreathf-dc_breathThreshOsc1_amp)
-                                        *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
-                float rampTimeDynNoiseOff = limit((previousBreathf-dc_breathNoise_amp)
-                                        *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
-                //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOscOff);      
-                //dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOscOff);      
-                dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathOff_rampTime);
-                // dc_breathThreshOscN_rampTime
-                dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathOff_rampTime);
-                dc_breathOscFilter1.amplitude(0,dc_breathOff_rampTime);
-                dc_breathOscFilter2.amplitude(0,dc_breathOff_rampTime);
-                dc_breathNoiseFilter3.amplitude(0,dc_breathOff_rampTime);
-                dc_breathNoiseFilter4.amplitude(0,dc_breathOff_rampTime);
-                //dc_breathNoise.amplitude(0,rampTimeDynNoiseOff);
-                dc_breathNoise.amplitude(0,dc_breathOff_rampTime);
-            }
+            noteOffFun();
             break;
 
         case midi_ho.PitchBend:
@@ -2074,7 +2010,40 @@ void processMIDI(bool midi_from_host_flag)
     } // switch (type)
 }
 
+void noteOffFun(void){
+    if(data1==currentMidiNote)
+    {
+        note_is_on = false;
+        fMidiNoteNorm = ((float)data1)/128.0;
+        dc_portatime.amplitude(fMidiNoteNorm); // 
+        dc_portatimef.amplitude(fMidiNoteNorm,portatimef_t); // 
 
+        // in case no breath signal comes after NoteOff
+        previousBreathf = lastBreathf;
+        lastBreathf = 0.0f;
+        dc_breathThreshOsc1_amp = 0;
+        dc_breathThreshOsc2_amp = 0;
+        dc_breathNoise_amp = 0;
+
+        float dynoMax = 35.0f;
+        float dynoIntercept = 75.0f;
+        float rampTimeDynOscOff = limit((previousBreathf-dc_breathThreshOsc1_amp) //TODO: (previous breathThresh value - 0)
+                                *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
+        float rampTimeDynNoiseOff = limit((previousBreathf-dc_breathNoise_amp)
+                                *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
+        //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOscOff);      
+        //dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOscOff);      
+        dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathOff_rampTime);
+        // dc_breathThreshOscN_rampTime
+        dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathOff_rampTime);
+        dc_breathOscFilter1.amplitude(0,dc_breathOff_rampTime);
+        dc_breathOscFilter2.amplitude(0,dc_breathOff_rampTime);
+        dc_breathNoiseFilter3.amplitude(0,dc_breathOff_rampTime);
+        dc_breathNoiseFilter4.amplitude(0,dc_breathOff_rampTime);
+        //dc_breathNoise.amplitude(0,rampTimeDynNoiseOff);
+        dc_breathNoise.amplitude(0,dc_breathOff_rampTime);
+    }
+}
 
 void UITimeout(void)
 {

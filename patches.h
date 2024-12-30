@@ -304,7 +304,7 @@ void patchToEffectsDelayTimeL(patch_t *patch);	//113,0,0,127, 0 to 1270 ms
 void patchToEffectsDelayFeedback(patch_t *patch); //113,1,0,127,
 void patchToEffectsDelayDamp(patch_t *patch); //113,2,0,127,
 void patchToEffectsDelayLevel(patch_t *patch);  //113,3,0,127,
-void patchToEffectsDelaySpare(patch_t *patch); //113,3,0,127,
+void patchToEffectsDelayPong(patch_t *patch); //113,3,0,127,
 void patchToEffectsReverbSpare(patch_t *patch); //114,1,0,127,
 void patchToEffectsReverbLevel(patch_t *patch); //114,1,0,127,
 void patchToEffectsReverbDenseEarly(patch_t *patch); //114,2,0,127, (using this for roomsize)
