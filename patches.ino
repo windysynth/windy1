@@ -142,7 +142,8 @@ void patchToKeyTriggerSingle(patch_t *patch) {KeyTriggerSingle = (bool)patch->nr
 void patchTos81_8(patch_t *patch) {s81_8 = (float)patch->nrpn_msb_common1[CC81_8];} //81,8,0,1,// ? 
 void patchToChorusOn(patch_t *patch) {ChorusOn = (bool)patch->nrpn_msb_common1[CCCHORUSON];}  //81,9,0,1,// Chorus on off
 void patchToVibratoAmp(patch_t *patch) {VibratoAmp = (float)patch->nrpn_msb_common2[CCVIBRATOAMP]*DIV127;} //88,0,0,127, (bite tremelo amount)
-void patchToAmpLevel(patch_t *patch) {AmpLevel = (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127;} //88,1,0,127,
+//void patchToAmpLevel(patch_t *patch) {AmpLevel = (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127;} //88,1,0,127,
+void patchToAmpLevel(patch_t *patch) {AmpLevel = log_pot_curve( (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127,logPotYmidLevelOscN);} //88,1,0,127,
 void patchToOctButtonLevel(patch_t *patch) {OctButtonLevel = (float)patch->nrpn_msb_common2[CCOCTBUTTONLEVEL]*DIV127;} //88,2,0,127,
 void patchToEffectsChorusDelay1(patch_t *patch) {
     // flange cuts delay in half, so mult by 2.0 here 
@@ -592,6 +593,13 @@ void setCurrentPatch(int patchNumber)
 
 void copyCurrentPatchToLoadedPatch(int patchNumber)
 {
+ if (!patchLoaded[patchNumber]) {
+    sprintf(str_buf1,"Patch: %03d not loaded. Can't copy", patchNumber);
+    Serial8.println(str_buf1);
+    return;   
+  } 
+   memcpy((byte*)&loadedPatches[patchNumber], (byte*)&current_patch ,  sizeof(loadedPatches[patchNumber])); 
+/*
     uint8_t i = 0;
     for(i = 0; i<31; i++)
        loadedPatches[patchNumber].patch_string[i] = current_patch.patch_string[i];
@@ -621,138 +629,190 @@ void copyCurrentPatchToLoadedPatch(int patchNumber)
        loadedPatches[patchNumber].nrpn_msb_delay[i] = current_patch.nrpn_msb_delay[i];
     for( i = 0; i<NRPN_MSB_REVERB_LENGTH; i++)
        loadedPatches[patchNumber].nrpn_msb_reverb[i] = current_patch.nrpn_msb_reverb[i];
+*/
 }
 
+void copyPatchBuffToPatchBuff(patch_t* destPatch, patch_t* sourcePatch)
+{
+   memcpy((byte*)destPatch, (byte*)sourcePatch ,  sizeof(*destPatch)); 
+}
 
 //---------------------
 // SD card access
 //---------------------
 
-    void configureSD() {
-      char str_buf_sd[16];
-      //SPI.setMOSI(11); 
-      //SPI.setSCK(13);
-      //if (!(SD.begin(10))) // chipSelect = 10
-      if (!(SD.begin(BUILTIN_SDCARD))) // chipSelect = built-in uses default?
-      {  
-          Serial8.println("Unable to access the SD card");
-      //    loadPatchEEPROM();
-      }
-      for(int i=0;i < NUMBER_OF_PATCHES ;i++) {
-        sprintf(str_buf_sd, "%03d.PAT", i );     
-        if(SD.exists(str_buf_sd)) {
-          dataFile = SD.open(str_buf_sd);
-          dataFile.read(&loadedPatches[i], sizeof(loadedPatches[0]));
-          dataFile.close();
-          patchLoaded[i] = true;
-        } else {
-          patchLoaded[i] = false;
-        }
-      }
+void configureSD() {
+  char str_buf_sd[16];
+  if (!(SD.begin(BUILTIN_SDCARD))) // chipSelect = built-in uses default?
+  {  
+      Serial8.println("Unable to access the SD card");
+  //    loadPatchEEPROM();
+  }
+  for(int i=0;i < NUMBER_OF_PATCHES ;i++) {
+    sprintf(str_buf_sd, "%03d.PAT", i );     
+    if(SD.exists(str_buf_sd)) {
+      dataFile = SD.open(str_buf_sd);
+      dataFile.read(&loadedPatches[i], sizeof(loadedPatches[0]));
+      dataFile.close();
+      patchLoaded[i] = true;
+    } else {
+      patchLoaded[i] = false;
     }
+  }
+}
 
-    void savePatchSD(int i) {
-      char str_buf_sd[16];
-      // loadedPatches[i] = createPatch();
-      if (!patchLoaded[i]) {
-        sprintf(str_buf1,"Patch: %03d not loaded. Nothing to save.", i);
-        Serial8.println(str_buf1);
-        return;   
-      } 
-      sprintf(str_buf_sd, "%03d.PAT", i );     
-      if (SD.exists(str_buf_sd)) {
-        SD.remove(str_buf_sd);
-      }
-      dataFile = SD.open(str_buf_sd, FILE_WRITE);
-      if(!dataFile) {
-        Serial8.println("Could not create file");
-        //TODO:  hook this up:  wavplayer.play("err.wav");
-      } else {
-        Serial8.print("size: ");
-        Serial8.print(sizeof(loadedPatches[0]));
-        Serial8.println();
-        dataFile.write((byte*)&loadedPatches[i], sizeof(loadedPatches[0]));
+void savePatchSD(int i) {
+  char str_buf_sd[16];
+  // loadedPatches[i] = createPatch();
+  if (!patchLoaded[i]) {
+    sprintf(str_buf1,"Patch: %03d not loaded. Nothing to save.", i);
+    Serial8.println(str_buf1);
+    return;   
+  } 
+  sprintf(str_buf_sd, "%03d.PAT", i );     
+  if (SD.exists(str_buf_sd)) {
+    SD.remove(str_buf_sd);
+  }
+  dataFile = SD.open(str_buf_sd, FILE_WRITE);
+  if(!dataFile) {
+    Serial8.println("Could not create file");
+    //TODO:  hook this up:  wavplayer.play("err.wav");
+  } else {
+    Serial8.print("size: ");
+    Serial8.print(sizeof(loadedPatches[0]));
+    Serial8.println();
+    dataFile.write((byte*)&loadedPatches[i], sizeof(loadedPatches[0]));
 //        Serial8.write((byte*)&loadedPatches[i], sizeof(loadedPatches[0]));
-        dataFile.close();
-        Serial8.print("Written");
-      }
-    }
+    dataFile.close();
+    Serial8.print("Written");
+  }
+}
 
-    void saveCurrentPatchSD(int i) { // i is patch number to save it
-      char str_buf_sd[16];
-      // loadedPatches[i] = createPatch();
-      if (!patchLoaded[i]) {
-        sprintf(str_buf1,"Patch: %03d not loaded. can't upsate.", i);
-        Serial8.println(str_buf1);
-        return;   
-      } 
-      sprintf(str_buf_sd, "%03d.PAT", i );     
-      if (SD.exists(str_buf_sd)) {
-        SD.remove(str_buf_sd);
-      }
+void saveCurrentPatchSD(int i) { // i is patch number to save it
+  char str_buf_sd[16];
+  // loadedPatches[i] = createPatch();
+  if (!patchLoaded[i]) {
+    sprintf(str_buf1,"Patch: %03d not loaded. can't upsate.", i);
+    Serial8.println(str_buf1);
+    return;   
+  } 
+  sprintf(str_buf_sd, "%03d.PAT", i );     
+  if (SD.exists(str_buf_sd)) {
+    SD.remove(str_buf_sd);
+  }
+  dataFile = SD.open(str_buf_sd, FILE_WRITE);
+  if(!dataFile) {
+    Serial8.println("Could not create file");
+    //TODO:  hook this up:  wavplayer.play("err.wav");
+  } else {
+    Serial8.print("size: ");
+    Serial8.print(sizeof(loadedPatches[0]));
+    Serial8.println();
+    dataFile.write((byte*)&current_patch, sizeof(loadedPatches[0]));
+    dataFile.close();
+    sprintf(str_buf1,"current_patch written into %03d.PAT", i);
+    copyCurrentPatchToLoadedPatch(i);
+    Serial8.println(str_buf1);
+  }
+}
+
+void saveCoppiedPatchSD(int i) { // i is patch number to save it
+  char str_buf_sd[16];
+  // loadedPatches[i] = createPatch();
+  if (!patchLoaded[i]) {
+    sprintf(str_buf1,"Patch: %03d not loaded. can't upsate.", i);
+    Serial8.println(str_buf1);
+    return;   
+  } 
+  sprintf(str_buf_sd, "%03d.PAT", i );     
+  if (SD.exists(str_buf_sd)) {
+    SD.remove(str_buf_sd);
+  }
+  dataFile = SD.open(str_buf_sd, FILE_WRITE);
+  if(!dataFile) {
+    Serial8.println("Could not create file");
+    //TODO:  hook this up:  wavplayer.play("err.wav");
+  } else {
+    Serial8.print("size: ");
+    Serial8.print(sizeof(loadedPatches[0]));
+    Serial8.println();
+    dataFile.write((byte*)&copy_buffer_patch, sizeof(loadedPatches[0]));
+    dataFile.close();
+    sprintf(str_buf1,"copy_buffer_patch written into %03d.PAT", i);
+    copyPatchBuffToPatchBuff(&current_patch, &copy_buffer_patch);
+    Serial8.println(str_buf1);
+  }
+}
+
+void copyLoadedPatchToCopyBuffer(int sourcePatchNumber){
+ if (!patchLoaded[sourcePatchNumber]) {
+    sprintf(str_buf1,"Patch: %03d not loaded. Can't copy", sourcePatchNumber);
+    Serial8.println(str_buf1);
+    return;   
+  } 
+   memcpy((byte*)&copy_buffer_patch,(byte*)&loadedPatches[sourcePatchNumber],  sizeof(copy_buffer_patch));
+}
+
+void loadPatchSD(int i) {
+  char str_buf_sd[16];
+  if(patchLoaded[i]) {
+    Serial8.println("patch alreadey loaded");
+    setCurrentPatch(i);
+    Serial8.println("setCurrentPatch");
+    patchToSynthVariables(&current_patch);
+    Serial8.println("patchToSynthVariables");
+  } else {
+    sprintf(str_buf_sd, "%03d.PAT", i );     
+    dataFile = SD.open(str_buf_sd);
+    if(!dataFile) {
+      Serial8.println("Could not load file");
+      //TODO: hook this up wavplayer.play("err.wav");
+    } else {
+      int bytes = dataFile.read(&loadedPatches[i], sizeof(loadedPatches[0]));
+      dataFile.close();
+      Serial8.print("Loaded:"); Serial8.println(bytes, DEC);
+      patchLoaded[i] = true;
+      setCurrentPatch(i);
+      patchToSynthVariables(&current_patch);
+    }
+  }
+}
+
+void loadAllPatches() {
+  char str_buf_sd[16];
+  int n_loaded = 0;
+  for(int i=0;i < NUMBER_OF_PATCHES ;i++) {
+    sprintf(str_buf_sd, "%03d.PAT", i );     
+    if(SD.exists(str_buf_sd)) {
+      dataFile = SD.open(str_buf_sd);
+      dataFile.read(&loadedPatches[i], sizeof(loadedPatches[0]));
+      dataFile.close();
+      patchLoaded[i] = true;
+      n_loaded++;
+    } else {
+      sprintf(str_buf1,"Patch: %03d does not exist. create one from copy_buffer_patch", i);
+      Serial8.println(str_buf1);
       dataFile = SD.open(str_buf_sd, FILE_WRITE);
       if(!dataFile) {
         Serial8.println("Could not create file");
         //TODO:  hook this up:  wavplayer.play("err.wav");
+        patchLoaded[i] = false;
       } else {
         Serial8.print("size: ");
         Serial8.print(sizeof(loadedPatches[0]));
         Serial8.println();
-        dataFile.write((byte*)&current_patch, sizeof(loadedPatches[0]));
-//        Serial8.write((byte*)&current_patch, sizeof(loadedPatches[0]));
+        dataFile.write((byte*)&copy_buffer_patch, sizeof(loadedPatches[0]));
         dataFile.close();
-        sprintf(str_buf1,"current_patch written into %03d.PAT", i);
-        copyCurrentPatchToLoadedPatch(i);
+        sprintf(str_buf1,"copy_buffer_patch written into %03d.PAT", i);
+        copyPatchBuffToPatchBuff(&loadedPatches[i], &copy_buffer_patch);
+        patchLoaded[i] = true;
         Serial8.println(str_buf1);
       }
     }
-
-
-    void loadPatchSD(int i) {
-      char str_buf_sd[16];
-      if(patchLoaded[i]) {
-        Serial8.println("patch alreadey loaded");
-        setCurrentPatch(i);
-        Serial8.println("setCurrentPatch");
-        patchToSynthVariables(&current_patch);
-        Serial8.println("patchToSynthVariables");
-      } else {
-        sprintf(str_buf_sd, "%03d.PAT", i );     
-        dataFile = SD.open(str_buf_sd);
-        if(!dataFile) {
-          Serial8.println("Could not load file");
-          //TODO: hook this up wavplayer.play("err.wav");
-        } else {
-          int bytes = dataFile.read(&loadedPatches[i], sizeof(loadedPatches[0]));
-          dataFile.close();
-          Serial8.print("Loaded:"); Serial8.println(bytes, DEC);
-          patchLoaded[i] = true;
-          setCurrentPatch(i);
-          patchToSynthVariables(&current_patch);
-        }
-      }
-    }
-
-    void loadAllPatches() {
-      char str_buf_sd[16];
-      int n_loaded = 0;
-      for(int i=0;i < NUMBER_OF_PATCHES ;i++) {
-        sprintf(str_buf_sd, "%03d.PAT", i );     
-        if(SD.exists(str_buf_sd)) {
-          dataFile = SD.open(str_buf_sd);
-          dataFile.read(&loadedPatches[i], sizeof(loadedPatches[0]));
-          dataFile.close();
-          patchLoaded[i] = true;
-          n_loaded++;
-        } else {
-          patchLoaded[i] = false;
-          sprintf(str_buf1,"Patch: %03d does not exist. Nothing to load.", i);
-          Serial8.println(str_buf1);
-        }
-      }
-          sprintf(str_buf1,"loaded %03d patches.", n_loaded);
-          Serial8.println(str_buf1);
-    }
+  }
+      sprintf(str_buf1,"loaded %03d patches.", n_loaded);
+      Serial8.println(str_buf1);
+}
 
 float noiseTimeCurve(float noiseTimePercent) {
     float a = 0.0f;

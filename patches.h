@@ -12,7 +12,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #ifndef patches_h_
 #define patches_h_
 
-#define NUMBER_OF_PATCHES 100
+//#define NUMBER_OF_PATCHES 100
+#define PATCHES_PER_BANK 128
+#define NUMBER_OF_BANKS 1
+#define NUMBER_OF_PATCHES (PATCHES_PER_BANK*NUMBER_OF_BANKS)
 
 #define PATCH_STRING_SYSPOS 0x0C
 #define PATCH_STRING_LENGTH 31
@@ -179,20 +182,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 typedef struct __attribute__((packed)) Patch{
     char patch_string[32]; 
-    uint8_t nrpn_msb_osc1[NRPN_MSB_OSC1_LENGTH];
-    uint8_t nrpn_msb_osc2[NRPN_MSB_OSC2_LENGTH];
-    uint8_t nrpn_msb_osc_filt1[NRPN_MSB_OSC_FILT1_LENGTH];
-    uint8_t nrpn_msb_osc_filt2[NRPN_MSB_OSC_FILT2_LENGTH];
-    uint8_t nrpn_msb_noise_filt3[NRPN_MSB_NOISE_FILT3_LENGTH];
-    uint8_t nrpn_msb_noise_filt4[NRPN_MSB_NOISE_FILT4_LENGTH];
-    uint8_t nrpn_msb_spare[NRPN_MSB_SPARE_LENGTH];
-    uint8_t nrpn_msb_noise[NRPN_MSB_NOISE_LENGTH];
-    uint8_t nrpn_msb_common1[NRPN_MSB_COMMON1_LENGTH];
-    uint8_t nrpn_msb_common2[NRPN_MSB_COMMON2_LENGTH];
+    uint8_t nrpn_msb_osc1[NRPN_MSB_OSC1_LENGTH];  // 18
+    uint8_t nrpn_msb_osc2[NRPN_MSB_OSC2_LENGTH];  // 18
+    uint8_t nrpn_msb_osc_filt1[NRPN_MSB_OSC_FILT1_LENGTH]; //12
+    uint8_t nrpn_msb_osc_filt2[NRPN_MSB_OSC_FILT2_LENGTH]; //12
+    uint8_t nrpn_msb_noise_filt3[NRPN_MSB_NOISE_FILT3_LENGTH]; //12
+    uint8_t nrpn_msb_noise_filt4[NRPN_MSB_NOISE_FILT4_LENGTH]; //12
+    uint8_t nrpn_msb_spare[NRPN_MSB_SPARE_LENGTH]; //3 
+    uint8_t nrpn_msb_noise[NRPN_MSB_NOISE_LENGTH]; //3
+    uint8_t nrpn_msb_common1[NRPN_MSB_COMMON1_LENGTH]; //10
+    uint8_t nrpn_msb_common2[NRPN_MSB_COMMON2_LENGTH]; //3
     uint8_t nrpn_msb_chorus[NRPN_MSB_CHORUS_LENGTH];  // 9 
     uint8_t nrpn_msb_delay[NRPN_MSB_DELAY_LENGTH];    // 5 
     uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH];   // 5
-} patch_t;
+} patch_t; // 154 bytes
 
 void patchToOctOsc1(patch_t *patch); //64,0,62,66,
 void patchToSemiOsc1(patch_t *patch); //64,1,52,76,
@@ -315,10 +318,13 @@ void patchToSynthVariables(patch_t *patch);
 void printCurveMidiData();
 void printPatchValues();
 void setCurrentPatch(int patchNumber);
-void copyCurrentPatchToLoadedPatch(int patchNumber);
 void configureSD();
 void savePatchSD(int i);
 void saveCurrentPatchSD(int i); 
+void saveCoppiedPatchSD(int i); 
+void copyPatchBuffToPatchBuff(patch_t *dest, patch_t *sourc); 
+void copyCurrentPatchToLoadedPatch(int patchNumber);
+void copyLoadedPatchToCopyBuffer(int sourcePatchNumber);
 void loadPatchSD(int i);
 void loadAllPatches();
 

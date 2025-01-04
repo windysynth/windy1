@@ -175,6 +175,7 @@ extern float octaveControlFilter4;
 extern float octaveControlFilter5;
 extern float offsetNoteKeyfollow;  // 84 = C6, 72 = C5, 60 = C4
 extern float offsetNoteKeyfollowNoise;  // 84 = C6, 72 = C5, 60 = C4
+extern float offsetNoteKeyfollowPreNoise;  // 84 = C6, 72 = C5, 60 = C4
 extern float minPreNoiseNoteNumbr;  // 84 = C6, 72 = C5, 60 = C4  4000s noise stops changing below about C4
 extern const uint32_t updatedAudioSystemInterval;  // milliseconds
 extern float freqOscFilterOctaveOffset ;    // use 3 to divide FreqOscFilterN by 2^3 to allow modulation to go from -1 to +3/7 
@@ -208,6 +209,8 @@ extern float mix_lineInLR_gain_1;
 
 // current patch nrpn numbers
 extern patch_t current_patch;  // 154 bytes long
+extern patch_t copy_buffer_patch;  // 154 bytes long
+extern patch_t swap_buffer_patch;  // 154 bytes long
 
 extern const uint32_t eepromUpdateInterval;  // milliseconds
 extern uint32_t eepromPreviousMillis;
@@ -216,6 +219,8 @@ extern bool programChangeFlag; // new programChange is happening
 extern int programChangeData; // value from midi_ho
 extern bool updateEpromFlag;
 extern int current_patchNumber;
+extern int paste_patchNumber;
+extern int sourcePatchNumber;
 extern int eeprom_patchNumber;
 extern patch_t loadedPatches[];
 extern bool patchLoaded[];

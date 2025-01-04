@@ -1,0 +1,12 @@
+MenuList	KEYWORD1
+MenuClass	KEYWORD1
+getItem	KEYWORD2
+getSize	KEYWORD2
+doMenu	KEYWORD2
+setCurrentMenu	KEYWORD2
+runFunction	KEYWORD2
+getText	KEYWORD2
+displayMenu	KEYWORD2
+checkForCancel	KEYWORD2
+updateSelection	KEYWORD2
+selectionMade	KEYWORD2

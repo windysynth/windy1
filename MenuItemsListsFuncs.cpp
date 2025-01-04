@@ -111,12 +111,51 @@ MenuItem PROGMEM patchCopyMenu[2] = {
     { "Back    " , goUpOneMenu   }
    ,{ "Copy    " , patchCopyFun   }
 };
-bool patchCopyFun(){ return goUpOneMenu(); }
-MenuItem PROGMEM patchPasteMenu[2] = {
-    { "Back    " , goUpOneMenu   }
-   ,{ "Paste   " , patchPasteFun   }
+bool patchCopyFun(){
+    copyLoadedPatchToCopyBuffer(current_patchNumber);
+    return goUpOneMenu(); 
+}
+MenuItem PROGMEM patchPasteMenu[1] = {
+//    { "Back    " , goUpOneMenu   }
+   { "Paste   " , patchPasteFun   }
 };
-bool patchPasteFun(){ return goUpOneMenu(); }
+bool patchPasteFun(){ 
+  if(myMenu.updateLeafValue){
+      paste_patchNumber += myMenu.updateLeafValue;
+    if(paste_patchNumber > NUMBER_OF_PATCHES ){
+        paste_patchNumber = 0; 
+    }
+    else if(paste_patchNumber < 0 ) {
+        paste_patchNumber = NUMBER_OF_PATCHES; 
+    } 
+    if (paste_patchNumber == NUMBER_OF_PATCHES){
+        sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+    }
+    else { 
+        String ps( loadedPatches[paste_patchNumber].patch_string );
+        ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+        sprintf(myMenu.str_oledbuf, "%03d\n%s", paste_patchNumber+1, ps.c_str() );
+        Serial8.println(loadedPatches[paste_patchNumber].patch_string);
+        // load the patch 
+        if (!patchLoaded[paste_patchNumber])
+        {
+            loadPatchSD(paste_patchNumber);
+        }
+    }
+
+//    if (updateEpromFlag)
+//    {
+//        eepromCurrentMillis = millis();
+//        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+//    }
+    return true;
+ }
+  display.clearDisplay(); // erase display
+  Serial8.println(F("patchPasteFun: goto TopMenu"));
+  if(paste_patchNumber == NUMBER_OF_PATCHES){ return goUpOneMenu(); }
+  saveCoppiedPatchSD(paste_patchNumber);
+  return goUpOneMenu();
+}
 MenuItem PROGMEM patchSwapMenu[2] = {
     { "Back:\n " , goUpOneMenu   }
    ,{ "Swap:\n " , patchSwapFun   }
@@ -2388,7 +2427,7 @@ MenuList listVolAdjustMenu(volAdjustMenu, 1);
 MenuList listPatchSelectMenu(patchSelectMenu, 1);
 MenuList listPatchResetMenu(patchResetMenu, 2);
 MenuList listPatchCopyMenu(patchCopyMenu, 2);
-MenuList listPatchPasteMenu(patchPasteMenu, 2);
+MenuList listPatchPasteMenu(patchPasteMenu, 1);
 MenuList listPatchSwapMenu(patchSwapMenu, 2);
 MenuList listPatchFxMenu(patchFxMenu, 23);
 MenuList listPatchOsc1Menu(patchOsc1Menu, 18);
@@ -2555,6 +2594,7 @@ bool gotoVolAdjMenu() {
   display.clearDisplay(); // erase display
   //display.display(); // refresh display
   myMenu.setCurrentMenu(&listVolAdjustMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %ld   ", vol);
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2563,6 +2603,7 @@ bool gotoPatchSelectMenu() {
   display.clearDisplay(); // erase display
   //display.display(); // refresh display
   myMenu.setCurrentMenu(&listPatchSelectMenu);
+  myMenu.knobAcceleration = 1;
   String ps( current_patch.patch_string );
   ps.setCharAt( ps.indexOf(' '), '\n'); 
   sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
@@ -2600,54 +2641,63 @@ bool gotoPatchFxMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchFxMenu);
+  myMenu.knobAcceleration = 1;
     return true;
 }
 bool gotoPatchOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchOsc1Menu);
+  myMenu.knobAcceleration = 1;
     return true;
 }
 bool gotoPatchOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchOsc2Menu);
+  myMenu.knobAcceleration = 1;
     return true;
 }
 bool gotoPatchOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchOscFilter1Menu);
+  myMenu.knobAcceleration = 1;
     return true;
 }
 bool gotoPatchOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchOscFilter2Menu);
+  myMenu.knobAcceleration = 1;
     return true;
 }
 bool gotoPatchNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchNoiseFilter3Menu);
+  myMenu.knobAcceleration = 1;
     return true;
 }
 bool gotoPatchNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchNoiseFilter4Menu);
+  myMenu.knobAcceleration = 1;
     return true;
 }
 bool gotoPatchNoiseMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchNoiseMenu);
+  myMenu.knobAcceleration = 1;
     return true;
 }
 bool gotoPatchFormantMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchFormantMenu);
+  myMenu.knobAcceleration = 1;
   switch (current_patch.nrpn_msb_common1[CCFORMANT]) {
      case 0:
          sprintf(myMenu.str_oledbuf,"  %s", "OFF     "); break; 
@@ -2666,6 +2716,7 @@ bool gotoPatchAmpMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchAmpMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_common2[CCAMPLEVEL]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2675,6 +2726,7 @@ bool gotoPatchCommonMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchCommonMenu);
+  myMenu.knobAcceleration = 1;
     return true;
 }
 
@@ -2682,6 +2734,7 @@ bool gotoSystemAdjMenu() {
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSystemAdjMenu);
+  myMenu.knobAcceleration = 1;
   return true;
 }
 
@@ -2710,6 +2763,7 @@ bool gotoTopMenu() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
   myMenu.setCurrentMenu(&listTopMenu);
+  myMenu.knobAcceleration = 1;
   return true;
 }
 
@@ -2737,6 +2791,7 @@ bool gotoDelayLevelMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayLevelMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYLEVEL]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2747,6 +2802,7 @@ bool gotoDelayTimeLMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayTimeLMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %04d    ", 10*current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2756,6 +2812,7 @@ bool gotoDelayPongMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayPongMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYSPARE]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2765,6 +2822,7 @@ bool gotoDelayFeedbackMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayFeedbackMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2774,6 +2832,7 @@ bool gotoDelayDampMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayDampMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYDAMP]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2783,6 +2842,7 @@ bool gotoReverbLevelMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbLevelMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_reverb[CCEFFECTSREVERBLEVEL]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2792,6 +2852,7 @@ bool gotoReverbTimeMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbTimeMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %04d    ", 100*current_patch.nrpn_msb_reverb[CCEFFECTSREVERBTIME]);//114,3,10,50,//1000 to 5000 ms
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2801,6 +2862,7 @@ bool gotoReverbDensityMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbDensityMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_reverb[CCEFFECTSREVERBDENSEEARLY]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2810,6 +2872,7 @@ bool gotoReverbDampMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbDampMenu);
+  myMenu.knobAcceleration = 1;
   // -10 to +10
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_reverb[CCEFFECTSREVERBDAMP]-64);
   display.clearDisplay();
@@ -2820,6 +2883,7 @@ bool gotoChorusOnMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusOnMenu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %s    ", 
           current_patch.nrpn_msb_common1[CCCHORUSON]? " On": "Off");
   display.clearDisplay(); // erase display
@@ -2830,6 +2894,7 @@ bool gotoChorusDryMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusDryMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2839,6 +2904,7 @@ bool gotoChorusLfoFMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusLfoFMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %2.1fHz  ", (float)current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ]/10.0);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2848,6 +2914,7 @@ bool gotoChorusFeedbackMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusFeedbackMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK]-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2857,6 +2924,7 @@ bool gotoChorusDelay1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusDelay1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d mS ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDELAY1]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2866,6 +2934,7 @@ bool gotoChorusMod1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusMod1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSMOD1]-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2875,6 +2944,7 @@ bool gotoChorusWet1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusWet1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSWET1]-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2884,6 +2954,7 @@ bool gotoChorusDelay2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusDelay2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d mS ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2]);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2893,6 +2964,7 @@ bool gotoChorusMod2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusMod2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSMOD2]-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2902,6 +2974,7 @@ bool gotoChorusWet2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusWet2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSWET2]-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
@@ -2913,6 +2986,7 @@ bool gotoOctOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listOscOsc1Menu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCOCTOSC1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -2922,6 +2996,7 @@ bool gotoSemiOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSemiOsc1Menu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSEMIOSC1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -2931,6 +3006,7 @@ bool gotoCentsOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listCentsOsc1Menu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCFINEOSC1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -2940,6 +3016,7 @@ bool gotoBeatOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBeatOsc1Menu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBEATOSC1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -2949,6 +3026,7 @@ bool gotoSawOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSawOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSAWOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -2958,6 +3036,7 @@ bool gotoTriOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listTriOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCTRIOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -2967,6 +3046,7 @@ bool gotoPulseOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPulseOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPULSEOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -2976,6 +3056,7 @@ bool gotoPWOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPWOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -2985,6 +3066,7 @@ bool gotoPwmFreqOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmFreqOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWMFREQOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -2994,6 +3076,7 @@ bool gotoPwmDepthOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmDepthOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWMDEPTHOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3003,6 +3086,7 @@ bool gotoSweepTimeOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSWEEPTIMEOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3012,6 +3096,7 @@ bool gotoSweepDepthOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSWEEPDEPTHOSC1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3021,6 +3106,7 @@ bool gotoBreathAttainOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathAttainOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHATTAINOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3030,6 +3116,7 @@ bool gotoBreathDepthOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathDepthOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHDEPTHOSC1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3039,6 +3126,7 @@ bool gotoBreathThresholdOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathThresholdOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHTHRESHOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3048,6 +3136,7 @@ bool gotoBreathCurveOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHCURVEOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3057,6 +3146,7 @@ bool gotoLevelOsc1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLevelOsc1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCLEVELOSC1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3070,6 +3160,7 @@ bool gotoOctOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listOscOsc2Menu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCOCTOSC2]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3079,6 +3170,7 @@ bool gotoSemiOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSemiOsc2Menu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSEMIOSC2]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3088,6 +3180,7 @@ bool gotoCentsOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listCentsOsc2Menu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCFINEOSC2]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3097,6 +3190,7 @@ bool gotoBeatOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBeatOsc2Menu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBEATOSC2]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3106,6 +3200,7 @@ bool gotoSawOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSawOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSAWOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3115,6 +3210,7 @@ bool gotoTriOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listTriOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCTRIOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3124,6 +3220,7 @@ bool gotoPulseOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPulseOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPULSEOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3133,6 +3230,7 @@ bool gotoPWOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPWOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3142,6 +3240,7 @@ bool gotoPwmFreqOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmFreqOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWMFREQOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3151,6 +3250,7 @@ bool gotoPwmDepthOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPwmDepthOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWMDEPTHOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3160,6 +3260,7 @@ bool gotoSweepTimeOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSWEEPTIMEOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3169,6 +3270,7 @@ bool gotoSweepDepthOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSWEEPDEPTHOSC2]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3178,6 +3280,7 @@ bool gotoBreathAttainOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathAttainOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHATTAINOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3187,6 +3290,7 @@ bool gotoBreathDepthOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathDepthOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHDEPTHOSC2]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3196,6 +3300,7 @@ bool gotoBreathThresholdOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathThresholdOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHTHRESHOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3205,6 +3310,7 @@ bool gotoBreathCurveOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHCURVEOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3214,6 +3320,7 @@ bool gotoLevelOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLevelOsc2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCLEVELOSC2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3223,6 +3330,7 @@ bool gotoXFadeOsc2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listXFadeOsc2Menu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %s    ", 
           current_patch.nrpn_msb_common1[CCXFADE]? " On": "Off");
   display.clearDisplay(); // erase display
@@ -3236,6 +3344,7 @@ bool gotoLinkOscFiltersMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLinkOscFiltersMenu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf," %s ", 
     current_patch.nrpn_msb_common1[CCLINKOSCFILTERS]%2 ? " Linkded": "UnLinked"); //1 Linked, 2 UnLinked
   display.clearDisplay(); // erase display
@@ -3246,6 +3355,7 @@ bool gotoModeOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listModeOscFilter1Menu);
+  myMenu.knobAcceleration = 1;
    switch (current_patch.nrpn_msb_osc_filt1[CCMODEOSCFILTER1]) {
      case LP:
          sprintf(myMenu.str_oledbuf,"   %s    ", " LP"); break; 
@@ -3268,6 +3378,7 @@ bool gotoFreqOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFreqOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   float FreqFilterNN = (float)current_patch.nrpn_msb_osc_filt1[CCFREQOSCFILTER1];
   float FreqFilter = 440.0*pow(2, (FreqFilterNN-69.0)/12 );
   sprintf(myMenu.str_oledbuf,"%5.1fHz", FreqFilter);
@@ -3279,6 +3390,7 @@ bool gotoQOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listQOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   float QFactor = (float)current_patch.nrpn_msb_osc_filt1[CCQFACTOROSCFILTER1]/10.0;
   sprintf(myMenu.str_oledbuf,"   %2.1f   ", QFactor);
   display.clearDisplay(); // erase display
@@ -3289,6 +3401,7 @@ bool gotoKeyFollowOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listKeyFollowOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt1[CCKEYFOLLOWOSCFILTER1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3298,6 +3411,7 @@ bool gotoBreathModOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathModOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt1[CCBREATHMODOSCFILTER1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3307,6 +3421,7 @@ bool gotoBreathCurveOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt1[CCBREATHCURVEOSCFILTER1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3316,6 +3431,7 @@ bool gotoLfoFreqOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoFreqOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt1[CCLFOFREQOSCFILTER1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3325,6 +3441,7 @@ bool gotoLfoDepthOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoDepthOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt1[CCLFODEPTHOSCFILTER1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3334,6 +3451,7 @@ bool gotoLfoBreathOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoBreathOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt1[CCLFOBREATHOSCFILTER1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3343,6 +3461,7 @@ bool gotoLfoThresholdOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoThresholdOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt1[CCLFOTHRESHOSCFILTER1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3352,6 +3471,7 @@ bool gotoSweepTimeOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt1[CCSWEEPTIMEOSCFILTER1]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3361,6 +3481,7 @@ bool gotoSweepDepthOscFilter1Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthOscFilter1Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt1[CCSWEEPDEPTHOSCFILTER1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3372,6 +3493,7 @@ bool gotoModeOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listModeOscFilter2Menu);
+  myMenu.knobAcceleration = 1;
    switch (current_patch.nrpn_msb_osc_filt2[CCMODEOSCFILTER2]) {
      case LP:
          sprintf(myMenu.str_oledbuf,"   %s    ", " LP"); break; 
@@ -3394,6 +3516,7 @@ bool gotoFreqOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFreqOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   float FreqFilterNN = (float)current_patch.nrpn_msb_osc_filt2[CCFREQOSCFILTER2];
   float FreqFilter = 440.0*pow(2, (FreqFilterNN-69.0)/12 );
   sprintf(myMenu.str_oledbuf,"%5.1fHz", FreqFilter);
@@ -3405,6 +3528,7 @@ bool gotoQOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listQOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   float QFactor = (float)current_patch.nrpn_msb_osc_filt2[CCQFACTOROSCFILTER2]/10.0;
   sprintf(myMenu.str_oledbuf,"   %2.1f   ", QFactor);
   display.clearDisplay(); // erase display
@@ -3415,6 +3539,7 @@ bool gotoKeyFollowOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listKeyFollowOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt2[CCKEYFOLLOWOSCFILTER2]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3424,6 +3549,7 @@ bool gotoBreathModOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathModOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt2[CCBREATHMODOSCFILTER2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);  
@@ -3433,6 +3559,7 @@ bool gotoBreathCurveOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt2[CCBREATHCURVEOSCFILTER1]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3442,6 +3569,7 @@ bool gotoLfoFreqOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoFreqOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt2[CCLFOFREQOSCFILTER2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3451,6 +3579,7 @@ bool gotoLfoDepthOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoDepthOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt2[CCLFODEPTHOSCFILTER2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3460,6 +3589,7 @@ bool gotoLfoBreathOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoBreathOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt2[CCLFOBREATHOSCFILTER2]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3469,6 +3599,7 @@ bool gotoLfoThresholdOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoThresholdOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt2[CCLFOTHRESHOSCFILTER2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3478,6 +3609,7 @@ bool gotoSweepTimeOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt2[CCSWEEPTIMEOSCFILTER2]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3487,6 +3619,7 @@ bool gotoSweepDepthOscFilter2Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthOscFilter2Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt2[CCSWEEPDEPTHOSCFILTER2]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3499,12 +3632,18 @@ bool gotoLinkNoiseFiltersMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLinkNoiseFiltersMenu);
+  myMenu.knobAcceleration = 1;
+  sprintf(myMenu.str_oledbuf," %s ", 
+    current_patch.nrpn_msb_common1[CCLINKNOISEFILTERS]%2 ? " Linkded": "UnLinked"); //1 Linked, 2 UnLinked
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoModeNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listModeNoiseFilter3Menu);
+  myMenu.knobAcceleration = 1;
   switch (current_patch.nrpn_msb_noise_filt3[CCMODENOISEFILTER3]) {
      case LP:
          sprintf(myMenu.str_oledbuf,"   %s    ", " LP"); break; 
@@ -3527,6 +3666,7 @@ bool gotoFreqNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFreqNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   float FreqFilterNN = (float)current_patch.nrpn_msb_noise_filt3[CCFREQNOISEFILTER3];
   float FreqFilter = 440.0*pow(2, (FreqFilterNN-69.0)/12 );
   sprintf(myMenu.str_oledbuf,"%5.1fHz", FreqFilter);
@@ -3538,6 +3678,7 @@ bool gotoQNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listQNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   float QFactor = (float)current_patch.nrpn_msb_noise_filt3[CCQFACTORNOISEFILTER3]/10.0;
   sprintf(myMenu.str_oledbuf,"   %2.1f   ", QFactor);
   display.clearDisplay(); // erase display
@@ -3548,6 +3689,7 @@ bool gotoKeyFollowNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listKeyFollowNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCKEYFOLLOWNOISEFILTER3]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3557,6 +3699,7 @@ bool gotoBreathModNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathModNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCBREATHMODNOISEFILTER3]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);    
@@ -3566,6 +3709,7 @@ bool gotoBreathCurveNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCBREATHCURVENOISEFILTER3]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3575,6 +3719,7 @@ bool gotoLfoFreqNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoFreqNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCLFOFREQNOISEFILTER3]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3584,6 +3729,7 @@ bool gotoLfoDepthNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoDepthNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt3[CCLFODEPTHNOISEFILTER3]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3593,6 +3739,7 @@ bool gotoLfoBreathNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoBreathNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCLFOBREATHNOISEFILTER3]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3602,6 +3749,7 @@ bool gotoLfoThresholdNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoThresholdNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCLFOTHRESHNOISEFILTER3]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3611,6 +3759,7 @@ bool gotoSweepTimeNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCSWEEPTIMENOISEFILTER3]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3620,6 +3769,7 @@ bool gotoSweepDepthNoiseFilter3Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthNoiseFilter3Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCSWEEPDEPTHNOISEFILTER3]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3631,6 +3781,7 @@ bool gotoModeNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listModeNoiseFilter4Menu);
+  myMenu.knobAcceleration = 1;
     switch (current_patch.nrpn_msb_noise_filt4[CCMODENOISEFILTER4]) {
      case LP:
          sprintf(myMenu.str_oledbuf,"   %s    ", " LP"); break; 
@@ -3653,6 +3804,7 @@ bool gotoFreqNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFreqNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   float FreqFilterNN = (float)current_patch.nrpn_msb_noise_filt4[CCFREQNOISEFILTER4];
   float FreqFilter = 440.0*pow(2, (FreqFilterNN-69.0)/12 );
   sprintf(myMenu.str_oledbuf,"%5.1fHz", FreqFilter);
@@ -3664,6 +3816,7 @@ bool gotoQNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listQNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   float QFactor = (float)current_patch.nrpn_msb_noise_filt4[CCQFACTORNOISEFILTER4]/10.0;
   sprintf(myMenu.str_oledbuf,"   %2.1f   ", QFactor);
   display.clearDisplay(); // erase display
@@ -3674,6 +3827,7 @@ bool gotoKeyFollowNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listKeyFollowNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt4[CCKEYFOLLOWNOISEFILTER4]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3683,6 +3837,7 @@ bool gotoBreathModNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathModNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt4[CCBREATHMODNOISEFILTER4]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);    
@@ -3692,6 +3847,7 @@ bool gotoBreathCurveNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBreathCurveNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt4[CCBREATHCURVENOISEFILTER4]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3701,6 +3857,7 @@ bool gotoLfoFreqNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoFreqNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt4[CCLFOFREQNOISEFILTER4]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3710,6 +3867,7 @@ bool gotoLfoDepthNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoDepthNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt4[CCLFODEPTHNOISEFILTER4]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3719,6 +3877,7 @@ bool gotoLfoBreathNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoBreathNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt4[CCLFOBREATHNOISEFILTER4]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3728,6 +3887,7 @@ bool gotoLfoThresholdNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listLfoThresholdNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt4[CCLFOTHRESHNOISEFILTER4]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3737,6 +3897,7 @@ bool gotoSweepTimeNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepTimeNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt4[CCSWEEPTIMENOISEFILTER4]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3746,6 +3907,7 @@ bool gotoSweepDepthNoiseFilter4Menu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listSweepDepthNoiseFilter4Menu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt4[CCSWEEPDEPTHNOISEFILTER4]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3757,6 +3919,7 @@ bool gotoNoiseTimeMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listNoiseTimeMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise[CCNOISETIME]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3766,6 +3929,7 @@ bool gotoNoiseBreathMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listNoiseBreathMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise[CCNOISEBREATHCURVE]-64);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3775,6 +3939,7 @@ bool gotoNoiseLevelMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listNoiseLevelMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise[CCNOISELEVEL]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3785,6 +3950,7 @@ bool gotoKeyTriggerMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listKeyTriggerMenu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"  %s  ", 
       current_patch.nrpn_msb_common1[CCKEYTRIGGER]? "Single": "  Mult");
   display.clearDisplay(); // erase display
@@ -3795,6 +3961,7 @@ bool gotoOctButtonLevelMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listOctButtonLevelMenu);
+  myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_common2[CCOCTBUTTONLEVEL]);
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3804,6 +3971,7 @@ bool gotoBendRangeMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBendRangeMenu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_common1[CCBENDRANGE]); // 0 12 semitones
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
@@ -3813,6 +3981,7 @@ bool gotoBendStepMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listBendStepMenu);
+  myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %s    ", 
       current_patch.nrpn_msb_common1[CCBENDSTEP]? " On": "Off");
   display.clearDisplay(); // erase display

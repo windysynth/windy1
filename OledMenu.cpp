@@ -107,8 +107,15 @@ bool OledMenu::checkButtonsAndKnobs(){
     }
     newKnob_temp = knob.read()/4; //don't need 4X counting mode, so integer div by 4
     newKnob = newKnob_temp > 0 ? 1 : newKnob_temp < 0 ? -1 : 0; 
-    if (newKnob){
+    if (newKnob != 0){
         knob.write(0);
+        uint32_t tNOW = millis();
+        if(tNOW - lastTimeKnobMoved > knobSlowTime){
+            lastTimeKnobMoved = tNOW;
+            return true;
+        }
+        newKnob *= knobAcceleration;
+        lastTimeKnobMoved = tNOW;
         return true;
     } else { return false; }
 }

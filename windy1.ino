@@ -59,7 +59,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define BREATH_CC_EEPROM_ADDR ( (int)24 )
 
 //------------ includes -------------------------------
-#include <MenuClass.h>
+//#include <MenuClass.h>
+#include "MenuClass.h"
 #include "OledMenu.h"
 #include "globals.h"
 #include "MenuItemsListsFuncs.h"
@@ -506,8 +507,10 @@ void setup() {
     sgtl5000_1.unmuteHeadphone();
     sgtl5000_1.volume(0.80);
     
-    AudioMemory(540);  //TODO: how much AudioMemory do I need? (delay 2.9ms per block for 1270/2.9 = 438
-    AudioMemory_F32(20);
+    //AudioMemory(540);  //TODO: how much AudioMemory do I need? (delay 2.9ms per block for 1270/2.9 = 438
+    //AudioMemory_F32(20);
+    AudioMemory(100);  //TODO: how much AudioMemory do I need? (delay 2.9ms per block for 1270/2.9 = 438
+    AudioMemory_F32(200);
     AudioNoInterrupts();
     dc_pwOsc1.amplitude(PwOsc1); // default 50% dutycycle
     sine_lfoOsc1.amplitude(PwmDepthOsc1);
@@ -1143,7 +1146,7 @@ void loop()
                     + SemiOsc1+FineOsc1 + FineTuneCentsf + Transposef + Octavef;
     //noteNumberFilter1 = dc_portatimef.read()*128 + OctOsc1*12.0 + SemiOsc1+FineOsc1;
     //noteNumberFilter1 = dc_portatimef.read()*128 + SemiOsc1+FineOsc1;
-    noteNumberFilter1 = dc_portatimef.read()*128 + FineTuneCentsf + Transposef + Octavef;
+    noteNumberFilter1 = dc_portatimef.read()*128.0f + FineTuneCentsf + Transposef + Octavef;
     noteNumberOsc2 = porta_step ? round(dc_portatime.read()*128.0) : dc_portatime.read()*128;
     noteNumberOsc2 = BendStep ? round( noteNumberOsc2 + BendRange * dc_pitchbend.read() )
                                      : noteNumberOsc2 + BendRange * dc_pitchbend.read();
@@ -1153,13 +1156,14 @@ void loop()
     //noteNumberFilter2 = dc_portatimef.read()*128 + SemiOsc2+FineOsc2;
     noteFreqOsc1 = 440.0 * pow(2, (noteNumberOsc1-69.0)/12 );  // 69 is note number for A4=440Hz
     noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2-69.0)/12 );  // 69 is note number for A4=440Hz
-    noteFreqFilter5 = 440.0 * pow(2, (min(60,min(noteNumberOsc1,noteNumberOsc2))-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
+    //noteFreqFilter5 = 440.0 * pow(2, (min(60,min(noteNumberOsc1,noteNumberOsc2))-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
+    noteFreqFilter5 = 440.0 * pow(2, (min(60,min(noteNumberOsc1,noteNumberOsc2))-69.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
     //noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
     keyfollowFilter1 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter1/144.0); //60 is C4   
     keyfollowFilter2 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter2/144.0); //60 is C4   
-    keyfollowFilter3 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowNoiseFilter3/144.0); //60 is C4   
-    keyfollowFilter4 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowNoiseFilter4/144.0); //60 is C4   
-    keyfollowFilterPreNoise = pow(2, ( (noteNumberFilter1 < minPreNoiseNoteNumbr ? minPreNoiseNoteNumbr : noteNumberFilter1)- offsetNoteKeyfollowNoise )
+    keyfollowFilter3 = pow(2, (noteNumberFilter1-offsetNoteKeyfollowNoise)*KeyFollowNoiseFilter3/144.0); //60 is C4   
+    keyfollowFilter4 = pow(2, (noteNumberFilter1-offsetNoteKeyfollowNoise)*KeyFollowNoiseFilter4/144.0); //60 is C4   
+    keyfollowFilterPreNoise = pow(2, ( (noteNumberFilter1 < minPreNoiseNoteNumbr ? minPreNoiseNoteNumbr : noteNumberFilter1)- offsetNoteKeyfollowPreNoise )
                                 *KeyFollowPreNoiseFilter/144.0); //72 is C5 
     wfmod_sawOsc1.frequency(noteFreqOsc1);
     wfmod_triOsc1.frequency(noteFreqOsc1);
@@ -1445,7 +1449,7 @@ float piecewise_curve_func(float x, CurveLines fcl){
 
 float log_pot_curve(float x, float Ymid) {
    // y = a*b^x - a; where b = (1/Ymid-1)^2, a = 1/(b-1);
-   if (Ymid > 0.501f && Ymid < 0.499f) { return x; }
+   if (Ymid > 0.499f && Ymid < 0.501f) { return x; }
    float b = pow(1.0f/Ymid - 1.0f,2.0f);
    return (pow(b,x)-1.0f)/(b-1.0f);
 }

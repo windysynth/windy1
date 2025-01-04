@@ -1,6 +1,7 @@
 #pragma once
 #include <stack>
-#include <MenuClass.h>
+//#include <MenuClass.h>
+#include "MenuClass.h"
 //#include "globals.h"
 
 
@@ -39,6 +40,9 @@ public:
   bool shortKnobButtonPress = false; 
   bool reDoMenu = false;
   int32_t newKnob = 0;
+  uint32_t lastTimeKnobMoved = 0;
+  uint32_t knobSlowTime = 150; 
+  int32_t knobAcceleration = 1; // set this in goto<name>Fun for <name> menu
   int updateSelection(); // checks up there is an update to selection
   int updateLeafValue = 0;
   bool selectionMade(); // Checks if a selection has been made
