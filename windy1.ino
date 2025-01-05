@@ -208,8 +208,8 @@ AudioEffectEnvelope      env_squelchL; //xy=2583.14990234375,1556.050048828125
 AudioConvert_F32toI16           Float2IntR; //xy=2165.9503173828125,1731.6500244140625
 AudioConvert_F32toI16           Float2IntL; //xy=2170.9503173828125,1609.6500244140625
 AudioFilterStateVariable filter5;        //xy=2289.333251953125,1137
-AudioFilterStateVariable filterPreMixLPR; //xy=2347.3336181640625,1738
-AudioFilterStateVariable filterPreMixLPL; //xy=2357.3333740234375,1614
+//AudioFilterStateVariable filterPreMixLPR; //xy=2347.3336181640625,1738
+//AudioFilterStateVariable filterPreMixLPL; //xy=2357.3333740234375,1614
 AudioFilterStateVariable filterPreMixHPR; //xy=2533.3336181640625,1732
 AudioFilterStateVariable filterPreMixHPL; //xy=2538.333297729492,1606
 AudioInputI2S            i2s2;           //xy=2541.333297729492,1670
@@ -376,11 +376,13 @@ AudioConnection_F32          patchCord170(mix_pongL_F32, 0, Float2IntL, 0);
 AudioConnection          patchCord145(mix_ntcFilter2, fir_formant);
 AudioConnection          patchCord146(fir_formant, 0, mix_Amp, 0);
 AudioConnection          patchCord147(mix_Amp, env_squelch);
-AudioConnection          patchCord148(Float2IntR, 0, filterPreMixLPR, 0);
-AudioConnection          patchCord149(Float2IntL, 0, filterPreMixLPL, 0);
+//AudioConnection          patchCord148(Float2IntR, 0, filterPreMixLPR, 0);
+//AudioConnection          patchCord149(Float2IntL, 0, filterPreMixLPL, 0);
 AudioConnection          patchCord150(env_squelch, 0, filter5, 0);
-AudioConnection          patchCord151(filterPreMixLPR, 0, env_squelchR, 0);
-AudioConnection          patchCord152(filterPreMixLPL, 0, env_squelchL, 0);
+//AudioConnection          patchCord151(filterPreMixLPR, 0, env_squelchR, 0);
+//AudioConnection          patchCord152(filterPreMixLPL, 0, env_squelchL, 0);
+AudioConnection          patchCord151(Float2IntR, 0, env_squelchR, 0);
+AudioConnection          patchCord152(Float2IntL, 0, env_squelchL, 0);
 AudioConnection          patchCord153(filter5, 2, mix_chorus_fb, 0);
 AudioConnection          patchCord154(filter5, 2, mix_chorus_dry, 0);
 AudioConnection          patchCord155(env_squelchR, 0, filterPreMixHPR, 0);
@@ -590,12 +592,12 @@ void setup() {
     filterPreMixHPR.frequency(200);
     filterPreMixHPR.resonance(0.5);
     filterPreMixHPR.octaveControl(1.0);
-    filterPreMixLPL.frequency(20500);  // LP filter
-    filterPreMixLPL.resonance(0.707);
-    filterPreMixLPL.octaveControl(1.0);
-    filterPreMixLPR.frequency(20500);  // LP filter
-    filterPreMixLPR.resonance(0.707);
-    filterPreMixLPR.octaveControl(1.0);
+//    filterPreMixLPL.frequency(20500);  // LP filter
+//    filterPreMixLPL.resonance(0.707);
+//    filterPreMixLPL.octaveControl(1.0);
+//    filterPreMixLPR.frequency(20500);  // LP filter
+//    filterPreMixLPR.resonance(2.0);
+//    filterPreMixLPR.octaveControl(1.0);
     //ws_threshOsc1.shape(waveShape_threshOsc1, 3);
     //ws_threshOsc2.shape(waveShape_threshOsc2, 3);
 
@@ -1157,7 +1159,8 @@ void loop()
     noteFreqOsc1 = 440.0 * pow(2, (noteNumberOsc1-69.0)/12 );  // 69 is note number for A4=440Hz
     noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2-69.0)/12 );  // 69 is note number for A4=440Hz
     //noteFreqFilter5 = 440.0 * pow(2, (min(60,min(noteNumberOsc1,noteNumberOsc2))-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
-    noteFreqFilter5 = 440.0 * pow(2, (min(60,min(noteNumberOsc1,noteNumberOsc2))-69.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
+    //noteFreqFilter5 = 440.0 * pow(2, (min(60,min(noteNumberOsc1,noteNumberOsc2))-69.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
+    noteFreqFilter5 = 440.0 * pow(2, (min(noteNumberOsc1,noteNumberOsc2)-69.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
     //noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
     keyfollowFilter1 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter1/144.0); //60 is C4   
     keyfollowFilter2 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter2/144.0); //60 is C4   

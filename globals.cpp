@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.82"};
+String verNum_str = {"0.0.83"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -176,7 +176,7 @@ float gammaDelayFeedback = 1.5; //TODO: find out correct value
 float maxTimeNoise = 1000;  // 1000 ms
 float TimeNoiseGamma = 4.0;  
 float maxNoiseLevel = 0.375; //0.23;  
-float logPotYmidLevelNoise = 0.8f;
+float logPotYmidLevelNoise = 0.55f;
 float minGamma = 0.1;
 float maxGamma = 2.0;
 float maxReverbLevel = 0.3f; //0.3;
