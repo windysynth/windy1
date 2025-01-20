@@ -325,6 +325,7 @@ void saveCoppiedPatchSD(int i);
 void copyPatchBuffToPatchBuff(patch_t *dest, patch_t *sourc); 
 void copyCurrentPatchToLoadedPatch(int patchNumber);
 void copyLoadedPatchToCopyBuffer(int sourcePatchNumber);
+void copyCurrentPatchToCopyBuffer(void);
 void loadPatchSD(int i);
 void loadAllPatches();
 

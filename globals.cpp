@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.83"};
+String verNum_str = {"0.0.84"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -58,7 +58,7 @@ float dc_breathNoiseFilter3_amp = 0.0;
 float dc_breathNoiseFilter4_amp = 0.0;
 float dc_breathFilterN_rampTime = 8.0;
 float dc_breathNoise_amp = 0.0;
-float dc_breathNoise_rampTime =  4.0;
+float dc_breathNoise_rampTime =  0.0;
 float dc_breathThreshOsc1_amp = 0.0;
 float dc_breathThreshOsc2_amp = 0.0;
 float dc_breathSweepOscN_rampTime = 4.0;
@@ -109,7 +109,7 @@ int32_t breath_cc = 2;  // can be 1, 2, 7 or 11 for cc01, cc02, etc. (default cc
 int eeprom_breath_cc = 2;
 
 // synth variable limits and references
-float maxPwmLfoFreq = 10.0;         // 4000s is 10 Hz at 100%
+float maxPwmLfoFreq = 5.6f;         // 4000s is 10 Hz at 100%
 float maxPwmDepthOsc = 0.50;        // 4000s is +/- 25% at 100% depth
 float maxSweepTimeOsc = 500.0;       // TODO: set this to match 4000s
 float sweepTimeOscGamma = 3.50;       // TODO: adjust this to match 4000s
@@ -125,11 +125,7 @@ float maxSweepDepthOscFilter = 0.70;  	//72,9,0,127,
 //                            -4.0/16.0, -3.0/16.0, -2.0/16.0, -1.0/16.0, 0.0, 1.0/16.0, 2.0/16.0, 
 //                            3.0/16.0, 4.0/16.0, 5.0/16.0, 6.0/16.0, 7.0/16.0, 8.0/16.0, 9.0/16.0, 
 //                            10.0/16.0, 11.0/16.0, 12.0/16.0, 13.0/16.0, 13.5/16.0, 13.75/16.0, 14.0/16.0};
-float WAVESHAPER_ARRAY[] = {-16.0/16.0, -15.0/16.0, -14.0/16, -13.0/16.0, -12.0/16.0,-11.0/16.0, 
-                            -10.0/16.0, -9.0/16.0, -8.0/16.0, -7.0/16.0, -6.0/16.0, -5.0/16.0, 
-                            -4.0/16.0, -3.0/16.0, -2.0/16.0, -1.0/16.0, 0.0, 1.0/16.0, 2.0/16.0, 
-                            3.0/16.0, 4.0/16.0, 5.0/16.0, 6.0/16.0, 7.0/16.0, 8.0/16.0, 9.0/16.0, 
-                            10.0/16.0, 11.0/16.0, 12.0/16.0, 13.0/16.0, 14.0/16.0, 15.0/16.0, 16.0/16.0};
+//float WS_PWOSC_ARRAY[] = {};
 
 
 float maxLfoFreqFilter1 = 100.0;
@@ -159,7 +155,8 @@ float octaveControlFilter2 = 8.0;
 float octaveControlFilter3 = 8.0;
 float octaveControlFilter4 = 8.0;
 float octaveControlFilter5 = 8.0;
-float offsetNoteKeyfollow = 48.0; //60.0 // 84 = C6, 72 = C5, 60 = C4
+float octaveControlPreNoiseFilter = 1.0;
+float offsetNoteKeyfollow = 60.0; // 84 = C6, 72 = C5, 60 = C4
 float offsetNoteKeyfollowNoise = 60.0;  // 84 = C6, 72 = C5, 60 = C4
 float offsetNoteKeyfollowPreNoise = 60.0;  // 84 = C6, 72 = C5, 60 = C4
 float minPreNoiseNoteNumbr = 60.0;  // 84 = C6, 72 = C5, 60 = C4  4000s noise stops changing below about C4
@@ -176,7 +173,7 @@ float gammaDelayFeedback = 1.5; //TODO: find out correct value
 float maxTimeNoise = 1000;  // 1000 ms
 float TimeNoiseGamma = 4.0;  
 float maxNoiseLevel = 0.375; //0.23;  
-float logPotYmidLevelNoise = 0.55f;
+float logPotYmidLevelNoise = 0.7f;
 float minGamma = 0.1;
 float maxGamma = 2.0;
 float maxReverbLevel = 0.3f; //0.3;
@@ -284,6 +281,7 @@ float OctOsc1 = 0;      //64,0,62,66,
 float SemiOsc1 = 0.0;     //64,1,52,76, -12 to +12
 float FineOsc1 = 0.0;  	//64,2,14,114, -50cents/100 to +50cents/100
 float BeatOsc1 = 0.0;  	//64,3,0,127, 0 to 1.0
+float BeatMax = 5.33f;  	
 float SawOsc1 = 0.0;  	//64,5,0,127, 0 to 1.0
 float logPotYmidWaveN = 0.50f;
 float TriOsc1 = 1.0;  	//64,6,0,127, 0 to 1.0
@@ -300,8 +298,10 @@ float BreathCurveOsc1 = 0.7;  	//64,15,0,127,
 CurveLines BreathOscCurveLines1 = {0.0f, 1.0f, 1.0f};
 float BreathThreshOsc1 = 0;  	//64,16,0,127,
 float LevelOsc1 = 0;  		//64,17,0,127,
-float LevelOscN_HeadRoom = 1.0f/2.75; //1.0f/2.2f;  //extraAmpFactor //64,17,0,127,
-float logPotYmidLevelOscN = 0.80f;
+float LimiterAmount = 0.0; // 0 <= LimiterAmout <= 0.5, where 0 is linear
+//float LevelOscN_HeadRoom = 1.0f/2.75; //1.0f/2.2f;  //extraAmpFactor //64,17,0,127,
+float LevelOscN_HeadRoom = 1.0f/1.375; //1.0f/2.2f;  //extraAmpFactor //64,17,0,127,
+float logPotYmidLevelOscN = 0.50f; // 0.5 is linear, 0.8 means at 0.5 in you get 0.8 out
 float Amp_HeadRoom = 1.0f;  		//64,17,0,127,
 float OctOsc2 = 0;  	//65,0,62,66,
 float SemiOsc2 = 0;  	//65,1,52,76,
@@ -382,12 +382,12 @@ float BreathCurveNoiseFilter4 = 1.0;  	//75,11,0,127, TODO: hook this up
 CurveLines BreathNoiseFiltCurveLines4 = {0.0f, 1.0f, 1.0f};
 float KeyFollowPreNoiseFilter = 5;  // TODO: match 4000s
 float keyfollowFilterPreNoise = 1.0; 
-float FreqPreNoiseFilter = 3000.0; // TODO: match 4000s
+float FreqPreNoiseFilter = 1500.0f; // TODO: match 4000s
 float NoiseTime = 0.0;  	//80,0,0,127,
 float TimeNoiseAmp = 1.0;  	//80,0,0,127,
 float NoiseBreathCurve = 1.0;  	//80,1,0,127,
 CurveLines NoiseBreathCurveLines = {0.0f, 1.0f, 1.0f};
-float NoiseLevel = 1.0;  	//80,2,0,127,
+float NoiseLevel = maxNoiseLevel;  	//80,2,0,127,
 float BendRange = 2.0;  	//81,0,0,12,// num semitones
 bool BendStep = false;  	//81,1,0,1,//0=off 1=on
 float VibratoPitch = 0;  	//81,2,0,127,
@@ -401,6 +401,7 @@ bool ChorusOn = 1;
 float VibratoAmp = 0;  	    //88,0,0,127,
 float AmpLevel = 0.5;  	    //88,1,0,127,
 float mix_Amp_gain_0 =  AmpLevel*Amp_HeadRoom;
+float mix_Amp_gain_1 =  1.0f;
 float OctButtonLevel = 0;  	    //88,2,0,127,
 float EffectsChorusDelay1 = 0;  //112,0,0,127,
 float EffectsChorusMod1 = 0;  	//112,1,0,127,

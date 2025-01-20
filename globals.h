@@ -144,7 +144,7 @@ extern float sweepTimeNoiseFilterGamma;       // TODO: adjust this to match 4000
 extern float maxSweepDepthFilter;   // 7/8 = 0.875 (because new max filter modulation is 8 octaves) TODO: set this to match 4000s
 extern float maxSweepDepthOscFilter;  	//72,9,0,127,
 
-extern float WAVESHAPER_ARRAY[]; 
+//extern float WS_PWOSC_ARRAY[]; 
 
 extern float maxLfoFreqFilter1;
 extern float maxLfoFreqFilter2;
@@ -173,6 +173,7 @@ extern float octaveControlFilter2;
 extern float octaveControlFilter3;
 extern float octaveControlFilter4;
 extern float octaveControlFilter5;
+extern float octaveControlPreNoiseFilter;
 extern float offsetNoteKeyfollow;  // 84 = C6, 72 = C5, 60 = C4
 extern float offsetNoteKeyfollowNoise;  // 84 = C6, 72 = C5, 60 = C4
 extern float offsetNoteKeyfollowPreNoise;  // 84 = C6, 72 = C5, 60 = C4
@@ -234,6 +235,7 @@ extern float OctOsc1;      //64,0,62,66,
 extern float SemiOsc1;     //64,1,52,76, -12 to +12
 extern float FineOsc1;  	//64,2,14,114, -50cents/100 to +50cents/100
 extern float BeatOsc1;  	//64,3,0,127, 0 to 1.0
+extern float BeatMax;  	
 extern float SawOsc1;  	//64,5,0,127, 0 to 1.0
 extern float logPotYmidWaveN;
 extern float TriOsc1;  	//64,6,0,127, 0 to 1.0
@@ -255,6 +257,7 @@ extern float BreathCurveOsc1;  	//64,15,0,127,
 extern CurveLines BreathOscCurveLines1;
 extern float BreathThreshOsc1;  	//64,16,0,127,
 extern float LevelOsc1;  		//64,17,0,127,
+extern float LimiterAmount;
 extern float LevelOscN_HeadRoom;  		//64,17,0,127,
 extern float logPotYmidLevelOscN;
 extern float Amp_HeadRoom;  		//64,17,0,127,
@@ -356,6 +359,7 @@ extern bool ChorusOn;
 extern float VibratoAmp;  	    //88,0,0,127,
 extern float AmpLevel;  	    //88,1,0,127,
 extern float mix_Amp_gain_0;
+extern float mix_Amp_gain_1;
 extern float OctButtonLevel;  	    //88,2,0,127,
 extern float EffectsChorusDelay1;  //112,0,0,127,
 extern float EffectsChorusMod1;  	//112,1,0,127,

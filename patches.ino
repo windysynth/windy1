@@ -12,10 +12,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "patches.h"
 #include <SD.h>
 
-void patchToOctOsc1(patch_t *patch) {OctOsc1 = (float)patch->nrpn_msb_osc1[CCOCTOSC1]-64.0;} //64,0,62,66,
-void patchToSemiOsc1(patch_t *patch) {SemiOsc1 = (float)patch->nrpn_msb_osc1[CCSEMIOSC1]-64.0;} //64,1,52,76,
-void patchToFineOsc1(patch_t *patch) {FineOsc1 = ((float)patch->nrpn_msb_osc1[CCFINEOSC1]-64.0)/100.0;} //64,2,14,114, -50 to +50 cents
-void patchToBeatOsc1(patch_t *patch) {BeatOsc1 = ((float)patch->nrpn_msb_osc1[CCBEATOSC1]-64.0)/64.0;}  	//64,3,0,127,
+void patchToOctOsc1(patch_t *patch) {OctOsc1 = (float)patch->nrpn_msb_osc1[CCOCTOSC1]-64.0f;} //64,0,62,66,
+void patchToSemiOsc1(patch_t *patch) {SemiOsc1 = (float)patch->nrpn_msb_osc1[CCSEMIOSC1]-64.0f;} //64,1,52,76,
+void patchToFineOsc1(patch_t *patch) {FineOsc1 = ((float)patch->nrpn_msb_osc1[CCFINEOSC1]-64.0f)/100.0f;} //64,2,14,114,-50 to +50 cents
+void patchToBeatOsc1(patch_t *patch) {BeatOsc1 = ((float)patch->nrpn_msb_osc1[CCBEATOSC1]-64.0f)/64.0f*BeatMax;} //64,3,0,127, -5.33hz to +5.33hz
 void patchToSawOsc1(patch_t *patch) {SawOsc1 = log_pot_curve( (float)patch->nrpn_msb_osc1[CCSAWOSC1]*DIV127, logPotYmidWaveN);} 	//64,5,0,127,
 void patchToTriOsc1(patch_t *patch) {TriOsc1 = log_pot_curve( (float)patch->nrpn_msb_osc1[CCTRIOSC1]*DIV127, logPotYmidWaveN);}	//64,6,0,127,
 void patchToPulseOsc1(patch_t *patch) {PulseOsc1 = log_pot_curve( (float)patch->nrpn_msb_osc1[CCPULSEOSC1]*DIV127, logPotYmidWaveN);} //64,7,0,127,
@@ -30,17 +30,17 @@ void patchToBreathAttainOsc1(patch_t *patch) {BreathAttainOsc1 = (float)patch->n
 void patchToBreathOscCurveLines1(patch_t *patch) {BreathOscCurveLines1 = gen_osc_curve_lines(((float)patch->nrpn_msb_osc1[CCBREATHCURVEOSC1])*DIV127);}	//64,15,0,127,
 void patchToBreathThreshOsc1(patch_t *patch) {BreathThreshOsc1 = (float)patch->nrpn_msb_osc1[CCBREATHTHRESHOSC1]*DIV127;} //64,16,0,127,
 void patchToLevelOsc1(patch_t *patch) {LevelOsc1 = log_pot_curve( (float)patch->nrpn_msb_osc1[CCLEVELOSC1]*DIV127, logPotYmidLevelOscN) ;} //64,17,0,127,
-void patchToOctOsc2(patch_t *patch) {OctOsc2 = (float)patch->nrpn_msb_osc2[CCOCTOSC2]-64.0;}  //65,0,62,66,
-void patchToSemiOsc2(patch_t *patch) {SemiOsc2 = (float)patch->nrpn_msb_osc2[CCSEMIOSC2]-64.0;} //64,1,52,76,
-void patchToFineOsc2(patch_t *patch) {FineOsc2 = ((float)patch->nrpn_msb_osc2[CCFINEOSC2]-64.0)/100.0;} //64,2,14,114, -50 to +50 cents
-void patchToBeatOsc2(patch_t *patch) {BeatOsc2 = ((float)patch->nrpn_msb_osc2[CCBEATOSC2]-64.0)/64.0;}  	//64,3,0,127,
+void patchToOctOsc2(patch_t *patch) {OctOsc2 = (float)patch->nrpn_msb_osc2[CCOCTOSC2]-64.0f;}  //65,0,62,66,
+void patchToSemiOsc2(patch_t *patch) {SemiOsc2 = (float)patch->nrpn_msb_osc2[CCSEMIOSC2]-64.0f;} //64,1,52,76,
+void patchToFineOsc2(patch_t *patch) {FineOsc2 = ((float)patch->nrpn_msb_osc2[CCFINEOSC2]-64.0f)/100.0f;} //64,2,14,114, -50 to +50 cents
+void patchToBeatOsc2(patch_t *patch) {BeatOsc2 = ((float)patch->nrpn_msb_osc2[CCBEATOSC2]-64.0f)/64.0f*BeatMax;}  	//64,3,0,127,
 void patchToSawOsc2(patch_t *patch) {SawOsc2 = log_pot_curve( (float)patch->nrpn_msb_osc2[CCSAWOSC2]*DIV127, logPotYmidWaveN);} 	//64,5,0,127,
 void patchToTriOsc2(patch_t *patch) {TriOsc2 = log_pot_curve( (float)patch->nrpn_msb_osc2[CCTRIOSC2]*DIV127, logPotYmidWaveN);}	//64,6,0,127,
 void patchToPulseOsc2(patch_t *patch) {PulseOsc2 = log_pot_curve( (float)patch->nrpn_msb_osc2[CCPULSEOSC2]*DIV127, logPotYmidWaveN);} //64,7,0,127,
 void patchToPwOsc2(patch_t *patch) {PwOsc2 = (float)patch->nrpn_msb_osc2[CCPWOSC2]*DIV127+PwOffsetOsc2;} //64,8,0,127,  GUI 0 = 50%
 void patchToPwmFreqOsc2(patch_t *patch) {PwmFreqOsc2 = (float)patch->nrpn_msb_osc2[CCPWMFREQOSC2]*DIV127*maxPwmLfoFreq;}  	//64,9,0,127,
 void patchToPwmDepthOsc2(patch_t *patch) {PwmDepthOsc2 = (float)patch->nrpn_msb_osc2[CCPWMDEPTHOSC2]*DIV127;} //64,10,0,127,  
-void patchToSweepDepthOsc2(patch_t *patch) {SweepDepthOsc2 = ((float)patch->nrpn_msb_osc2[CCSWEEPDEPTHOSC2]-64.0)/64.0;} //64,11,0,127,
+void patchToSweepDepthOsc2(patch_t *patch) {SweepDepthOsc2 = ((float)patch->nrpn_msb_osc2[CCSWEEPDEPTHOSC2]-64.0f)/64.0f;} //64,11,0,127,
 void patchToSweepTimeOsc2(patch_t *patch) {SweepTimeOsc2 = sweepTimeOscCurve( (float)patch->nrpn_msb_osc2[CCSWEEPTIMEOSC2]*DIV127);} //64,12,0,127,
 void patchToBreathDepthOsc2(patch_t *patch) {BreathDepthOsc2 = ((float)patch->nrpn_msb_osc2[CCBREATHDEPTHOSC2]-64.0)/64.0;}	//64,13,0,127,
 void patchToBreathAttainOsc2(patch_t *patch) {BreathAttainOsc2 = (float)patch->nrpn_msb_osc2[CCBREATHATTAINOSC2]*DIV127;} //64,14,0,127,
@@ -53,16 +53,16 @@ void patchToFreqOscFilter1(patch_t *patch) {
     // 69 is note number for A4=440Hz ;  	
     float FreqOscFilter1NN = (float)patch->nrpn_msb_osc_filt1[CCFREQOSCFILTER1];  //72,1,36,124,note# 36(c2) to 124(e9)
     FreqOscFilter1BModFactor  = FreqOscFilter1NN/96.0f;//(when slider = 96 (c7), BModFactor is 1.0) 
-    FreqOscFilter1 = 440.0*pow(2, (FreqOscFilter1NN-69.0)/12 );  //72,1,36,124,note# 36(c2) to 124(e9)
+    FreqOscFilter1 = 440.0f*pow(2, (FreqOscFilter1NN-69.0)/12 );  //72,1,36,124,note# 36(c2) to 124(e9)
 }
-void patchToQFactorOscFilter1(patch_t *patch) {QFactorOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCQFACTOROSCFILTER1]/10.0;}	//72,2,5,127,"// 5=0.5, 127=12.7"
-void patchToKeyFollowOscFilter1(patch_t *patch) {KeyFollowOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCKEYFOLLOWOSCFILTER1]-64.0);} //72,3,52,88,// -12 to +24 num semi tones
+void patchToQFactorOscFilter1(patch_t *patch) {QFactorOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCQFACTOROSCFILTER1]/10.0f;}	//72,2,5,127,"// 5=0.5, 127=12.7"
+void patchToKeyFollowOscFilter1(patch_t *patch) {KeyFollowOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCKEYFOLLOWOSCFILTER1]-64.0f);} //72,3,52,88,// -12 to +24 num semi tones
 void patchToBreathModOscFilter1(patch_t *patch) {BreathModOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCBREATHMODOSCFILTER1]*DIV127;}	//72,4,0,127,
-void patchToLfoFreqOscFilter1(patch_t *patch) {LfoFreqOscFilter1 = pow((float)patch->nrpn_msb_osc_filt1[CCLFOFREQOSCFILTER1]*DIV127,2.0)*maxLfoFreqFilter1;}	//72,5,0,127,
+void patchToLfoFreqOscFilter1(patch_t *patch) {LfoFreqOscFilter1 = pow((float)patch->nrpn_msb_osc_filt1[CCLFOFREQOSCFILTER1]*DIV127,2.0f)*maxLfoFreqFilter1;}	//72,5,0,127,
 void patchToLfoDepthOscFilter1(patch_t *patch) {LfoDepthOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCLFODEPTHOSCFILTER1]*DIV127;} 	//72,6,0,127,
-void patchToLfoBreathOscFilter1(patch_t *patch) {LfoBreathOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCLFOBREATHOSCFILTER1]-64.0)/64.0;}  	//72,7,0,127,
+void patchToLfoBreathOscFilter1(patch_t *patch) {LfoBreathOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCLFOBREATHOSCFILTER1]-64.0f)/64.0f;}  	//72,7,0,127,
 void patchToLfoThreshOscFilter1(patch_t *patch) {LfoThreshOscFilter1 = (float)patch->nrpn_msb_osc_filt1[CCLFOTHRESHOSCFILTER1]*DIV127;}	//72,8,0,127,
-void patchToSweepDepthOscFilter1(patch_t *patch) {SweepDepthOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCSWEEPDEPTHOSCFILTER1]-64.0)/64.0;}	//72,9,0,127,
+void patchToSweepDepthOscFilter1(patch_t *patch) {SweepDepthOscFilter1 = ((float)patch->nrpn_msb_osc_filt1[CCSWEEPDEPTHOSCFILTER1]-64.0f)/64.0f;}	//72,9,0,127,
 void patchToSweepTimeOscFilter1(patch_t *patch) {SweepTimeOscFilter1 = sweepTimeFilterCurve((float)patch->nrpn_msb_osc_filt1[CCSWEEPTIMEOSCFILTER1]*DIV127);} //72,10,0,127,
     //BreathCurveOscFilter1 = gen_filter_gamma(((float)patch->nrpn_msb_osc_filt1[CCBREATHCURVEOSCFILTER1])*DIV127);  	//72,11,0,127,
 void patchToBreathOscFiltCurveLines1(patch_t *patch) {
@@ -73,16 +73,16 @@ void patchToFreqOscFilter2(patch_t *patch) {
     // 69 is note number for A4=440Hz ;  	
     float FreqOscFilter2NN = (float)patch->nrpn_msb_osc_filt2[CCFREQOSCFILTER2];  //72,1,36,124,note# 36(c2) to 124(e9)
     FreqOscFilter2BModFactor  = FreqOscFilter2NN/96.0f;//(when slider = 96 (c7), BModFactor is 1.0) 
-    FreqOscFilter2 = 440.0*pow(2, (FreqOscFilter2NN-69.0)/12 );  //72,1,36,124,note# 36(c2) to 124(e9)
+    FreqOscFilter2 = 440.0f*pow(2, (FreqOscFilter2NN-69.0f)/12.0f );  //72,1,36,124,note# 36(c2) to 124(e9)
 }
 void patchToQFactorOscFilter2(patch_t *patch) {QFactorOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCQFACTOROSCFILTER2]/10.0;}	//72,2,5,127,"// 5=0.5, 127=12.7"
-void patchToKeyFollowOscFilter2(patch_t *patch) {KeyFollowOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCKEYFOLLOWOSCFILTER2]-64.0);} //72,3,52,88,// -12 to +24 num semi tones
+void patchToKeyFollowOscFilter2(patch_t *patch) {KeyFollowOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCKEYFOLLOWOSCFILTER2]-64.0f);} //72,3,52,88,// -12 to +24 num semi tones
 void patchToBreathModOscFilter2(patch_t *patch) {BreathModOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCBREATHMODOSCFILTER2]*DIV127;}	//72,4,0,127,
-void patchToLfoFreqOscFilter2(patch_t *patch) {LfoFreqOscFilter2 = pow((float)patch->nrpn_msb_osc_filt2[CCLFOFREQOSCFILTER2]*DIV127,2.0)*maxLfoFreqFilter2;}	//72,5,0,127,
+void patchToLfoFreqOscFilter2(patch_t *patch) {LfoFreqOscFilter2 = pow((float)patch->nrpn_msb_osc_filt2[CCLFOFREQOSCFILTER2]*DIV127,2.0f)*maxLfoFreqFilter2;}	//72,5,0,127,
 void patchToLfoDepthOscFilter2(patch_t *patch) {LfoDepthOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCLFODEPTHOSCFILTER2]*DIV127;} 	//72,6,0,127,
-void patchToLfoBreathOscFilter2(patch_t *patch) {LfoBreathOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCLFOBREATHOSCFILTER2]-64.0)/64.0;}  	//72,7,0,127,
+void patchToLfoBreathOscFilter2(patch_t *patch) {LfoBreathOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCLFOBREATHOSCFILTER2]-64.0f)/64.0f;}  	//72,7,0,127,
 void patchToLfoThreshOscFilter2(patch_t *patch) {LfoThreshOscFilter2 = (float)patch->nrpn_msb_osc_filt2[CCLFOTHRESHOSCFILTER2]*DIV127;}	//72,8,0,127,
-void patchToSweepDepthOscFilter2(patch_t *patch) {SweepDepthOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCSWEEPDEPTHOSCFILTER2]-64.0)/64.0;}	//72,9,0,127,
+void patchToSweepDepthOscFilter2(patch_t *patch) {SweepDepthOscFilter2 = ((float)patch->nrpn_msb_osc_filt2[CCSWEEPDEPTHOSCFILTER2]-64.0f)/64.0f;}	//72,9,0,127,
 void patchToSweepTimeOscFilter2(patch_t *patch) {SweepTimeOscFilter2 = sweepTimeFilterCurve((float)patch->nrpn_msb_osc_filt2[CCSWEEPTIMEOSCFILTER2]*DIV127);} //72,10,0,127,
     //BreathCurveOscFilter2 = gen_filter_gamma(((float)patch->nrpn_msb_osc_filt2[CCBREATHCURVEOSCFILTER2])*DIV127);  	//72,11,0,127,
 void patchToBreathOscFiltCurveLines2(patch_t *patch) {
@@ -92,7 +92,7 @@ void patchToModeNoiseFilter3(patch_t *patch) {ModeNoiseFilter3 = (filterMode_t)p
 void patchToFreqNoiseFilter3(patch_t *patch) { 
     float FreqNoiseFilter3NN = (float)patch->nrpn_msb_noise_filt3[CCFREQNOISEFILTER3];  //72,1,36,124,note# 36(c2) to 124(e9)
     FreqNoiseFilter3BModFactor  = FreqNoiseFilter3NN/96.0f; 
-    FreqNoiseFilter3 = 440.0*pow(2, (FreqNoiseFilter3NN-69.0)/12 );  //72,1,36,124,note# 36(c2) to 124(e9)
+    FreqNoiseFilter3 = 440.0f*pow(2, (FreqNoiseFilter3NN-69.0f)/12.0f );  //72,1,36,124,note# 36(c2) to 124(e9)
 }
 void patchToQFactorNoiseFilter3(patch_t *patch) {QFactorNoiseFilter3 = (float)patch->nrpn_msb_noise_filt3[CCQFACTORNOISEFILTER3]/10.0;} //74,2,5,127,"// 5=0.5, 127=12.7"
 void patchToKeyFollowNoiseFilter3(patch_t *patch) {KeyFollowNoiseFilter3 = ((float)patch->nrpn_msb_noise_filt3[CCKEYFOLLOWNOISEFILTER3]-64.0);} //74,3,52,88,// -12 to +24 num semitones
@@ -111,16 +111,16 @@ void patchToModeNoiseFilter4(patch_t *patch) {ModeNoiseFilter4 = (filterMode_t)p
 void patchToFreqNoiseFilter4(patch_t *patch) { 
     float FreqNoiseFilter4NN = (float)patch->nrpn_msb_noise_filt4[CCFREQNOISEFILTER4];  //72,1,36,124,note# 36(c2) to 124(e9)
     FreqNoiseFilter4BModFactor  = FreqNoiseFilter4NN/96.0f; 
-    FreqNoiseFilter4 = 440.0*pow(2, (FreqNoiseFilter4NN-69.0)/12 );  //72,1,36,124,note# 36(c2) to 124(e9)
+    FreqNoiseFilter4 = 440.0f*pow(2, (FreqNoiseFilter4NN-69.0f)/12.0f );  //72,1,36,124,note# 36(c2) to 124(e9)
 }
-void patchToQFactorNoiseFilter4(patch_t *patch) {QFactorNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCQFACTORNOISEFILTER4]/10.0;} //74,2,5,127,"// 5=0.5, 127=12.7"
-void patchToKeyFollowNoiseFilter4(patch_t *patch) {KeyFollowNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCKEYFOLLOWNOISEFILTER4]-64.0);} //74,3,52,88,// -12 to +24 num semitones
+void patchToQFactorNoiseFilter4(patch_t *patch) {QFactorNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCQFACTORNOISEFILTER4]/10.0f;} //74,2,5,127,"// 5=0.5, 127=12.7"
+void patchToKeyFollowNoiseFilter4(patch_t *patch) {KeyFollowNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCKEYFOLLOWNOISEFILTER4]-64.0f);} //74,3,52,88,// -12 to +24 num semitones
 void patchToBreathModNoiseFilter4(patch_t *patch) {BreathModNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCBREATHMODNOISEFILTER4]*DIV127;}	//74,4,0,127,
-void patchToLfoFreqNoiseFilter4(patch_t *patch) {LfoFreqNoiseFilter4 = pow((float)patch->nrpn_msb_noise_filt4[CCLFOFREQNOISEFILTER4]*DIV127,2.0)*maxLfoFreqFilter4;}  	//74,5,0,127,
+void patchToLfoFreqNoiseFilter4(patch_t *patch) {LfoFreqNoiseFilter4 = pow((float)patch->nrpn_msb_noise_filt4[CCLFOFREQNOISEFILTER4]*DIV127,2.0f)*maxLfoFreqFilter4;}  	//74,5,0,127,
 void patchToLfoDepthNoiseFilter4(patch_t *patch) {LfoDepthNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCLFODEPTHNOISEFILTER4]*DIV127;}  	//74,6,0,127,
-void patchToLfoBreathNoiseFilter4(patch_t *patch) {LfoBreathNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCLFOBREATHNOISEFILTER4]-64.0)/64.0;}  	//74,7,0,127,
+void patchToLfoBreathNoiseFilter4(patch_t *patch) {LfoBreathNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCLFOBREATHNOISEFILTER4]-64.0f)/64.0f;}  	//74,7,0,127,
 void patchToLfoThreshNoiseFilter4(patch_t *patch) {LfoThreshNoiseFilter4 = (float)patch->nrpn_msb_noise_filt4[CCLFOTHRESHNOISEFILTER4]*DIV127;}  	//74,8,0,127,
-void patchToSweepDepthNoiseFilter4(patch_t *patch) {SweepDepthNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCSWEEPDEPTHNOISEFILTER4]-64.0)/64.0;}  	//74,9,0,127,
+void patchToSweepDepthNoiseFilter4(patch_t *patch) {SweepDepthNoiseFilter4 = ((float)patch->nrpn_msb_noise_filt4[CCSWEEPDEPTHNOISEFILTER4]-64.0f)/64.0f;}  	//74,9,0,127,
 void patchToSweepTimeNoiseFilter4(patch_t *patch) {SweepTimeNoiseFilter4 = sweepTimeFilterCurve((float)patch->nrpn_msb_noise_filt4[CCSWEEPTIMENOISEFILTER4]*DIV127);}  	//74,10,0,127,
     //BreathCurveNoiseFilter4 = gen_filter_gamma(((float)patch->nrpn_msb_noise_filt4[CCBREATHCURVENOISEFILTER4])*DIV127);  	//74,11,0,127,
 void patchToBreathNoiseFiltCurveLines4(patch_t *patch) {
@@ -148,28 +148,28 @@ void patchToOctButtonLevel(patch_t *patch) {OctButtonLevel = (float)patch->nrpn_
 void patchToEffectsChorusDelay1(patch_t *patch) {
     // flange cuts delay in half, so mult by 2.0 here 
     // 7.0ms*44.1s/ms for range of ChorusMod1 and 2
-    EffectsChorusDelay1 = 2.0*44.1*(float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY1]; //112,0,0,127, (0 to 127 ms)*44.1s/ms
+    EffectsChorusDelay1 = 2.0f*44.1f*(float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY1]; //112,0,0,127, (0 to 127 ms)*44.1s/ms
 }  
-void patchToEffectsChorusMod1(patch_t *patch) {EffectsChorusMod1 = (2.0*44.1)*((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD1]-64.0)/64.0;} //112,1,0,127, (-50% to +50%)
-void patchToEffectsChorusWet1(patch_t *patch) {EffectsChorusWet1 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSWET1]-64.0)/64.0;} //112,2,0,127, neg vals are phase inverted
-void patchToEffectsChorusDelay2(patch_t *patch) {EffectsChorusDelay2 = 2.0*44.1*(float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2];} //112,3,0,127,
-void patchToEffectsChorusMod2(patch_t *patch) {EffectsChorusMod2 = (2.0*44.1)*((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD2]-64.0)/64.0;} //112,4,0,127,
-void patchToEffectsChorusWet2(patch_t *patch) {EffectsChorusWet2 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSWET2]-64.0)/64.0;} //112,5,0,127,
-void patchToEffectsChorusFeedback(patch_t *patch) {EffectsChorusFeedback = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK]-64.0)/64.0;} //112,6,0,127,
-void patchToEffectsChorusLfoFreq(patch_t *patch) {EffectsChorusLfoFreq = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ]/10.0;} //112,7,0,127,
+void patchToEffectsChorusMod1(patch_t *patch) {EffectsChorusMod1 = (2.0f*44.1f)*((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD1]-64.0f)/64.0f;} //112,1,0,127, (-50% to +50%)
+void patchToEffectsChorusWet1(patch_t *patch) {EffectsChorusWet1 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSWET1]-64.0f)/64.0f;} //112,2,0,127, neg vals are phase inverted
+void patchToEffectsChorusDelay2(patch_t *patch) {EffectsChorusDelay2 = 2.0f*44.1f*(float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2];} //112,3,0,127,
+void patchToEffectsChorusMod2(patch_t *patch) {EffectsChorusMod2 = (2.0f*44.1f)*((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD2]-64.0)/64.0;} //112,4,0,127,
+void patchToEffectsChorusWet2(patch_t *patch) {EffectsChorusWet2 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSWET2]-64.0f)/64.0f;} //112,5,0,127,
+void patchToEffectsChorusFeedback(patch_t *patch) {EffectsChorusFeedback = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK]-64.0f)/64.0f;} //112,6,0,127,
+void patchToEffectsChorusLfoFreq(patch_t *patch) {EffectsChorusLfoFreq = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ]/10.0f;} //112,7,0,127,
 void patchToEffectsChorusDryLevel(patch_t *patch) {EffectsChorusDryLevel = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL]*DIV127;} //112,8,0,127,
-//void patchToEffectsDelayTimeL(patch_t *patch) {EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*10.0;}	//113,0,0,127, 0 to 1270 ms
+//void patchToEffectsDelayTimeL(patch_t *patch) {EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*10.0f;}	//113,0,0,127, 0 to 1270 ms
 void patchToEffectsDelayTimeL(patch_t *patch) {EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*DIV127;}	//113,0,0,127, 1.0 = 1270 ms
 void patchToEffectsDelayFeedback(patch_t *patch) {EffectsDelayFeedback = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]*DIV127;} //113,1,0,127,
 void patchToEffectsDelayDamp(patch_t *patch) {EffectsDelayDamp = maxDelayDamp*pow(2, -( (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP])/24.0 );} //113,2,0,127,
-void patchToEffectsDelayLevel(patch_t *patch) {EffectsDelayLevel = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYLEVEL]*DIV127*0.5;}  //113,3,0,127,
+void patchToEffectsDelayLevel(patch_t *patch) {EffectsDelayLevel = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYLEVEL]*DIV127*0.5f;}  //113,3,0,127,
 void patchToEffectsDelayPong(patch_t *patch) {EffectsDelayPong = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYSPARE]*DIV127;} //113,3,0,127,
 void patchToEffectsReverbSpare(patch_t *patch) {EffectsReverbSpare = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBSPARE]*DIV127;} //114,1,0,127,
 void patchToEffectsReverbLevel(patch_t *patch) {EffectsReverbLevel = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBLEVEL]*DIV127*maxReverbLevel;} //114,1,0,127,
 void patchToEffectsReverbDenseEarly(patch_t *patch) {EffectsReverbDenseEarly = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDENSEEARLY]*DIV127*maxDenseEarly;} //114,2,0,127, (using this for roomsize)
 // EffectsReverbTime is from 1000ms to 5000ms, but the Plate reverb takes 0.0 to 1.0 as inputs, 0.1 to 0.6 is approximately 1sec to 5sec.
 void patchToEffectsReverbTime(patch_t *patch) {EffectsReverbTime = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBTIME]/100.0f+0.1f;} //114,3,10,50,//1000 to 5000 ms
-void patchToEffectsReverbDamp(patch_t *patch) {EffectsReverbDamp = ((float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDAMP]-54)/20.0;}  	//114,4,54,74,//-10 to +10
+void patchToEffectsReverbDamp(patch_t *patch) {EffectsReverbDamp = ((float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDAMP]-54.0f)/20.0f;}  	//114,4,54,74,//-10 to +10
 
 void patchToSynthVariables(patch_t *patch) {
     patchToOctOsc1(patch ); //64,0,62,66,
@@ -720,7 +720,7 @@ void saveCoppiedPatchSD(int i) { // i is patch number to save it
   char str_buf_sd[16];
   // loadedPatches[i] = createPatch();
   if (!patchLoaded[i]) {
-    sprintf(str_buf1,"Patch: %03d not loaded. can't upsate.", i);
+    sprintf(str_buf1,"Patch: %03d not loaded. can't update.", i);
     Serial8.println(str_buf1);
     return;   
   } 
@@ -753,15 +753,20 @@ void copyLoadedPatchToCopyBuffer(int sourcePatchNumber){
    memcpy((byte*)&copy_buffer_patch,(byte*)&loadedPatches[sourcePatchNumber],  sizeof(copy_buffer_patch));
 }
 
+void copyCurrentPatchToCopyBuffer(void){
+   memcpy((byte*)&copy_buffer_patch,(byte*)&current_patch,  sizeof(copy_buffer_patch));
+}
+
+
 void loadPatchSD(int i) {
   char str_buf_sd[16];
-  if(patchLoaded[i]) {
-    Serial8.println("patch alreadey loaded");
-    setCurrentPatch(i);
-    Serial8.println("setCurrentPatch");
-    patchToSynthVariables(&current_patch);
-    Serial8.println("patchToSynthVariables");
-  } else {
+//  if(patchLoaded[i]) {
+//    Serial8.println("patch alreadey loaded");
+//    setCurrentPatch(i);
+//    Serial8.println("setCurrentPatch");
+//    patchToSynthVariables(&current_patch);
+//    Serial8.println("patchToSynthVariables");
+//} else {
     sprintf(str_buf_sd, "%03d.PAT", i );     
     dataFile = SD.open(str_buf_sd);
     if(!dataFile) {
@@ -775,7 +780,7 @@ void loadPatchSD(int i) {
       setCurrentPatch(i);
       patchToSynthVariables(&current_patch);
     }
-  }
+//}
 }
 
 void loadAllPatches() {
@@ -817,7 +822,7 @@ void loadAllPatches() {
 float noiseTimeCurve(float noiseTimePercent) {
     float a = 0.0f;
     float b = 1.0f;
-    if (noiseTimePercent <= 0){
+    if (noiseTimePercent <= 0.0f){
         a = 0.0f;
         b = 0.0f;
     } else if (noiseTimePercent < 0.7f){
@@ -837,8 +842,9 @@ float noiseTimeCurve(float noiseTimePercent) {
 float sweepTimeFilterCurve(float sweepTime) {
     float a = 0.0f;
     float b = 1.0f;
-    if (sweepTime <= 0){
-        a = 0.0f;
+    if (sweepTime <= 0.0f){
+       // a = 0.0f;
+        a = 10.0f; // minumum time is 10mS
         b = 0.0f;
     } else if (sweepTime < 0.7f){
          a = 0.0103f * 1000.0f; // 1000 for time in mS

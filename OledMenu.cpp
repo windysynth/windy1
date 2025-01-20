@@ -121,12 +121,20 @@ bool OledMenu::checkButtonsAndKnobs(){
 }
 
 int OledMenu::updateSelection() {
-  int32_t newKnob_temp = newKnob;
-  newKnob = 0; 
-  return newKnob_temp; 
+    if (updateEpromFlag){
+      eepromCurrentMillis = millis();
+      eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+    }
+    int32_t newKnob_temp = newKnob;
+    newKnob = 0; 
+    return newKnob_temp; 
 }
 
 boolean OledMenu::selectionMade() {
+    if (updateEpromFlag){
+        eepromCurrentMillis = millis();
+        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+    }
     bool shortKnobButtonPress_temp = shortKnobButtonPress;
     shortKnobButtonPress = false;
     return shortKnobButtonPress_temp;

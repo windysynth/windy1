@@ -88,11 +88,11 @@ bool patchSelectFun() {
     sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
     Serial8.println(current_patch.patch_string);
 
-    if (updateEpromFlag)
-    {
-        eepromCurrentMillis = millis();
-        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
-    }
+//    if (updateEpromFlag)
+//    {
+//        eepromCurrentMillis = millis();
+//        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+//    }
     return true;
  }
   display.clearDisplay(); // erase display
@@ -107,12 +107,17 @@ MenuItem PROGMEM patchResetMenu[2] = {
    ,{ "Reset   " , patchResetFun   }
 };
 bool patchResetFun(){ return goUpOneMenu(); }
-MenuItem PROGMEM patchCopyMenu[2] = {
+MenuItem PROGMEM patchCopyMenu[3] = {
     { "Back    " , goUpOneMenu   }
    ,{ "Copy    " , patchCopyFun   }
+   ,{ "CpyEdits" , patchCopyEditsFun   }
 };
 bool patchCopyFun(){
     copyLoadedPatchToCopyBuffer(current_patchNumber);
+    return goUpOneMenu(); 
+}
+bool patchCopyEditsFun(){
+    copyCurrentPatchToCopyBuffer();
     return goUpOneMenu(); 
 }
 MenuItem PROGMEM patchPasteMenu[1] = {
@@ -149,11 +154,13 @@ bool patchPasteFun(){
 //        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
 //    }
     return true;
- }
+  }
   display.clearDisplay(); // erase display
   Serial8.println(F("patchPasteFun: goto TopMenu"));
-  if(paste_patchNumber == NUMBER_OF_PATCHES){ return goUpOneMenu(); }
+  // NUMBER_OF_PATCHES is Exit w/o writing
+  if(paste_patchNumber == NUMBER_OF_PATCHES){ return goUpOneMenu(); } 
   saveCoppiedPatchSD(paste_patchNumber);
+  loadPatchSD(paste_patchNumber);
   return goUpOneMenu();
 }
 MenuItem PROGMEM patchSwapMenu[2] = {
@@ -918,15 +925,19 @@ MenuItem PROGMEM beatOsc2Menu[1] = {
     { "BeatOs2:\n " , beatOsc2Fun   }
 };
 bool beatOsc2Fun(){
+ if(myMenu.updateLeafValue){
      int Temp = current_patch.nrpn_msb_osc2[CCBEATOSC2];
      Temp += myMenu.updateLeafValue;
      current_patch.nrpn_msb_osc2[CCBEATOSC2] = std::clamp(Temp,0, 127);
-     patchToSawOsc2(&current_patch);
+     patchToBeatOsc2(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
      sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBEATOSC2]-64);
      return true;
  }
+ Serial8.println(F("centsOsc2Fun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM sawOsc2Menu[1] = {
     { "SawOsc2:\n " , sawOsc2Fun   }
 };
@@ -1053,7 +1064,7 @@ bool sweepDepthOsc2Fun(){
  if(myMenu.updateLeafValue){
      int Temp = current_patch.nrpn_msb_osc2[CCSWEEPDEPTHOSC2];
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_osc2[CCSWEEPDEPTHOSC1] = std::clamp(Temp,0, 127);
+     current_patch.nrpn_msb_osc2[CCSWEEPDEPTHOSC2] = std::clamp(Temp,0, 127);
      patchToSweepDepthOsc2(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
@@ -1259,7 +1270,7 @@ bool qOscFilter1Fun() {
      int Temp = current_patch.nrpn_msb_osc_filt1[CCQFACTOROSCFILTER1];
      Temp += myMenu.updateLeafValue;
      current_patch.nrpn_msb_osc_filt1[CCQFACTOROSCFILTER1] = std::clamp(Temp,5, 127); // 5 = 0.5
-     patchToFreqOscFilter1(&current_patch);
+     patchToQFactorOscFilter1(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
      float QFactor = (float)current_patch.nrpn_msb_osc_filt1[CCQFACTOROSCFILTER1]/10.0f;
@@ -1496,7 +1507,7 @@ bool qOscFilter2Fun() {
      int Temp = current_patch.nrpn_msb_osc_filt2[CCQFACTOROSCFILTER2];
      Temp += myMenu.updateLeafValue;
      current_patch.nrpn_msb_osc_filt2[CCQFACTOROSCFILTER2] = std::clamp(Temp,5, 127); // 5 = 0.5
-     patchToFreqOscFilter2(&current_patch);
+     patchToQFactorOscFilter2(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
      float QFactor = (float)current_patch.nrpn_msb_osc_filt2[CCQFACTOROSCFILTER2]/10.0f;
@@ -2426,7 +2437,7 @@ MenuList listTopMenu(topMenu, 18);
 MenuList listVolAdjustMenu(volAdjustMenu, 1);
 MenuList listPatchSelectMenu(patchSelectMenu, 1);
 MenuList listPatchResetMenu(patchResetMenu, 2);
-MenuList listPatchCopyMenu(patchCopyMenu, 2);
+MenuList listPatchCopyMenu(patchCopyMenu, 3);
 MenuList listPatchPasteMenu(patchPasteMenu, 1);
 MenuList listPatchSwapMenu(patchSwapMenu, 2);
 MenuList listPatchFxMenu(patchFxMenu, 23);
@@ -2624,9 +2635,11 @@ bool gotoPatchCopyMenu(){
   return true;
 }
 bool gotoPatchPasteMenu(){
+  display.clearDisplay(); // erase display
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchPasteMenu);
+  myMenu.knobAcceleration = 4;
     return true;
 }
 bool gotoPatchSwapMenu(){

@@ -28,6 +28,7 @@ extern MenuItem patchResetMenu[];
 extern bool patchResetFun();
 extern MenuItem patchCopyMenu[];
 extern bool patchCopyFun();
+extern bool patchCopyEditsFun();
 extern MenuItem patchPasteMenu[];
 extern bool patchPasteFun();
 extern MenuItem patchSwapMenu[];
