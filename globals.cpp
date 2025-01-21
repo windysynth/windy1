@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.84"};
+String verNum_str = {"0.0.85"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -110,7 +110,7 @@ int eeprom_breath_cc = 2;
 
 // synth variable limits and references
 float maxPwmLfoFreq = 5.6f;         // 4000s is 10 Hz at 100%
-float maxPwmDepthOsc = 0.50;        // 4000s is +/- 25% at 100% depth
+float maxPwmDepthOsc = 0.250;        // 4000s is +/- 25% at 100% depth
 float maxSweepTimeOsc = 500.0;       // TODO: set this to match 4000s
 float sweepTimeOscGamma = 3.50;       // TODO: adjust this to match 4000s
 float maxSweepTimeOscFilter = 1000.0; // 255.0;
