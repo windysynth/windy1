@@ -861,9 +861,24 @@ float sweepTimeFilterCurve(float sweepTime) {
 }
 
 float sweepTimeOscCurve(float sweepTime){
-    // separate func in case it needs to be different
-    // but just call the FilterCurve one for now 
-    return sweepTimeFilterCurve(sweepTime);
+    float a = 0.0f;
+    float b = 1.0f;
+    if (sweepTime <= 0.0f){
+       // a = 0.0f;
+        a = 30.0f; // minumum time is 30ms
+        b = 0.0f;
+    } else if (sweepTime < 0.7f){
+         a = 0.035f * 1000.0f; // 1000 for time in mS
+         b = 3.25f;
+    } else if (sweepTime < 0.9f) {
+        a = 0.0040f * 1000.0f; // 1000 for time in mS
+        b = 6.38f;
+    } else {
+        a = 0.00005f * 1000.0f; // 1000 for time in mS
+        b = 11.2f;
+    }
+    float y = a*exp(b*sweepTime);
+    return y;
 }
 
 void patchSelect(){

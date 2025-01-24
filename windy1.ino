@@ -128,9 +128,15 @@ AudioMixer4              mix_pwOsc1;     //xy=704.333251953125,209
 AudioFilterStateVariable filterPreNoise; //xy=706.333251953125,933
 //AudioAnalyzeRMS          rms_filterPreNoise;     //xy=524.333251953125,916
 AudioSynthWaveformDc     dc_sweepDepthOsc1; //xy=713.333251953125,85
+AudioEffectMultiply      sq_swpOsc1;     //xy=643.3332366943359,525
+AudioSynthWaveformDc     dc_sweepDepthOscSign1; //xy=713.333251953125,85
+AudioEffectMultiply      mlt_DepthOscSign1; //xy=834.3332366943359,561
 AudioSynthWaveformDc     dc_breathSweepOsc1; //xy=713.333251953125,116
 AudioSynthWaveformDc     dc_breathSweepOsc2; //xy=731.333251953125,332
 AudioSynthWaveformDc     dc_sweepDepthOsc2; //xy=734.333251953125,300
+AudioEffectMultiply      sq_swpOsc2;     //xy=643.3332366943359,525
+AudioSynthWaveformDc     dc_sweepDepthOscSign2; //xy=713.333251953125,85
+AudioEffectMultiply      mlt_DepthOscSign2; //xy=834.3332366943359,561
 AudioSynthWaveformDc     dc_beatOsc1;    //xy=741.333251953125,148
 AudioMixer4              mix_pwOsc2;     //xy=742.333251953125,417
 AudioSynthWaveformDc     dc_beatOsc2;    //xy=761.333251953125,364
@@ -279,10 +285,18 @@ AudioConnection          patchCord42(sine_lfoFilter4, 0, mult_lfoDepthFilter4, 0
 AudioConnection          patchCord43(mix_breathTimeNoise, 0, multiply2, 1);
 AudioConnection          patchCord46(filterPreNoise, 2, multiply2, 0);
 //AudioConnection          patchCordTest3(filterPreNoise, 2, rms_filterPreNoise, 0);
-AudioConnection          patchCord47(dc_sweepDepthOsc1, 0, mix_pitchModOsc1, 0);
+AudioConnection          patchCord47(dc_sweepDepthOsc1, 0, sq_swpOsc1, 0);
+AudioConnection          patchCord180(dc_sweepDepthOsc1, 0, sq_swpOsc1, 1);
+AudioConnection          patchCord181(dc_sweepDepthOscSign1, 0, mlt_DepthOscSign1, 1);
+AudioConnection          patchCord182(sq_swpOsc1, 0, mlt_DepthOscSign1, 0);
+AudioConnection          patchCord183(mlt_DepthOscSign1, 0, mix_pitchModOsc1, 0);
 AudioConnection          patchCord48(dc_breathSweepOsc1, 0, mix_pitchModOsc1, 1);
 AudioConnection          patchCord49(dc_breathSweepOsc2, 0, mix_pitchModOsc2, 1);
-AudioConnection          patchCord50(dc_sweepDepthOsc2, 0, mix_pitchModOsc2, 0);
+AudioConnection          patchCord50(dc_sweepDepthOsc2, 0, sq_swpOsc2, 0);
+AudioConnection          patchCord184(dc_sweepDepthOsc2, 0, sq_swpOsc2, 1);
+AudioConnection          patchCord185(dc_sweepDepthOscSign2, 0, mlt_DepthOscSign2, 1);
+AudioConnection          patchCord186(sq_swpOsc2, 0, mlt_DepthOscSign2, 0);
+AudioConnection          patchCord187(mlt_DepthOscSign2, 0, mix_pitchModOsc2, 0);
 AudioConnection          patchCord52(dc_beatOsc1, 0, mix_pitchModOsc1, 2);
 AudioConnection          patchCord54(dc_beatOsc2, 0, mix_pitchModOsc2, 2);
 AudioConnection          patchCord55(dc_sweepDepthFilter4, 0, sq_swpflt4, 0);
@@ -305,7 +319,7 @@ AudioConnection          patchCord69(dc_breathNoiseFilter4, 0, mix_fcModFilter4,
 AudioConnection          patchCord70(dc_modOffsetNoiseFilter4, 0, mix_fcModFilter4, 3);
 AudioConnection          patchCord71(mix_pwOsc1, 0, wfmod_pulseOsc1, 1);
 AudioConnection          patchCord72(dc_sweepDepthFilterSign4, 0, mlt_DepthFilterSign4, 1);
-AudioConnection          patchCord73(mix_pitchModOsc1, 0, wfmod_sawOsc1, 0);
+AudioConnection          patchCord73(mix_pitchModOsc1, 0, wfmod_sawOsc1, 0); // here
 AudioConnection          patchCord74(mix_pitchModOsc1, 0, wfmod_triOsc1, 0);
 AudioConnection          patchCord75(mix_pitchModOsc1, 0, wfmod_pulseOsc1, 0);
 AudioConnection          patchCord76(sq_swpflt4, 0, mlt_DepthFilterSign4, 0);
@@ -1983,12 +1997,16 @@ void processMIDI(bool midi_from_host_flag)
 
                 if(SweepDepthOsc1 != 0.0f)
                 {
-                    dc_sweepDepthOsc1.amplitude(SweepDepthOsc1);
+                    // the sign signal now is aplitude as well, so the sq_swpOscN always runs between 1.0 and 0
+                    dc_sweepDepthOscSign1.amplitude(SweepDepthOsc1);
+                    dc_sweepDepthOsc1.amplitude(1.0f);
                     dc_sweepDepthOsc1.amplitude(0,SweepTimeOsc1);
                 }
                 if(SweepDepthOsc2 != 0.0f)
                 {
-                    dc_sweepDepthOsc2.amplitude(SweepDepthOsc2);
+                    // the sign signal now is aplitude as well, so the sq_swpOscN always runs between 1.0 and 0
+                    dc_sweepDepthOscSign2.amplitude(SweepDepthOsc2);
+                    dc_sweepDepthOsc2.amplitude(1.0f);
                     dc_sweepDepthOsc2.amplitude(0,SweepTimeOsc2);
                 }
                 // dc_beatOsc1.amplitude(BeatOsc1); // TODO calculate beat number
