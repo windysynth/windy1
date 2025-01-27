@@ -1206,11 +1206,14 @@ bool linkOscFiltersFun() {
      patchToLinkOscFilters(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
+     if(current_patch.nrpn_msb_common1[CCLINKOSCFILTERS]%2 == 0){
+         ModeOscFilter2 = ModeOscFilter2_stored;
+     }
      sprintf(myMenu.str_oledbuf," %s ", 
          current_patch.nrpn_msb_common1[CCLINKOSCFILTERS]%2 ? " Linkded": "UnLinked"); //1 Linked, 2 UnLinked
      return true;
  }
- Serial8.println(F("xFadeOsc2Fun calls goUpOneMenu"));
+ Serial8.println(F("linkOscFiltersFun calls goUpOneMenu"));
  return goUpOneMenu(); 
 }
 MenuItem PROGMEM modeOscFilter1Menu[1] = {
@@ -1691,7 +1694,24 @@ MenuItem PROGMEM patchNoiseFilter3Menu[14] = {
 MenuItem PROGMEM linkNoiseFiltersMenu[1] = {
     { "LinkNFs:\n " , linkNoiseFiltersFun   }
 };
-bool linkNoiseFiltersFun() { return goUpOneMenu(); }
+bool linkNoiseFiltersFun() { 
+ if(myMenu.updateLeafValue){
+     int Temp = current_patch.nrpn_msb_common1[CCLINKNOISEFILTERS];
+     Temp += myMenu.updateLeafValue;
+     current_patch.nrpn_msb_common1[CCLINKNOISEFILTERS] = std::clamp(Temp,1, 2);
+     patchToLinkNoiseFilters(&current_patch);
+     //preUpdateSynthVariablesFlag = true; // to use squelch
+     updateSynthVariablesFlag = true;
+     if(current_patch.nrpn_msb_common1[CCLINKNOISEFILTERS]%2 == 0){
+         ModeNoiseFilter4 = ModeNoiseFilter4_stored;
+     }
+     sprintf(myMenu.str_oledbuf," %s ", 
+         current_patch.nrpn_msb_common1[CCLINKNOISEFILTERS]%2 ? " Linkded": "UnLinked"); //1 Linked, 2 UnLinked
+     return true;
+ }
+ Serial8.println(F("linkNoiseFiltersFun calls goUpOneMenu"));
+ return goUpOneMenu(); 
+}
 MenuItem PROGMEM modeNoiseFilter3Menu[1] = {
     { "ModeNF1:\n " , modeNoiseFilter3Fun   }
 };
@@ -2640,6 +2660,21 @@ bool gotoPatchPasteMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchPasteMenu);
   myMenu.knobAcceleration = 4;
+      if (paste_patchNumber == NUMBER_OF_PATCHES){
+        sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+    }
+    else { 
+        String ps( loadedPatches[paste_patchNumber].patch_string );
+        ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+        sprintf(myMenu.str_oledbuf, "%03d\n%s", paste_patchNumber+1, ps.c_str() );
+        Serial8.println(loadedPatches[paste_patchNumber].patch_string);
+        // load the patch 
+        if (!patchLoaded[paste_patchNumber])
+        {
+            loadPatchSD(paste_patchNumber);
+        }
+    }
+  //display.println(myMenu.str_oledbuf);
     return true;
 }
 bool gotoPatchSwapMenu(){

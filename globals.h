@@ -184,6 +184,7 @@ extern float freqOscFilterOctaveOffset ;    // use 3 to divide FreqOscFilterN by
 extern float maxFilterFreq; 
 extern float minFilterFreq; // min note number 36
 extern float minFilterPreNoiseFreq; // middle C (C4)
+extern float FreqPreNoiseVariableFreq; // TODO: match 4000s
 extern float maxDelayDamp; //TODO: find out correct value
 extern float maxDelayLevel; //TODO: find out correct value
 extern float gammaDelayLevel; //TODO: find out correct value
@@ -295,6 +296,7 @@ extern float SweepTimeOscFilter1;  	//72,10,0,127,
 extern float BreathCurveOscFilter1;  	//72,11,0,127,  TODO: hook this up
 extern CurveLines BreathOscFiltCurveLines1;
 extern filterMode_t ModeOscFilter2;  	//73,0,0,4,//LP HP BP NTC OFF
+extern filterMode_t ModeOscFilter2_stored;  	//73,0,0,4,//LP HP BP NTC OFF
 extern float FreqOscFilter2;    // C6  	//73,1,36,124,//Midi Note 36 to 124
 extern float FreqOscFilter2BModFactor; // Freq slider Note numeber 36 to 124
 extern float QFactorOscFilter2;  	//73,2,5,127,"// 5=0.5, 127=12.7"
@@ -323,6 +325,7 @@ extern float SweepTimeNoiseFilter3;  	//74,10,0,127,
 extern float BreathCurveNoiseFilter3;  	//74,11,0,127, TODO: hook this up
 extern CurveLines BreathNoiseFiltCurveLines3;
 extern filterMode_t ModeNoiseFilter4;  	//75,0,0,4,//LP HP BP NTC OFF
+extern filterMode_t ModeNoiseFilter4_stored;  	//75,0,0,4,//LP HP BP NTC OFF
 extern float FreqNoiseFilter4;    // C6  	//75,1,36,124,//Midi Note 36 to 124
 extern float FreqNoiseFilter4BModFactor; // Freq slider Note numeber 36 to 124
 extern float QFactorNoiseFilter4;  	//75,2,5,127,"// 5=0.5, 127=12.7"

@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.86"};
+String verNum_str = {"0.0.88"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -158,14 +158,15 @@ float octaveControlFilter5 = 8.0;
 float octaveControlPreNoiseFilter = 1.0;
 float offsetNoteKeyfollow = 60.0; // 84 = C6, 72 = C5, 60 = C4
 float offsetNoteKeyfollowNoise = 60.0;  // 84 = C6, 72 = C5, 60 = C4
-float offsetNoteKeyfollowPreNoise = 60.0;  // 84 = C6, 72 = C5, 60 = C4
+float offsetNoteKeyfollowPreNoise = 48.0;  // 84 = C6, 72 = C5, 60 = C4
 float minPreNoiseNoteNumbr = 60.0;  // 84 = C6, 72 = C5, 60 = C4  4000s noise stops changing below about C4
 const uint32_t updatedAudioSystemInterval = 1;  // milliseconds
 float freqOscFilterOctaveOffset  = 0.0;    // use 3 to divide FreqOscFilterN by 2^3 to allow modulation to go from -1 to +3/7 
 //float fOFOFactor = 1.0; 
 float maxFilterFreq = 20000; //12000.0; 
 float minFilterFreq = 65.4; // min note number 36 (C2)
-float minFilterPreNoiseFreq = 261.63; // middle C (C4)
+float minFilterPreNoiseFreq = 65.4; // 
+float FreqPreNoiseVariableFreq = 261.63f; // TODO: match 4000s
 float maxDelayDamp = 3000.0; //TODO: find out correct value
 float maxDelayLevel = 0.15; //TODO: find out correct value
 float gammaDelayLevel = 3.0; //TODO: find out correct value
@@ -337,6 +338,7 @@ float SweepTimeOscFilter1 = 0;  	//72,10,0,127,
 float BreathCurveOscFilter1 = 1.0;  	//72,11,0,127,  TODO: hook this up
 CurveLines BreathOscFiltCurveLines1 = {0.0f, 1.0f, 1.0f};
 filterMode_t ModeOscFilter2 = LP;  	//73,0,0,4,//LP HP BP NTC OFF
+filterMode_t ModeOscFilter2_stored = LP;  	//73,0,0,4,//LP HP BP NTC OFF
 float FreqOscFilter2 = 1046.5;    // C6  	//73,1,36,124,//Midi Note 36 to 124
 float FreqOscFilter2BModFactor  = 1.0; // Note number of Freq slider 36 to 124
 float QFactorOscFilter2 = 0.707;  	//73,2,5,127,"// 5=0.5, 127=12.7"
@@ -365,6 +367,7 @@ float SweepTimeNoiseFilter3 = 0;  	//74,10,0,127,
 float BreathCurveNoiseFilter3 = 1.0;  	//74,11,0,127, TODO: hook this up
 CurveLines BreathNoiseFiltCurveLines3 = {0.0f, 1.0f, 1.0f};
 filterMode_t ModeNoiseFilter4 = LP;  	//75,0,0,4,//LP HP BP NTC OFF
+filterMode_t ModeNoiseFilter4_stored = LP;  	//73,0,0,4,//LP HP BP NTC OFF
 float FreqNoiseFilter4 = 1046.5;    // C6  	//75,1,36,124,//Midi Note 36 to 124
 float FreqNoiseFilter4BModFactor  = 1.0; // Note number of Freq slider 36 to 124
 float QFactorNoiseFilter4 = 2.5;  	//75,2,5,127,"// 5=0.5, 127=12.7"
@@ -380,9 +383,9 @@ float SweepDepthNoiseFilter4 = 0;  	//75,9,0,127,
 float SweepTimeNoiseFilter4 = 0;  	//75,10,0,127,
 float BreathCurveNoiseFilter4 = 1.0;  	//75,11,0,127, TODO: hook this up
 CurveLines BreathNoiseFiltCurveLines4 = {0.0f, 1.0f, 1.0f};
-float KeyFollowPreNoiseFilter = 5;  // TODO: match 4000s
+float KeyFollowPreNoiseFilter = 12;  // TODO: match 4000s
 float keyfollowFilterPreNoise = 1.0; 
-float FreqPreNoiseFilter = 1500.0f; // TODO: match 4000s
+float FreqPreNoiseFilter = 4000.0f; // TODO: match 4000s
 float NoiseTime = 0.0;  	//80,0,0,127,
 float TimeNoiseAmp = 1.0;  	//80,0,0,127,
 float NoiseBreathCurve = 1.0;  	//80,1,0,127,

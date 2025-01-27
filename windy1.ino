@@ -126,6 +126,7 @@ AudioSynthWaveformSine   sine_lfoFilter4; //xy=687.333251953125,1288.00006103515
 AudioMixer4              mix_breathTimeNoise; //xy=692.333251953125,996
 AudioMixer4              mix_pwOsc1;     //xy=704.333251953125,209
 AudioFilterStateVariable filterPreNoise; //xy=706.333251953125,933
+AudioFilterOnepole onepole_PreNoise; //xy=706.333251953125,933
 //AudioAnalyzeRMS          rms_filterPreNoise;     //xy=524.333251953125,916
 AudioSynthWaveformDc     dc_sweepDepthOsc1; //xy=713.333251953125,85
 AudioEffectMultiply      sq_swpOsc1;     //xy=643.3332366943359,525
@@ -264,6 +265,7 @@ AudioConnection          patchCord22(mlt_DepthFilterSign3, 0, mix_fcModFilter3_s
 AudioConnection          patchCord23(dc_breathNoise, 0, mix_breathTimeNoise, 0);
 AudioConnection          patchCord24(sq_timeNoise, 0, mix_breathTimeNoise, 1);
 AudioConnection          patchCord25(pink_Noise, 0, filterPreNoise, 0);
+AudioConnection          patchCord25a(filterPreNoise, 2, onepole_PreNoise, 0);
 //AudioConnection          patchCordTest1(pink_Noise, 0, rms_pink_Noise, 0 );
 AudioConnection          patchCord26(sine_lfoOsc1, 0, mix_pwOsc1, 1);
 AudioConnection          patchCord27(mix_fcModFilter3, 0, mix_fcModFilter3_sweep, 1);
@@ -283,7 +285,8 @@ AudioConnection          patchCord40(sq_swpflt1, 0, mlt_DepthFilterSign1, 0);
 AudioConnection          patchCord41(dc_breathLfoFilter4, 0, mult_lfoDepthFilter4, 1);
 AudioConnection          patchCord42(sine_lfoFilter4, 0, mult_lfoDepthFilter4, 0);
 AudioConnection          patchCord43(mix_breathTimeNoise, 0, multiply2, 1);
-AudioConnection          patchCord46(filterPreNoise, 2, multiply2, 0);
+//AudioConnection          patchCord46(filterPreNoise, 2, multiply2, 0);
+AudioConnection          patchCord46(onepole_PreNoise, 0, multiply2, 0);
 //AudioConnection          patchCordTest3(filterPreNoise, 2, rms_filterPreNoise, 0);
 AudioConnection          patchCord47(dc_sweepDepthOsc1, 0, sq_swpOsc1, 0);
 AudioConnection          patchCord180(dc_sweepDepthOsc1, 0, sq_swpOsc1, 1);
@@ -627,6 +630,8 @@ void setup() {
     filterPreNoise.frequency(clippedFreqFilterPreNoise);   // highpass pre-filter for noise signal 
     filterPreNoise.resonance(0.707);
     filterPreNoise.octaveControl(octaveControlPreNoiseFilter); // sets range of control from mix_fcModFilter4 
+    onepole_PreNoise.highpassOn(true);   // highpass pre-filter for noise signal 
+    onepole_PreNoise.frequency(FreqPreNoiseFilter);   // highpass pre-filter for noise signal 
     //filterPostDelayL.frequency(EffectsDelayDamp);
     //filterPostDelayL.resonance(0.707);
     //filterPostDelayR.frequency(EffectsDelayDamp);
@@ -1272,9 +1277,9 @@ void loop()
     clippedFreqFilter4 = (keyfollowFilter4*FreqNoiseFilter4 < minFilterFreq)  
                         ? minFilterFreq : (keyfollowFilter4*FreqNoiseFilter4 < maxFilterFreq) 
                         ? keyfollowFilter4*FreqNoiseFilter4 : maxFilterFreq;  
-    clippedFreqFilterPreNoise = keyfollowFilterPreNoise*FreqPreNoiseFilter < minFilterPreNoiseFreq // TODO: add offset or factor relative to current note freq
-                        ? minFilterPreNoiseFreq : keyfollowFilterPreNoise*FreqPreNoiseFilter < maxFilterFreq
-                        ? keyfollowFilterPreNoise*FreqPreNoiseFilter : maxFilterFreq;
+    clippedFreqFilterPreNoise = keyfollowFilterPreNoise*FreqPreNoiseVariableFreq < minFilterPreNoiseFreq 
+                        ? minFilterPreNoiseFreq : keyfollowFilterPreNoise*FreqPreNoiseVariableFreq < maxFilterFreq
+                        ? keyfollowFilterPreNoise*FreqPreNoiseVariableFreq : maxFilterFreq;
     filter1.frequency(clippedFreqFilter1);  
     filter1.resonance(QFactorOscFilter1);   // Q factor
     mix_fcModFilter1.gain(0, BreathModOscFilter1*FreqOscFilter1BModFactor); 
@@ -1286,6 +1291,7 @@ void loop()
         filter2.resonance(QFactorOscFilter1);   // Q factor
         mix_fcModFilter2.gain(0,  BreathModOscFilter1*FreqOscFilter1BModFactor); 
         mix_fcModFilter2.gain(3, modOffsetFilter1*FreqOscFilter1BModFactor); 
+        ModeOscFilter2_stored = ModeOscFilter2;    
         ModeOscFilter2 = ModeOscFilter1;    
         dc_modOffsetOscFilter2.amplitude(-BreathModOscFilter1);
     }
@@ -1308,6 +1314,7 @@ void loop()
         filter4.resonance(QFactorNoiseFilter3);   // Q factor
         mix_fcModFilter4.gain(0,  BreathModNoiseFilter3*FreqNoiseFilter3BModFactor); 
         mix_fcModFilter4.gain(3, modOffsetFilter3*FreqNoiseFilter3BModFactor); 
+        ModeNoiseFilter4_stored = ModeNoiseFilter4;    
         ModeNoiseFilter4 = ModeNoiseFilter3;    
         dc_modOffsetNoiseFilter4.amplitude(-BreathModNoiseFilter3);
     }
@@ -1320,6 +1327,7 @@ void loop()
         dc_modOffsetNoiseFilter4.amplitude(-BreathModNoiseFilter4);
     }
     filterPreNoise.frequency(clippedFreqFilterPreNoise); 
+    onepole_PreNoise.frequency(FreqPreNoiseFilter); 
     filter5.frequency(noteFreqFilter5); // HP filter post mix_Amp
     //filterPreMixHPL.frequency(noteFreqFilter5);
     //filterPreMixHPR.frequency(noteFreqFilter5);
