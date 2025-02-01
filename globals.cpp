@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.0.88"};
+String verNum_str = {"0.1.0"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -79,6 +79,8 @@ float noteFreqOsc1 = 440.0;
 float noteNumberOsc2 = 69.0;  
 float noteFreqOsc2 = 440.0;  
 float noteFreqFilter5 = 220.0;  
+float noteFreqFilterOsc1 = 68.0; // note for hp filter for each osc
+float noteFreqFilterOsc2 = 68.0;
 float noteNumberFilter1 = 69.0;  
 float noteNumberFilter2 = 69.0;  
 float portatimef_t = 6;
@@ -132,8 +134,8 @@ float maxLfoFreqFilter1 = 100.0;
 float maxLfoFreqFilter2 = 100.0;
 float maxLfoFreqFilter3 = 100.0;
 float maxLfoFreqFilter4 = 100.0;
-float maxLfoDepthOscFilter1 = 0.15;  // 4000s goes up and down about 2 octaves (so 0.28 should be right, but seems too much)
-float maxLfoDepthOscFilter2 = 0.15;  // 4000s goes up and down about 2 octaves 
+float maxLfoDepthOscFilter1 = 0.20; //0.15;  // 4000s goes up and down about 2 octaves (so 0.28 should be right, but seems too much)
+float maxLfoDepthOscFilter2 = 0.20; //0.15;  // 4000s goes up and down about 2 octaves 
 float maxLfoDepthNoiseFilter3 = 0.28;  // 4000s goes up and down about 2 octaves 
 float maxLfoDepthNoiseFilter4 = 0.28;  // 4000s goes up and down about 2 octaves 
 float modOffsetFilter1 = 1;    // -0.25, Hack to start filter at lower frequency
@@ -150,6 +152,7 @@ float keyfollowFilter1 = 1.0;
 float keyfollowFilter2 = 1.0;
 float keyfollowFilter3 = 1.0;
 float keyfollowFilter4 = 1.0;
+float keyfollowFilter5 = 1.0;
 float octaveControlFilter1 = 8.0;
 float octaveControlFilter2 = 8.0;
 float octaveControlFilter3 = 8.0;
@@ -157,6 +160,7 @@ float octaveControlFilter4 = 8.0;
 float octaveControlFilter5 = 8.0;
 float octaveControlPreNoiseFilter = 1.0;
 float offsetNoteKeyfollow = 60.0; // 84 = C6, 72 = C5, 60 = C4
+float offsetNoteKeyfollowFilter5 = 40.0; // 84 = C6, 72 = C5, 60 = C4
 float offsetNoteKeyfollowNoise = 60.0;  // 84 = C6, 72 = C5, 60 = C4
 float offsetNoteKeyfollowPreNoise = 48.0;  // 84 = C6, 72 = C5, 60 = C4
 float minPreNoiseNoteNumbr = 60.0;  // 84 = C6, 72 = C5, 60 = C4  4000s noise stops changing below about C4
@@ -173,8 +177,8 @@ float gammaDelayLevel = 3.0; //TODO: find out correct value
 float gammaDelayFeedback = 1.5; //TODO: find out correct value
 float maxTimeNoise = 1000;  // 1000 ms
 float TimeNoiseGamma = 4.0;  
-float maxNoiseLevel = 0.375; //0.23;  
-float logPotYmidLevelNoise = 0.7f;
+float maxNoiseLevel = 0.23;  
+float logPotYmidLevelNoise = 0.5f;
 float minGamma = 0.1;
 float maxGamma = 2.0;
 float maxReverbLevel = 0.3f; //0.3;
@@ -301,7 +305,7 @@ float BreathThreshOsc1 = 0;  	//64,16,0,127,
 float LevelOsc1 = 0;  		//64,17,0,127,
 float LimiterAmount = 0.0; // 0 <= LimiterAmout <= 0.5, where 0 is linear
 //float LevelOscN_HeadRoom = 1.0f/2.75; //1.0f/2.2f;  //extraAmpFactor //64,17,0,127,
-float LevelOscN_HeadRoom = 1.0f/1.375; //1.0f/2.2f;  //extraAmpFactor //64,17,0,127,
+float LevelOscN_HeadRoom = 1.0f/1.7; //1.0f/2.2f;  //extraAmpFactor //64,17,0,127,
 float logPotYmidLevelOscN = 0.50f; // 0.5 is linear, 0.8 means at 0.5 in you get 0.8 out
 float Amp_HeadRoom = 1.0f;  		//64,17,0,127,
 float OctOsc2 = 0;  	//65,0,62,66,
@@ -373,7 +377,7 @@ float FreqNoiseFilter4BModFactor  = 1.0; // Note number of Freq slider 36 to 124
 float QFactorNoiseFilter4 = 2.5;  	//75,2,5,127,"// 5=0.5, 127=12.7"
 float QFactorFilter5 = .707;  	//75,2,5,127,"// 5=0.5, 127=12.7"
 float KeyFollowNoiseFilter4 = 12;  	//75,3,52,88,// -12 to +24 num semi tones
-float KeyFollowFilter5 = 12;  	//75,3,52,88,// -12 to +24 num semi tones
+float KeyFollowFilter5 = 1;  	//75,3,52,88,// -12 to +24 num semi tones
 float BreathModNoiseFilter4 = 0;  	//75,4,0,127,
 float LfoFreqNoiseFilter4 = 0;  	//75,5,0,127,
 float LfoDepthNoiseFilter4 = 0;  	//75,6,0,127,

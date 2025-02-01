@@ -101,6 +101,8 @@ extern float noteNumberOsc1;
 extern float noteFreqOsc1;  
 extern float noteNumberOsc2;  
 extern float noteFreqOsc2;  
+extern float noteFreqFilterOsc1; // note for hp filter for each osc
+extern float noteFreqFilterOsc2;
 extern float noteFreqFilter5;  
 extern float noteNumberFilter1;  
 extern float noteNumberFilter2;  
@@ -168,6 +170,7 @@ extern float keyfollowFilter1;
 extern float keyfollowFilter2;
 extern float keyfollowFilter3;
 extern float keyfollowFilter4;
+extern float keyfollowFilter5;
 extern float octaveControlFilter1;
 extern float octaveControlFilter2;
 extern float octaveControlFilter3;
@@ -175,6 +178,7 @@ extern float octaveControlFilter4;
 extern float octaveControlFilter5;
 extern float octaveControlPreNoiseFilter;
 extern float offsetNoteKeyfollow;  // 84 = C6, 72 = C5, 60 = C4
+extern float offsetNoteKeyfollowFilter5; // 84 = C6, 72 = C5, 60 = C4
 extern float offsetNoteKeyfollowNoise;  // 84 = C6, 72 = C5, 60 = C4
 extern float offsetNoteKeyfollowPreNoise;  // 84 = C6, 72 = C5, 60 = C4
 extern float minPreNoiseNoteNumbr;  // 84 = C6, 72 = C5, 60 = C4  4000s noise stops changing below about C4

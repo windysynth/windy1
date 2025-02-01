@@ -53,7 +53,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //------------some define statements --------------------
 // #define FREQQ (440)
 
-//#define PSRAM_INSTALLED
+#define PSRAM_INSTALLED
 
 #define PATCH_NUMBER_EEPROM_ADDR ( (int)0 )
 #define VOL_EEPROM_ADDR ( (int)4 )
@@ -196,10 +196,16 @@ AudioMixer4              mix_fcModFilter2_sweep; //xy=1497.333251953125,884
 AudioMixer4              mix_xfade;      //xy=1505.333251953125,122
 AudioFilterStateVariable filter1;        //xy=1553.333251953125,658
 AudioEffectMultiply      mult_thCurveOsc2; //xy=1640.333251953125,298
+//AudioFilterOnepole       onepole_osc2; 
+AudioFilterStateVariable filter_osc2;        //xy=1553.333251953125,658
+AudioFilterStateVariable filter_osc2b;        //xy=1553.333251953125,658
 //AudioEffectWaveshaper    waveshape4;     //xy=1644.8497924804688,1173.8501586914062
 //AudioMixer4              mix_delayLevelR; //xy=1655.3334197998047,1844
 //AudioMixer4              mix_delayLevelL; //xy=1661.3332977294922,1430.666748046875
 AudioEffectMultiply      mult_thCurveOsc1; //xy=1674.333251953125,177
+//AudioFilterOnepole       onepole_osc1; 
+AudioFilterStateVariable filter_osc1;        //xy=1553.333251953125,658
+AudioFilterStateVariable filter_osc1b;        //xy=1553.333251953125,658
 AudioMixer4              mix_ntcFilter1; //xy=1709.333251953125,652
 //AudioEffectWaveshaper    waveshape2;     //xy=1728.8499755859375,920.8499908447266
 AudioConvert_I16toF32           Int2FloatR; //xy=1769.949951171875,1688.6500244140625
@@ -374,13 +380,17 @@ AudioConnection          patchCord120(mix_xfade, 0, mult_thCurveOsc1, 0);
 AudioConnection          patchCord121(filter1, 0, mix_ntcFilter1, 1);
 AudioConnection          patchCord122(filter1, 1, mix_ntcFilter1, 2);
 AudioConnection          patchCord123(filter1, 2, mix_ntcFilter1, 3);
-AudioConnection          patchCord124(mult_thCurveOsc2, 0, mix_oscLevels, 1);
+AudioConnection          patchCord124a(mult_thCurveOsc2, 0, filter_osc2, 0);
+AudioConnection          patchCord124b(filter_osc2, 2, filter_osc2b, 0);
+AudioConnection          patchCord124(filter_osc2b, 2, mix_oscLevels, 1);
 AudioConnection          patchCord125(mix_fcModFilter4_sweep, 0, filter4, 1);
 //AudioConnection          patchCord126(mix_delayLevelR, Int2FloatR);
 //AudioConnection          patchCord127(mix_delayLevelL, Int2FloatL);
 AudioConnection          patchCord126(mix_chorus_dry, Int2FloatR);
 AudioConnection          patchCord127(mix_chorus_dry, Int2FloatL);
-AudioConnection          patchCord128(mult_thCurveOsc1, 0, mix_oscLevels, 0);
+AudioConnection          patchCord128a(mult_thCurveOsc1, 0, filter_osc1, 0);
+AudioConnection          patchCord128b(filter_osc1, 2, filter_osc1b, 0);
+AudioConnection          patchCord128(filter_osc1b, 2, mix_oscLevels, 0);
 AudioConnection          patchCord129(mix_ntcFilter1, 0, filter2, 0);
 AudioConnection          patchCord130(mix_ntcFilter1, 0, mix_ntcFilter2, 0);
 AudioConnection          patchCord131(mix_fcModFilter2_sweep, 0, filter2, 1);
@@ -420,7 +430,8 @@ AudioConnection_F32          patchCord170(mix_pongL_F32, 0, Float2IntL, 0);
 AudioConnection          patchCord145(mix_ntcFilter2, fir_formant);
 //AudioConnection          patchCord146(fir_formant, 0, mix_Amp, 0);
 AudioConnection          patchCord146(fir_formant, 0, filter5, 0);
-AudioConnection          patchCord150(filter5, 2, mix_Amp, 0);
+//AudioConnection          patchCord150(filter5, 2, mix_Amp, 0);
+AudioConnection          patchCord150(fir_formant, 0, mix_Amp, 0);
 AudioConnection          patchCord147(mix_Amp, 0, env_squelch, 0);
 //AudioConnection          patchCord148(Float2IntR, 0, filterPreMixLPR, 0);
 //AudioConnection          patchCord149(Float2IntL, 0, filterPreMixLPL, 0);
@@ -580,8 +591,8 @@ void setup() {
     dc_beatOsc1.amplitude(0.0); // TODO calculate beat number
     dc_beatOsc2.amplitude(0.0); // TODO calculate beat number
 
-    //wfmod_sawOsc1.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
-    wfmod_sawOsc1.begin(WAVEFORM_SAWTOOTH);
+    wfmod_sawOsc1.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
+    //wfmod_sawOsc1.begin(WAVEFORM_SAWTOOTH);
     wfmod_sawOsc1.amplitude(SawOsc1);
     wfmod_sawOsc1.frequency(noteFreqOsc1);
     wfmod_sawOsc1.frequencyModulation(octaveControlOsc1);  // max freq mod +/- 4.0 octaves
@@ -589,14 +600,14 @@ void setup() {
     wfmod_triOsc1.amplitude(TriOsc1);
     wfmod_triOsc1.frequency(noteFreqOsc1);
     wfmod_triOsc1.frequencyModulation(octaveControlOsc1);  // max freq mod +/- 4.0 octaves
-    //wfmod_pulseOsc1.begin(WAVEFORM_BANDLIMIT_PULSE);
-    wfmod_pulseOsc1.begin(WAVEFORM_PULSE);
+    wfmod_pulseOsc1.begin(WAVEFORM_BANDLIMIT_PULSE);
+    //wfmod_pulseOsc1.begin(WAVEFORM_PULSE);
     wfmod_pulseOsc1.amplitude(PulseOsc1);
     wfmod_pulseOsc1.frequency(noteFreqOsc1);
     wfmod_pulseOsc1.frequencyModulation(octaveControlOsc1);  // max freq mod +/- 4.0 octaves
     wfmod_pulseOsc1.pulsewidth_offset(PwOsc1); // ws added this to synth_waveform.cpp .h
-    //wfmod_sawOsc2.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
-    wfmod_sawOsc2.begin(WAVEFORM_SAWTOOTH);
+    wfmod_sawOsc2.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
+    //wfmod_sawOsc2.begin(WAVEFORM_SAWTOOTH);
     wfmod_sawOsc2.amplitude(SawOsc2);
     wfmod_sawOsc2.frequency(noteFreqOsc2);
     wfmod_sawOsc2.frequencyModulation(octaveControlOsc2);  // max freq mod +/- 4.0 octaves
@@ -604,8 +615,8 @@ void setup() {
     wfmod_triOsc2.amplitude(TriOsc2);
     wfmod_triOsc2.frequency(noteFreqOsc2);
     wfmod_triOsc2.frequencyModulation(octaveControlOsc2);  // max freq mod +/- 4.0 octaves
-    //wfmod_pulseOsc2.begin(WAVEFORM_BANDLIMIT_PULSE);
-    wfmod_pulseOsc2.begin(WAVEFORM_PULSE);
+    wfmod_pulseOsc2.begin(WAVEFORM_BANDLIMIT_PULSE);
+   // wfmod_pulseOsc2.begin(WAVEFORM_PULSE);
     wfmod_pulseOsc2.amplitude(PulseOsc2);
     wfmod_pulseOsc2.frequency(noteFreqOsc2);
     wfmod_pulseOsc2.frequencyModulation(octaveControlOsc2);  // max freq mod +/- 4.0 octaves
@@ -624,9 +635,26 @@ void setup() {
     filter4.frequency(FreqNoiseFilter4); // Freq slider
     filter4.resonance(QFactorNoiseFilter4);   // Q factor
     filter4.octaveControl(octaveControlFilter4); // sets range of control from mix_fcModFilter4 
-    filter5.frequency(noteFreqFilter5); // Freq slider
-    filter5.resonance(QFactorFilter5);   // Q factor
-    filter5.octaveControl(octaveControlFilter5); // sets range of control from mix_fcModFilter4 
+    //filter5.frequency(noteFreqFilter5); // Freq slider
+    //filter5.frequency(1.0f); // Freq slider
+    //filter5.resonance(QFactorFilter5);   // Q factor
+    //filter5.octaveControl(octaveControlFilter5); // sets range of control from mix_fcModFilter4 
+    filter_osc1.frequency(noteFreqFilterOsc1); // Freq of osc1 
+    filter_osc1.resonance(0.7f);   // Q factor
+    filter_osc1.octaveControl(1.0f); // not using this control 
+    filter_osc1b.frequency(noteFreqFilterOsc1); // Freq of osc1 
+    filter_osc1b.resonance(2.0f);   // Q factor
+    filter_osc1b.octaveControl(1.0f); // not using this control 
+    filter_osc2.frequency(noteFreqFilterOsc2); // Freq of osc1 
+    filter_osc2.resonance(0.7f);   // Q factor
+    filter_osc2.octaveControl(1.0f); // not using this control 
+    filter_osc2b.frequency(noteFreqFilterOsc2); // Freq of osc1 
+    filter_osc2b.resonance(2.0f);   // Q factor
+    filter_osc2b.octaveControl(1.0f); // not using this control 
+    //onepole_osc1.highpassOn(true);    
+    //onepole_osc1.frequency(noteFreqOsc1);   // highpass for osc1 before  mix_oscLevels 
+    //onepole_osc2.highpassOn(true);    
+    //onepole_osc2.frequency(noteFreqOsc2);   // highpass for osc2 before  mix_oscLevels 
     filterPreNoise.frequency(clippedFreqFilterPreNoise);   // highpass pre-filter for noise signal 
     filterPreNoise.resonance(0.707);
     filterPreNoise.octaveControl(octaveControlPreNoiseFilter); // sets range of control from mix_fcModFilter4 
@@ -637,10 +665,10 @@ void setup() {
     //filterPostDelayR.frequency(EffectsDelayDamp);
     //filterPostDelayR.resonance(0.707);
     filterPreMixHPL.frequency(200);
-    filterPreMixHPL.resonance(0.5);
+    filterPreMixHPL.resonance(0.7);
     filterPreMixHPL.octaveControl(1.0);
     filterPreMixHPR.frequency(200);
-    filterPreMixHPR.resonance(0.5);
+    filterPreMixHPR.resonance(0.7);
     filterPreMixHPR.octaveControl(1.0);
 //    filterPreMixLPL.frequency(20500);  // LP filter
 //    filterPreMixLPL.resonance(0.707);
@@ -767,9 +795,9 @@ void setup() {
     mix_Amp.gain(1, 1.0f);  // 4000s AmpLevel doesn't control Noise Level
 
     flange1.begin(delayline_flange1,FLANGE_DELAY_LENGTH,
-                (int)EffectsChorusDelay1,(int)EffectsChorusMod1,EffectsChorusLfoFreq);
+                (int)EffectsChorusDelay1 % 93,(int)EffectsChorusMod1,EffectsChorusLfoFreq);
     flange2.begin(delayline_flange2,FLANGE_DELAY_LENGTH,
-                (int)EffectsChorusDelay2,(int)EffectsChorusMod2,EffectsChorusLfoFreq);
+                (int)EffectsChorusDelay2 % 93,(int)EffectsChorusMod2,EffectsChorusLfoFreq);
     flange3.begin(delayline_flange3,FLANGE_DELAY_LENGTH,
                 FLANGE_DELAY_PASSTHRU,0,0.0);
     mix_chorus_fb.gain(0,1.0*EffectsChorusFBHeadroom);
@@ -1156,9 +1184,9 @@ void loop()
         wfmod_pulseOsc2.pulsewidth_offset(PwOsc2); // ws added this to synth_waveform.cpp .h
         pink_Noise.amplitude(NoiseLevel);  //
         
-        // TODO: wrap EffectsChorusDelay1 & 2 at 93ms (44.1*93 = 4101.3) (ewi 4k wraps like this)
-        flange1.voices( (int)EffectsChorusDelay1,(int)EffectsChorusMod1,EffectsChorusLfoFreq);
-        flange2.voices((int)EffectsChorusDelay2,(int)EffectsChorusMod2,EffectsChorusLfoFreq);
+        // wrap EffectsChorusDelay1 & 2 at 93ms (44.1*93 = 4101.3) (ewi 4k wraps like this)
+        flange1.voices( (int)EffectsChorusDelay1 % 93,(int)EffectsChorusMod1,EffectsChorusLfoFreq);
+        flange2.voices( (int)EffectsChorusDelay2 % 93,(int)EffectsChorusMod2,EffectsChorusLfoFreq);
         mix_chorus_fb.gain(0,1.0*EffectsChorusFBHeadroom);
         mix_chorus_fb.gain(1,EffectsChorusFeedback*EffectsChorusFBHeadroom);
         mix_chorus_wet.gain(0,EffectsChorusWet1);
@@ -1247,14 +1275,14 @@ void loop()
     noteFreqOsc1 = noteFreqOsc1+BeatOsc1; // BeatOsc1 is additive
     noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2-69.0)/12 );  // 69 is note number for A4=440Hz
     noteFreqOsc2 = noteFreqOsc2+BeatOsc2; // BeatOsc2 is additive
-    //noteFreqFilter5 = 440.0 * pow(2, (min(60,min(noteNumberOsc1,noteNumberOsc2))-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
-    //noteFreqFilter5 = 440.0 * pow(2, (min(60,min(noteNumberOsc1,noteNumberOsc2))-69.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
+    noteFreqFilterOsc1 = 440.0 * pow(2, (noteNumberOsc1-69.0f+9.0f)/12.0f );  // 69 is note number for A4=440Hz
+    noteFreqFilterOsc2 = 440.0 * pow(2, (noteNumberOsc2-69.0f+9.0f)/12.0f );  // 69 is note number for A4=440Hz
     noteFreqFilter5 = 440.0 * pow(2, (min(noteNumberOsc1,noteNumberOsc2)-69.0)/12 );  // always at noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
-    //noteFreqFilter5 = 440.0 * pow(2, (noteNumberOsc1-69.0-12.0)/12 );  // always Oct below noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
     keyfollowFilter1 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter1/144.0); //60 is C4   
     keyfollowFilter2 = pow(2, (noteNumberFilter1-offsetNoteKeyfollow)*KeyFollowOscFilter2/144.0); //60 is C4   
     keyfollowFilter3 = pow(2, (noteNumberFilter1-offsetNoteKeyfollowNoise)*KeyFollowNoiseFilter3/144.0); //60 is C4   
     keyfollowFilter4 = pow(2, (noteNumberFilter1-offsetNoteKeyfollowNoise)*KeyFollowNoiseFilter4/144.0); //60 is C4   
+    //keyfollowFilter5 = pow(2, (noteNumberFilter1-offsetNoteKeyfollowFilter5)*KeyFollowFilter5/144.0); //60 is C4 
     keyfollowFilterPreNoise = pow(2, ( (noteNumberFilter1 < minPreNoiseNoteNumbr ? minPreNoiseNoteNumbr : noteNumberFilter1)- offsetNoteKeyfollowPreNoise )
                                 *KeyFollowPreNoiseFilter/144.0); //72 is C5 
     wfmod_sawOsc1.frequency(noteFreqOsc1);
@@ -1328,11 +1356,19 @@ void loop()
     }
     filterPreNoise.frequency(clippedFreqFilterPreNoise); 
     onepole_PreNoise.frequency(FreqPreNoiseFilter); 
-    filter5.frequency(noteFreqFilter5); // HP filter post mix_Amp
+    filter_osc1.frequency(noteFreqFilterOsc1); // Freq of osc1 
+    filter_osc1b.frequency(noteFreqOsc1); // Freq of osc1 
+    filter_osc2.frequency(noteFreqFilterOsc2); // Freq of osc1 
+    filter_osc2b.frequency(noteFreqOsc2); // Freq of osc1 
+    //onepole_osc1.frequency(noteFreqOsc1);   // highpass for osc1 before  mix_oscLevels 
+    //onepole_osc2.frequency(noteFreqOsc2);   // highpass for osc1 before  mix_oscLevels 
+    //filter5.frequency(noteFreqFilter5*keyfollowFilter5); // HP filter post mix_Amp
+    //filter5.frequency(noteFreqFilter5); // HP filter post mix_Amp
+    filter5.frequency(1.0f); // HP filter post mix_Amp (1.0Hz to get it out of the way for now)
     //filterPreMixHPL.frequency(noteFreqFilter5);
     //filterPreMixHPR.frequency(noteFreqFilter5);
-    filterPreMixHPL.frequency(62.5f);
-    filterPreMixHPR.frequency(62.5f);
+    filterPreMixHPL.frequency(0.1f); //(62.5f);
+    filterPreMixHPR.frequency(0.1f); //(62.5f);
 
 
     //-----------------------------------------------------------
@@ -1552,6 +1588,13 @@ float gamma_func(float x, float gamma) {
     float y = pow(x, gamma);
     return y;
 } 
+
+float amp_curve(float x) {
+    if (x >=0.5)
+        return x;
+    float y = gamma_func(2.0f*x, 1.0f/3.0f)/2.0f;
+    return y;
+}
 
 float limit(float input, float top, float bottom)
 {

@@ -105,6 +105,7 @@ bool OledMenu::checkButtonsAndKnobs(){
         knob.write(0); // ignore knob event if buttonButton is currently pressed
         return false;
     }
+    if (newKnob != 0) { return false; } // don't read again if not done with last time
     newKnob_temp = knob.read()/4; //don't need 4X counting mode, so integer div by 4
     newKnob = newKnob_temp > 0 ? 1 : newKnob_temp < 0 ? -1 : 0; 
     if (newKnob != 0){

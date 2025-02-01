@@ -130,7 +130,12 @@ void patchToNoiseTime(patch_t *patch) {NoiseTime = noiseTimeCurve((float)patch->
     //NoiseBreathCurve = gen_noise_gamma(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV127);  	//80,1,0,127,
 void patchToNoiseBreathCurveLines(patch_t *patch) {NoiseBreathCurveLines = gen_osc_curve_lines(((float)(patch->nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV127);} //80,1,0,127,
 //void patchToNoiseLevel(patch_t *patch) {NoiseLevel = pow((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,.35)*maxNoiseLevel;}	//80,2,0,127,
-void patchToNoiseLevel(patch_t *patch) {NoiseLevel = log_pot_curve((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,logPotYmidLevelNoise)*maxNoiseLevel;}	//80,2,0,127,
+//void patchToNoiseLevel(patch_t *patch) {NoiseLevel = log_pot_curve((float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127,logPotYmidLevelNoise)*maxNoiseLevel;}	//80,2,0,127,
+void patchToNoiseLevel(patch_t *patch) {
+    NoiseLevel = (float)patch->nrpn_msb_noise[CCNOISELEVEL]*DIV127*maxNoiseLevel;
+    if((float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127 > 0.005f)
+        NoiseLevel = NoiseLevel*(AmpLevel/((float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127));
+}	//80,2,0,127,
 void patchToBendRange(patch_t *patch) {BendRange = (float)patch->nrpn_msb_common1[CCBENDRANGE];} //81,0,0,12,// num semitones
 void patchToBendStep(patch_t *patch) {BendStep = (bool)patch->nrpn_msb_common1[CCBENDSTEP];}  	//81,1,0,1,//0=off 1=on
 void patchToVibratoPitch(patch_t *patch) {VibratoPitch = (float)patch->nrpn_msb_common1[CCVIBRATOPITCH]*DIV127;} //81,2,0,127,  (this isn't necessary since bite sensor pb and plate pb are the same).
@@ -143,7 +148,11 @@ void patchTos81_8(patch_t *patch) {s81_8 = (float)patch->nrpn_msb_common1[CC81_8
 void patchToChorusOn(patch_t *patch) {ChorusOn = (bool)patch->nrpn_msb_common1[CCCHORUSON];}  //81,9,0,1,// Chorus on off
 void patchToVibratoAmp(patch_t *patch) {VibratoAmp = (float)patch->nrpn_msb_common2[CCVIBRATOAMP]*DIV127;} //88,0,0,127, (bite tremelo amount)
 //void patchToAmpLevel(patch_t *patch) {AmpLevel = (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127;} //88,1,0,127,
-void patchToAmpLevel(patch_t *patch) {AmpLevel = log_pot_curve( (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127,logPotYmidLevelOscN);} //88,1,0,127,
+//void patchToAmpLevel(patch_t *patch) {AmpLevel = log_pot_curve( (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127,logPotYmidLevelOscN);} //88,1,0,127,
+void patchToAmpLevel(patch_t *patch) {
+    AmpLevel = amp_curve( (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127 );
+    patchToNoiseLevel(patch);
+} //88,1,0,127,
 void patchToOctButtonLevel(patch_t *patch) {OctButtonLevel = (float)patch->nrpn_msb_common2[CCOCTBUTTONLEVEL]*DIV127;} //88,2,0,127,
 void patchToEffectsChorusDelay1(patch_t *patch) {
     // flange cuts delay in half, so mult by 2.0 here 
@@ -152,14 +161,20 @@ void patchToEffectsChorusDelay1(patch_t *patch) {
 }  
 void patchToEffectsChorusMod1(patch_t *patch) {EffectsChorusMod1 = (2.0f*44.1f)*((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD1]-64.0f)/64.0f;} //112,1,0,127, (-50% to +50%)
 void patchToEffectsChorusWet1(patch_t *patch) {EffectsChorusWet1 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSWET1]-64.0f)/64.0f;} //112,2,0,127, neg vals are phase inverted
-void patchToEffectsChorusDelay2(patch_t *patch) {EffectsChorusDelay2 = 2.0f*44.1f*(float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2];} //112,3,0,127,
+void patchToEffectsChorusDelay2(patch_t *patch) {
+    EffectsChorusDelay2 = 2.0f*44.1f*(float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2];
+} //112,3,0,127,
 void patchToEffectsChorusMod2(patch_t *patch) {EffectsChorusMod2 = (2.0f*44.1f)*((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD2]-64.0)/64.0;} //112,4,0,127,
 void patchToEffectsChorusWet2(patch_t *patch) {EffectsChorusWet2 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSWET2]-64.0f)/64.0f;} //112,5,0,127,
 void patchToEffectsChorusFeedback(patch_t *patch) {EffectsChorusFeedback = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK]-64.0f)/64.0f;} //112,6,0,127,
 void patchToEffectsChorusLfoFreq(patch_t *patch) {EffectsChorusLfoFreq = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ]/10.0f;} //112,7,0,127,
 void patchToEffectsChorusDryLevel(patch_t *patch) {EffectsChorusDryLevel = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL]*DIV127;} //112,8,0,127,
 //void patchToEffectsDelayTimeL(patch_t *patch) {EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*10.0f;}	//113,0,0,127, 0 to 1270 ms
-void patchToEffectsDelayTimeL(patch_t *patch) {EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*DIV127;}	//113,0,0,127, 1.0 = 1270 ms
+void patchToEffectsDelayTimeL(patch_t *patch) {
+    // AudioEffectDelayStereo_F32::time() squares the number (for some reason), so i'll sqrt here first
+    EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*DIV127;
+    EffectsDelayTimeL = sqrt(EffectsDelayTimeL);
+}	//113,0,0,127, 1.0 = 1270 ms
 void patchToEffectsDelayFeedback(patch_t *patch) {EffectsDelayFeedback = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]*DIV127;} //113,1,0,127,
 void patchToEffectsDelayDamp(patch_t *patch) {EffectsDelayDamp = maxDelayDamp*pow(2, -( (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP])/24.0 );} //113,2,0,127,
 void patchToEffectsDelayLevel(patch_t *patch) {EffectsDelayLevel = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYLEVEL]*DIV127*0.5f;}  //113,3,0,127,
