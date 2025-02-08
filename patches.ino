@@ -176,7 +176,11 @@ void patchToEffectsDelayTimeL(patch_t *patch) {
     EffectsDelayTimeL = sqrt(EffectsDelayTimeL);
 }	//113,0,0,127, 1.0 = 1270 ms
 void patchToEffectsDelayFeedback(patch_t *patch) {EffectsDelayFeedback = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]*DIV127;} //113,1,0,127,
-void patchToEffectsDelayDamp(patch_t *patch) {EffectsDelayDamp = maxDelayDamp*pow(2, -( (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP])/24.0 );} //113,2,0,127,
+void patchToEffectsDelayDamp(patch_t *patch) {
+    //EffectsDelayDamp = maxDelayDamp*pow(2.0f, -( (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP])/24.0f );
+    //EffectsDelayDamp = EffectsDelayDamp/(2.0f*AUDIO_SAMPLE_RATE_EXACT);
+      EffectsDelayDamp = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP]*DIV127;
+} //113,2,0,127,
 void patchToEffectsDelayLevel(patch_t *patch) {EffectsDelayLevel = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYLEVEL]*DIV127*0.5f;}  //113,3,0,127,
 void patchToEffectsDelayPong(patch_t *patch) {EffectsDelayPong = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYSPARE]*DIV127;} //113,3,0,127,
 void patchToEffectsReverbSpare(patch_t *patch) {EffectsReverbSpare = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBSPARE]*DIV127;} //114,1,0,127,

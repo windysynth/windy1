@@ -6,7 +6,7 @@
 #include "MenuItemsListsFuncs.h"
 #include "patches.h"
 
-float longKnobButtonPressTime = 500;  // milliiseconds
+//float longKnobButtonPressTime = 500;  // milliiseconds
 int32_t newKnob = 0;
 
 // globls for midi
@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.1.0"};
+String verNum_str = {"0.1.02"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;

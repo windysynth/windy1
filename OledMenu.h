@@ -34,10 +34,20 @@ public MenuClass {
 
 public:
   bool checkButtonsAndKnobs(); // 
+  bool checkButtons(); // 
   void resetButtonsAndKnobs(); // 
+  float longKnobButtonPressTime = 500;  // milliiseconds
   bool longKnobButtonPressPending = false;
   bool longKnobButtonPress = false; 
   bool shortKnobButtonPress = false; 
+  float longTopButtonPressTime = 500;  // milliiseconds
+  bool longTopButtonPressPending = false;
+  bool longTopButtonPress = false; 
+  bool shortTopButtonPress = false; 
+  float longBotButtonPressTime = 500;  // milliiseconds
+  bool longBotButtonPressPending = false;
+  bool longBotButtonPress = false; 
+  bool shortBotButtonPress = false; 
   bool reDoMenu = false;
   int32_t newKnob = 0;
   uint32_t lastTimeKnobMoved = 0;
@@ -45,6 +55,7 @@ public:
   int32_t knobAcceleration = 1; // set this in goto<name>Fun for <name> menu
   int updateSelection(); // checks up there is an update to selection
   int updateLeafValue = 0;
+  bool escape(); // Checks if escape (top) button pressed 
   bool selectionMade(); // Checks if a selection has been made
   void doMenu(); // overiding MenuClass::doMenu() to handle leaf menus
   void displayMenu(); // 

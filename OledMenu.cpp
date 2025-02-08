@@ -16,6 +16,18 @@
  *****************************/
 
 void OledMenu::doMenu(){
+  if (escape()) {
+    Serial8.println("escape()");
+    //setCurrentMenu(&listEscapeMenu);
+    if(currentMenu != &listTopMenu){ 
+        goUpOneMenu(); 
+        getText(str_serial8buf, currentItemIndex);
+        Serial8.println(str_serial8buf);
+    } else {
+        currentItemIndex = 0; // got top of top
+    }
+    displayMenu();
+  }
     Serial8.print("doMenu, menuSize = ");
     Serial8.println(currentMenu->getSize());
     Serial8.print("OledMenu::runningFunction = ");
@@ -80,8 +92,36 @@ void OledMenu::resetButtonsAndKnobs(){
   Serial8.println(str_serial8buf);
 }
 
+bool OledMenu::checkButtons(){
+    //bool topButtonChanged = topButton.update();
+    topButton.update();
+    bool topButtonState = topButton.read(); ;// false means pressed
+    botButton.update();
+    bool botButtonState = botButton.read(); ;// false means pressed
+    if (topButton.rose()){
+        if (!longTopButtonPressPending){
+            longTopButtonPress = false; 
+            shortTopButtonPress = true; 
+        }
+        else
+        {
+            longTopButtonPress = true; 
+            shortTopButtonPress = false; 
+        }
+        longTopButtonPressPending = false; 
+        return true;
+    }
+    else if ( topButtonState == false && topButton.currentDuration() > longTopButtonPressTime ) {
+        longTopButtonPressPending = true; 
+        return true;
+
+    }
+    return false;
+}
+
 bool OledMenu::checkButtonsAndKnobs(){
-    bool knobButtonChanged = knobButton.update();
+    //bool knobButtonChanged = knobButton.update();
+    knobButton.update();
     bool knobButtonState = knobButton.read(); ;// false means pressed
     int32_t newKnob_temp = 0;
     if (knobButton.rose()){
@@ -100,9 +140,10 @@ bool OledMenu::checkButtonsAndKnobs(){
     }
     else if ( knobButtonState == false && knobButton.currentDuration() > longKnobButtonPressTime ) {
         longKnobButtonPressPending = true; 
+        return true;
     }
     if (!knobButtonState) { 
-        knob.write(0); // ignore knob event if buttonButton is currently pressed
+        knob.write(0); // ignore knob event if knobButton is currently pressed
         return false;
     }
     if (newKnob != 0) { return false; } // don't read again if not done with last time
@@ -131,7 +172,17 @@ int OledMenu::updateSelection() {
     return newKnob_temp; 
 }
 
-boolean OledMenu::selectionMade() {
+bool OledMenu::escape() {
+    if (updateEpromFlag){
+        eepromCurrentMillis = millis();
+        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+    }
+    bool shortTopButtonPress_temp = shortTopButtonPress;
+    shortTopButtonPress = false;
+    return shortTopButtonPress_temp;
+}
+
+bool OledMenu::selectionMade() {
     if (updateEpromFlag){
         eepromCurrentMillis = millis();
         eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 

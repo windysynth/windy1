@@ -39,6 +39,10 @@ MenuItem PROGMEM topMenu[18] = {
   , { "System  " , gotoSystemAdjMenu   }
 };
 
+MenuItem PROGMEM escapeMenu[1] = { 
+    { "Escaping..", goUpOneMenu    }
+};
+
 MenuItem PROGMEM volAdjustMenu[1] = { 
     { "Volume:\n ", volAdjustFun    }
 };
@@ -207,8 +211,8 @@ MenuItem PROGMEM fxPasteMenu[2] = {
 };
 bool fxPasteFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM fxSwapMenu[2] = {
-    { "Back:\n " , goUpOneMenu   }
-   ,{ "SwapFx:\n " , fxSwapFun   }
+    { "Back " , goUpOneMenu   }
+   ,{ "SwapFx " , fxSwapFun   }
 };
 bool fxSwapFun(){ return goUpOneMenu(); }
 MenuItem PROGMEM delayLevelMenu[1] = {
@@ -2257,7 +2261,7 @@ bool formantSelectFun() {
 }
 
 MenuItem PROGMEM patchAmpMenu[1] = {
-    { "Patch\n Amp:\n ", patchAmpAdjustFun    }
+    { "Amp:\n ", patchAmpAdjustFun    }
 };
 bool patchAmpAdjustFun() {
  if(myMenu.updateLeafValue){
@@ -2454,6 +2458,7 @@ bool breathCCFun() {
 }
 
 MenuList listTopMenu(topMenu, 18);
+MenuList listEscapeMenu(escapeMenu, 1);
 MenuList listVolAdjustMenu(volAdjustMenu, 1);
 MenuList listPatchSelectMenu(patchSelectMenu, 1);
 MenuList listPatchResetMenu(patchResetMenu, 2);
@@ -2622,6 +2627,8 @@ MenuList listBreathCCMenu(breathCCMenu, 1);
 //---------------------
 
 bool gotoVolAdjMenu() {
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   display.clearDisplay(); // erase display
   //display.display(); // refresh display
   myMenu.setCurrentMenu(&listVolAdjustMenu);
@@ -2631,6 +2638,8 @@ bool gotoVolAdjMenu() {
   return true;
 }
 bool gotoPatchSelectMenu() {
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   display.clearDisplay(); // erase display
   //display.display(); // refresh display
   myMenu.setCurrentMenu(&listPatchSelectMenu);
@@ -2684,8 +2693,6 @@ bool gotoPatchSwapMenu(){
     return true;
 }
 bool gotoPatchFxMenu(){
-  //myMenu.previousMenu = myMenu.currentMenu;
-  //myMenu.previousItemIndex = myMenu.currentItemIndex;
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchFxMenu);
@@ -2789,8 +2796,6 @@ bool gotoSystemAdjMenu() {
 bool goUpOneMenu() {
   display.clearDisplay(); // erase display
   display.display(); // refresh display
-  //myMenu.setCurrentMenu(myMenu.previousMenu);
-  //myMenu.currentItemIndex = myMenu.previousItemIndex;
   if(!myMenu.previousMenuStack.empty() 
           && !myMenu.previousItemIndexStack.empty()){
       myMenu.setCurrentMenu(myMenu.previousMenuStack.top());
@@ -2822,6 +2827,7 @@ bool gotoFxCopyMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFxCopyMenu);
   return true;
+  
 }
 bool gotoFxPasteMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);

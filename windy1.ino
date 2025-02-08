@@ -75,7 +75,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <EEPROM.h>
 
 #include <OpenAudio_ArduinoLibrary.h> //for AudioConvert_I16toF32, AudioConvert_F32toI16, and AudioEffectGain_F32
-#include <hexefx_audio_F32.h> // for AudioEffectPlateReverb_F32
+#include <hexefx_audiolib_F32.h> // for AudioEffectPlateReverb_F32 and AudioEffectDelayStereo_F32
 
 //-------- paste below here Auto generated code from Audio System Design Tooll --------
 #include <Audio.h>
@@ -474,9 +474,13 @@ AudioControlSGTL5000     sgtl5000_1;     //xy=346.333251953125,219
 const int knobButtonPin = 32;  // teensy4.1 pin
 const int knobEncoderPin1 = 30;  // teensy4.1 pin
 const int knobEncoderPin2 = 31;  // teensy4.1 pin
+const int topButtonPin = 27;  // teensy4.1 pin
+const int botButtonPin = 27;  // teensy4.1 pin
 const uint32_t debounceDelay = 10; //  ms
 Encoder knob(knobEncoderPin1, knobEncoderPin2);
 Bounce knobButton(knobButtonPin, debounceDelay);
+Bounce topButton(topButtonPin, debounceDelay);
+Bounce botButton(botButtonPin, debounceDelay);
 
 
 //const int patchNextButton = 29;
@@ -484,19 +488,19 @@ Bounce knobButton(knobButtonPin, debounceDelay);
 //uint32_t knobButtonPressedTime = 0;
 //int oldKnobButtonState = 0;
 
-int currentKnobButtonState = 0;
-bool longKnobButtonPressPending = false;
-bool longKnobButtonPress = false;
-bool shortKnobButtonPress = false;
-bool firstKnobButtonPress = true;
-bool KnobButtonRising = false;
-bool submenu_active = false;
+//int currentKnobButtonState = 0;
+//bool longKnobButtonPressPending = false;
+//bool longKnobButtonPress = false;
+//bool shortKnobButtonPress = false;
+//bool firstKnobButtonPress = true;
+//bool KnobButtonRising = false;
+//bool submenu_active = false;
 const uint32_t UITimeoutInterval = 7000;  // milliseconds
-typedef enum {SPLASH_SCREEN, VOL_ADJ, PATCH_SEL, MENU} uism_t;
-uism_t UISM = SPLASH_SCREEN;
-typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT, MENU_BR,
-              MENU_RVB_PATCH, MENU_DLY_PATCH, MENU_CHRS_PATCH, MENU_WR_PATCH_FX } menusm_t;
-menusm_t MENUSM = MENU_EXIT;
+//typedef enum {SPLASH_SCREEN, VOL_ADJ, PATCH_SEL, MENU} uism_t;
+//uism_t UISM = SPLASH_SCREEN;
+//typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT, MENU_BR,
+//              MENU_RVB_PATCH, MENU_DLY_PATCH, MENU_CHRS_PATCH, MENU_WR_PATCH_FX } menusm_t;
+//menusm_t MENUSM = MENU_EXIT;
 
 bool patchFxWriteFlag = false;
 
@@ -533,8 +537,21 @@ void setup() {
     sprintf(str_buf1, version_str.c_str());
     sprintf(str_oledbuf, splashScreen_str.c_str());
 
-    //pinMode(patchNextButton, INPUT_PULLUP);
     pinMode(knobButtonPin, INPUT_PULLUP);
+    pinMode(topButtonPin, INPUT_PULLUP);
+    pinMode(botButtonPin, INPUT_PULLUP);
+
+    // Enter Bootloader if topButton and botButton held down for 5 sec
+    uint32_t boatLoaderCatchTime = millis();
+    do{
+        delay(200);
+        bool topButtonState = topButton.update();
+        bool botButtonState = botButton.update();
+    }while( !topButton.read() && !botButton.read() ); // false is pressed because of PULLUP
+    if (millis() - boatLoaderCatchTime >= 5000){
+        asm("bkpt #251"); // run bootloader
+    }
+    
     Serial8.begin(1000000);
     MIDIs1.begin(MIDI_CHANNEL_OMNI);
     configureSD();
@@ -845,8 +862,8 @@ void setup() {
     delay_F32.mix(EffectsDelayLevel);
     //delay_F32.delay(number_of_samples); //  
     //delay_F32.inertia(0.5f); // 0 for fastest update - 1.0 for slowest update of delay time
-    //delay_F32.treble(0.0f); // 0- 1.0 
-    //delay_F32.treble_cut(0.0f); // 0- 1.0 
+    delay_F32.treble(1.0f - EffectsDelayDamp); // 0- 1.0 
+    delay_F32.treble_cut(EffectsDelayDamp); // 0- 1.0 
     //delay_F32.bass(0.0f); // 0- 1.0 
     //delay_F32.bass_cut(0.0f); // 0- 1.0 
     //delay_F32.mod_rateHz(0.0f); // 0- 16.0hz
@@ -1063,8 +1080,9 @@ void loop()
 {   
     static unsigned long prevMilMenu = millis(); 
     static unsigned long prevMilUpdateSynth = millis(); 
-    static unsigned long prevMilRMS = millis(); 
+    //static unsigned long prevMilRMS = millis(); 
     static bool activeButtonOrKnob = false;
+    static bool activeButtons = false;
     currentMillis = millis();
     currentUITimeoutTime = currentMillis;
 
@@ -1098,11 +1116,15 @@ void loop()
     }
     */
     
+    if(!activeButtons) {
+        activeButtons = myMenu.checkButtons();
+    }
     if(!activeButtonOrKnob) {
         activeButtonOrKnob = myMenu.checkButtonsAndKnobs();
     }
     if(currentMillis - prevMilMenu >= readKnobInterval) {  //every 50ms 
         prevMilMenu = currentMillis;
+        if(activeButtons) { myMenu.doMenu(); activeButtons = false; }
         if(activeButtonOrKnob | myMenu.reDoMenu) {
             myMenu.doMenu();
             activeButtonOrKnob = false;
@@ -1224,6 +1246,8 @@ void loop()
       delay_F32.time(EffectsDelayTimeL); // 1.27sec and use psram
       delay_F32.mix(EffectsDelayLevel);
       delay_F32.feedback(EffectsDelayFeedback); // 0 - 1.0 
+      delay_F32.treble(1.0f - EffectsDelayDamp); // 0- 1.0 
+      delay_F32.treble_cut(EffectsDelayDamp); // 0- 1.0 
         updateSynthVariablesFlag = false;
         //PRINT_VALUES_FLAG = true;
         PRINT_VALUES_FLAG = false;
@@ -1893,13 +1917,13 @@ void processMIDI(bool midi_from_host_flag)
                             //dc_breathThreshOsc1_amp = gamma_func(thresh( data2f,BreathThreshOsc1), BreathCurveOsc1);
                             //dc_breathThreshOsc2_amp = gamma_func(thresh( data2f,BreathThreshOsc2), BreathCurveOsc2);
                             dc_breathThreshOsc1_amp = piecewise_curve_func(thresh( data2f,BreathThreshOsc1), BreathOscCurveLines1);
-                            float dynoMax = 35.0f;
-                            float dynoIntercept = 75.0f;
-                            float rampTimeDynOscOn1 = limit((dc_breathThreshOsc1_amp-lastBreathf)
-                                                        *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
+                            //float dynoMax = 35.0f;
+                            //float dynoIntercept = 75.0f;
+                            //float rampTimeDynOscOn1 = limit((dc_breathThreshOsc1_amp-lastBreathf)
+                            //                            *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
                             dc_breathThreshOsc2_amp = piecewise_curve_func(thresh( data2f,BreathThreshOsc2), BreathOscCurveLines2);
-                            float rampTimeDynOscOn2 = limit((dc_breathThreshOsc2_amp-lastBreathf)
-                                                        *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
+                            //float rampTimeDynOscOn2 = limit((dc_breathThreshOsc2_amp-lastBreathf)
+                            //                            *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
                             dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime);
                             dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,dc_breathThreshOscN_rampTime);      
                             //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOscOn1);
@@ -1910,10 +1934,10 @@ void processMIDI(bool midi_from_host_flag)
                             dc_breathNoiseFilter4.amplitude(dc_breathNoiseFilter4_amp,dc_breathFilterN_rampTime);
                             if( NoiseLevel > 0.0f )
                             {
-                                float dynoMax = 40.0f;
-                                float dynoIntercept = 90.0f;
-                                float rampTimeDynNoiseOn = limit((dc_breathNoise_amp-lastBreathf)
-                                                            *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
+                                //float dynoMax = 40.0f;
+                                //float dynoIntercept = 90.0f;
+                                //float rampTimeDynNoiseOn = limit((dc_breathNoise_amp-lastBreathf)
+                                //                            *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
                                 dc_breathNoise.amplitude(dc_breathNoise_amp,dc_breathNoise_rampTime);
                                 //dc_breathNoise.amplitude(dc_breathNoise_amp,rampTimeDynNoiseOn);
                             }
@@ -1924,14 +1948,14 @@ void processMIDI(bool midi_from_host_flag)
                             dc_breathThreshOsc2_amp = 0;
                             dc_breathNoise_amp = 0;
                             // TODO: make rampOffTime slower for BC higher values
-                            float dynoMax = 35.0f;
-                            float dynoIntercept = 75.0f;
-                            float rampTimeDynOscOn1 = limit((previousBreathf-dc_breathThreshOsc1_amp)
-                                                    *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
-                            float rampTimeDynOscOn2 = limit((previousBreathf-dc_breathThreshOsc1_amp)
-                                                    *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
-                            float rampTimeDynNoiseOn = limit((previousBreathf-dc_breathNoise_amp)
-                                                        *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
+                            //float dynoMax = 35.0f;
+                            //float dynoIntercept = 75.0f;
+                            //float rampTimeDynOscOn1 = limit((previousBreathf-dc_breathThreshOsc1_amp)
+                            //                        *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
+                            //float rampTimeDynOscOn2 = limit((previousBreathf-dc_breathThreshOsc1_amp)
+                            //                        *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
+                            //float rampTimeDynNoiseOn = limit((previousBreathf-dc_breathNoise_amp)
+                            //                            *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
                             //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOscOn1);
                             //dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOscOn2);      
                             dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathOff_rampTime);
@@ -2008,13 +2032,13 @@ void processMIDI(bool midi_from_host_flag)
                 // non-legato section uses shorter rampTimnes
                 float rampTimeShortening = 0.82; 
                 float filterRampTimeShortening = 0.25; 
-                float dynoMax = 35.0f;
-                float dynoIntercept = 75.0f;
+                //float dynoMax = 35.0f;
+                //float dynoIntercept = 75.0f;
                 // lower values of lastBreath get extended rampTime for breathThreshOsc<N>.amplitiude
                 // (1.0-lastBreathf)*rampTimeExtensionFactor;
                 //float rampTimeDynOscN = limit((dc_breathThreshOsc1_amp-lastBreathf)*dynoIntercept,dc_breathThreshOscN_rampTime,dynoMax); 
-                float rampTimeDynOsc1 = limit((dc_breathThreshOsc1_amp-lastBreathf)*dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
-                float rampTimeDynOsc2 = limit((dc_breathThreshOsc2_amp-lastBreathf)*dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
+                //float rampTimeDynOsc1 = limit((dc_breathThreshOsc1_amp-lastBreathf)*dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
+                //float rampTimeDynOsc2 = limit((dc_breathThreshOsc2_amp-lastBreathf)*dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
                 dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);
                 dc_breathThreshOsc2.amplitude(dc_breathThreshOsc1_amp,dc_breathThreshOscN_rampTime*rampTimeShortening);
                 //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOsc1);      
@@ -2024,10 +2048,10 @@ void processMIDI(bool midi_from_host_flag)
                 dc_breathNoiseFilter3.amplitude(dc_breathNoiseFilter3_amp,dc_breathFilterN_rampTime*filterRampTimeShortening);
                 dc_breathNoiseFilter4.amplitude(dc_breathNoiseFilter4_amp,dc_breathFilterN_rampTime*filterRampTimeShortening);
                 if( NoiseLevel > 0.0f) { 
-                    float dynoMax = 40.0f;
-                    float dynoIntercept = 90.0f;
-                    float rampTimeDynNoiseOn = limit((dc_breathNoise_amp-lastBreathf)
-                                              *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
+                    //float dynoMax = 40.0f;
+                    //float dynoIntercept = 90.0f;
+                    //float rampTimeDynNoiseOn = limit((dc_breathNoise_amp-lastBreathf)
+                    //                          *dynoIntercept,dynoMax,dc_breathThreshOscN_rampTime); 
                     dc_breathNoise.amplitude(dc_breathNoise_amp,dc_breathNoise_rampTime*rampTimeShortening); 
                     //dc_breathNoise.amplitude(dc_breathNoise_amp,rampTimeDynNoiseOn); 
                 }
@@ -2163,12 +2187,12 @@ void noteOffFun(void){
         dc_breathThreshOsc2_amp = 0;
         dc_breathNoise_amp = 0;
 
-        float dynoMax = 35.0f;
-        float dynoIntercept = 75.0f;
-        float rampTimeDynOscOff = limit((previousBreathf-dc_breathThreshOsc1_amp) //TODO: (previous breathThresh value - 0)
-                                *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
-        float rampTimeDynNoiseOff = limit((previousBreathf-dc_breathNoise_amp)
-                                *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
+        //float dynoMax = 35.0f;
+        //float dynoIntercept = 75.0f;
+        //float rampTimeDynOscOff = limit((previousBreathf-dc_breathThreshOsc1_amp) //TODO: (previous breathThresh value - 0)
+        //                        *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
+        //float rampTimeDynNoiseOff = limit((previousBreathf-dc_breathNoise_amp)
+        //                        *dynoIntercept,dynoMax,dc_breathOff_rampTime); 
         //dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,rampTimeDynOscOff);      
         //dc_breathThreshOsc2.amplitude(dc_breathThreshOsc2_amp,rampTimeDynOscOff);      
         dc_breathThreshOsc1.amplitude(dc_breathThreshOsc1_amp,dc_breathOff_rampTime);

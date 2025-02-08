@@ -26,6 +26,8 @@ extern int currentPatch;
 
 extern Encoder knob;
 extern Bounce knobButton;
+extern Bounce topButton;
+extern Bounce botButton;
 extern float longKnobButtonPressTime; 
 extern int32_t newKnob;
 

@@ -20,6 +20,7 @@ extern float longKnobButtonPressTime;
 //extern OledMenu myMenu;
 
 extern MenuItem topMenu[]; 
+extern MenuItem escapeMenu[];
 extern MenuItem volAdjustMenu[]; 
 extern bool volAdjustFun();
 extern MenuItem patchSelectMenu[];
@@ -299,6 +300,7 @@ extern bool centsFun();
 extern MenuItem breathCCMenu[];
 extern bool breathCCFun();
 
+extern MenuList listEscapeMenu;
 extern MenuList listTopMenu;
 extern MenuList listVolAdjustMenu;
 extern MenuList listPatchSelectMenu;
