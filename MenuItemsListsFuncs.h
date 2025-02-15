@@ -23,6 +23,8 @@ extern MenuItem topMenu[];
 extern MenuItem escapeMenu[];
 extern MenuItem volAdjustMenu[]; 
 extern bool volAdjustFun();
+extern MenuItem fxSourceMenu[];
+extern bool fxSourceFun();
 extern MenuItem patchSelectMenu[];
 extern bool patchSelectFun();
 extern MenuItem patchResetMenu[];
@@ -303,6 +305,7 @@ extern bool breathCCFun();
 extern MenuList listEscapeMenu;
 extern MenuList listTopMenu;
 extern MenuList listVolAdjustMenu;
+extern MenuList listFxSourceMenu;
 extern MenuList listPatchSelectMenu;
 extern MenuList listPatchResetMenu;
 extern MenuList listPatchCopyMenu;
@@ -467,6 +470,7 @@ extern MenuList listBreathCCMenu;
 //---------------------
 
 extern bool gotoVolAdjMenu();
+extern bool gotoFxSourceMenu();
 extern bool gotoPatchSelectMenu();
 extern bool gotoPatchResetMenu();
 extern bool gotoPatchCopyMenu();

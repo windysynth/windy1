@@ -120,6 +120,8 @@ extern float previousBreathf;
 extern int32_t vol;
 extern int eeprom_vol;
 extern float volf;
+extern int32_t fxSourcePatch;
+extern int eeprom_fxSourcePatch;
 extern int32_t mix_linein;
 extern int eeprom_mix_linein;
 extern float mix_lineinf;
@@ -219,6 +221,7 @@ extern float mix_lineInLR_gain_1;
 extern patch_t current_patch;  // 154 bytes long
 extern patch_t copy_buffer_patch;  // 154 bytes long
 extern patch_t swap_buffer_patch;  // 154 bytes long
+extern fx_t global_buffer_fx;  // 51 bytes long
 
 extern const uint32_t eepromUpdateInterval;  // milliseconds
 extern uint32_t eepromPreviousMillis;

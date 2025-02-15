@@ -172,6 +172,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define CCEFFECTSDELAYFEEDBACK 1
 #define CCEFFECTSDELAYDAMP 2
 #define CCEFFECTSDELAYLEVEL 3
+// CCEFFECTSDELAYSPARE used for "Pong" 
 #define CCEFFECTSDELAYSPARE 4
 #define CCEFFECTSREVERBSPARE 0
 #define CCEFFECTSREVERBLEVEL 1
@@ -179,6 +180,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define CCEFFECTSREVERBTIME 3
 #define CCEFFECTSREVERBDAMP 4
 
+#define EFFECTGROUPCHORUS 0
+#define EFFECTGROUPDELAY 1 
+#define EFFECTGROUPREVERB 2
+#define EFFECTGROUPCOMMON1 3
 
 typedef struct __attribute__((packed)) Patch{
     char patch_string[32]; 
@@ -197,6 +202,16 @@ typedef struct __attribute__((packed)) Patch{
     uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH];   // 5
 } patch_t; // 154 bytes
 
+typedef struct __attribute__((packed)) Fx{
+    char fx_string[32]; 
+    uint8_t nrpn_msb_chorus[NRPN_MSB_CHORUS_LENGTH];  // 9 
+    uint8_t nrpn_msb_delay[NRPN_MSB_DELAY_LENGTH];    // 5 
+    uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH];   // 5
+    uint8_t nrpn_msb_common1[NRPN_MSB_COMMON1_LENGTH];   // 10
+} fx_t;
+
+uint8_t getFxValue(patch_t *patch, uint32_t effectGroup, uint32_t effectIdx);
+void setFxValue(uint8_t value, patch_t *patch, uint32_t effectGroup, uint32_t effectIdx);
 void patchToOctOsc1(patch_t *patch); //64,0,62,66,
 void patchToSemiOsc1(patch_t *patch); //64,1,52,76,
 void patchToFineOsc1(patch_t *patch); //64,2,14,114, -50 to +50 cents

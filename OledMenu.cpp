@@ -212,7 +212,7 @@ void OledMenu::displayMenu() {
         display.println(str_oledbuf);
         display.display(); 
         Serial8.println(outBuf);
-        Serial8.print(F("display Mennu, menuSize = "));
+        Serial8.print(F("display Menu, menuSize = "));
         Serial8.println(menuSize);
         return;
     }

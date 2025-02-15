@@ -18,14 +18,14 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET);
  ******************************
  *****************************/
 
-MenuItem PROGMEM topMenu[18] = {
+MenuItem PROGMEM topMenu[17] = {
     { "VolAdj  " , gotoVolAdjMenu   }
   , { "PatchSel" , gotoPatchSelectMenu   }
-  , { "PatchRst" , gotoPatchResetMenu   }
+//  , { "PatchRst" , gotoPatchResetMenu   }
   , { "PatchCpy" , gotoPatchCopyMenu   }
   , { "PatchPst" , gotoPatchPasteMenu   }
   , { "PatchSwp" , gotoPatchSwapMenu   }
-  , { "PatchFx " , gotoPatchFxMenu   }
+  , { "Fx      " , gotoPatchFxMenu   }
   , { "Osc1    " , gotoPatchOsc1Menu   }
   , { "Osc2    " , gotoPatchOsc2Menu   }
   , { "OscFilt1" , gotoPatchOscFilter1Menu   }
@@ -63,6 +63,22 @@ bool volAdjustFun() {
   //myMenu.setCurrentMenu(&listTopMenu);
   gotoTopMenu();
   return true;
+}
+MenuItem PROGMEM fxSourceMenu[1] = { 
+    { "FxSource:\n ", fxSourceFun    }
+};
+bool fxSourceFun() {
+ if(myMenu.updateLeafValue){
+     int Temp = fxSourcePatch;
+     Temp += myMenu.updateLeafValue;
+     fxSourcePatch = std::clamp(Temp,0, 1);
+     // re-apply synth variables to update effects 
+     patchToSynthVariables(&current_patch);
+     sprintf(myMenu.str_oledbuf,"  %s  ", fxSourcePatch ? "Patch " : "Global" );
+     return true;
+ }
+ Serial8.println(F("fxSourceFun: goUpOneMenu"));
+ return goUpOneMenu(); 
 }
 MenuItem PROGMEM patchSelectMenu[1] = {
     { "Patch:\n " , patchSelectFun   }
@@ -173,13 +189,14 @@ MenuItem PROGMEM patchSwapMenu[2] = {
 };
 bool patchSwapFun(){ return goUpOneMenu(); }
 
-MenuItem PROGMEM patchFxMenu[23] = {
+MenuItem PROGMEM patchFxMenu[24] = {
     { "Back    " , goUpOneMenu   }
+   ,{ "FxSource" , gotoFxSourceMenu   }
    ,{ "FxCopy  " , gotoFxCopyMenu   }
    ,{ "FxPaste " , gotoFxPasteMenu   }
    ,{ "FxSwap  " , gotoFxSwapMenu   }
    ,{ "DlyLevel" , gotoDelayLevelMenu   }
-   ,{ "DlyTimeL" , gotoDelayTimeLMenu   }
+   ,{ "DlyTime " , gotoDelayTimeLMenu   }
    //,{ "DlyTimeR" , gotoDelayTimeRMenu   }
    ,{ "DlyPong " , gotoDelayPongMenu   }
    ,{ "DlyFB   " , gotoDelayFeedbackMenu   }
@@ -220,30 +237,31 @@ MenuItem PROGMEM delayLevelMenu[1] = {
 };
 bool delayLevelFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_delay[CCEFFECTSDELAYLEVEL];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYLEVEL);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_delay[CCEFFECTSDELAYLEVEL] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp,0, 127), &current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYLEVEL);
      patchToEffectsDelayLevel(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYLEVEL]);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYLEVEL));
      return true;
  }
  Serial8.println(F("delayLevelFun calls goUpOneMenu"));
  return goUpOneMenu(); 
 }
 MenuItem PROGMEM delayTimeLMenu[1] = {
-    { "DlyTimeL\n " , delayTimeLFun   }
+    { "DlyTime\n " , delayTimeLFun   }
 };
 bool delayTimeLFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYTIME);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp,0, 127), &current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYTIME);
      patchToEffectsDelayTimeL(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"  %04d    ", 10*current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME]);
+     sprintf(myMenu.str_oledbuf,"  %04d    ", 
+             10*getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYTIME));
      return true;
  }
  Serial8.println(F("delayLevelLFun calls goUpOneMenu"));
@@ -254,13 +272,14 @@ MenuItem PROGMEM delayPongMenu[1] = {
 };
 bool delayPongFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_delay[CCEFFECTSDELAYSPARE];
+     int Temp = 127 - getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYSPARE);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_delay[CCEFFECTSDELAYSPARE] = std::clamp(Temp,0, 127);
+     setFxValue(127 - std::clamp(Temp,0, 127), &current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYSPARE);
      patchToEffectsDelayPong(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYSPARE]);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        127 - getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYSPARE));
      return true;
  }
  Serial8.println(F("delayPongFun calls goUpOneMenu"));
@@ -271,13 +290,13 @@ MenuItem PROGMEM delayFeedbackMenu[1] = {
 };
 bool delayFeedbackFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYFEEDBACK);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp,0, 127), &current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYFEEDBACK);
      patchToEffectsDelayFeedback(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYFEEDBACK));
      return true;
  }
  Serial8.println(F("delayFeedbackFun calls goUpOneMenu"));
@@ -288,13 +307,13 @@ MenuItem PROGMEM delayDampMenu[1] = {
 };
 bool delayDampFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_delay[CCEFFECTSDELAYDAMP];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYDAMP);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_delay[CCEFFECTSDELAYDAMP] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp,0, 127), &current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYDAMP);
      patchToEffectsDelayDamp(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYDAMP]);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYDAMP));
      return true;
  }
  Serial8.println(F("delayFeedbackFun calls goUpOneMenu"));
@@ -305,13 +324,14 @@ MenuItem PROGMEM reverbLevelMenu[1] = {
 };
 bool reverbLevelFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_reverb[CCEFFECTSREVERBLEVEL];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBLEVEL);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_reverb[CCEFFECTSREVERBLEVEL] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp,0, 127), &current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBLEVEL);
      patchToEffectsReverbLevel(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_reverb[CCEFFECTSREVERBLEVEL]);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBLEVEL));
      return true;
  }
  Serial8.println(F("reverbLevelFun calls goUpOneMenu"));
@@ -322,13 +342,14 @@ MenuItem PROGMEM reverbTimeMenu[1] = {
 };
 bool reverbTimeFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_reverb[CCEFFECTSREVERBTIME];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBTIME);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_reverb[CCEFFECTSREVERBTIME] = std::clamp(Temp,10, 50);
+     setFxValue(std::clamp(Temp,10, 50), &current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBTIME);
      patchToEffectsReverbTime(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"  %04d    ", 100*current_patch.nrpn_msb_reverb[CCEFFECTSREVERBTIME]);
+     sprintf(myMenu.str_oledbuf,"  %04d    ", 
+        100*getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBTIME)); //114,3,10,50,//1000 to 5000 ms
      return true;
  }
  Serial8.println(F("reverbTimeFun calls goUpOneMenu"));
@@ -339,13 +360,14 @@ MenuItem PROGMEM reverbDensityMenu[1] = {
 };
 bool reverbDensityFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_reverb[CCEFFECTSREVERBDENSEEARLY];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDENSEEARLY);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_reverb[CCEFFECTSREVERBDENSEEARLY] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp,0, 127), &current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDENSEEARLY);
      patchToEffectsReverbDenseEarly(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_reverb[CCEFFECTSREVERBDENSEEARLY]);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", 
+             getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDENSEEARLY));
      return true;
  }
  Serial8.println(F("reverbDensityFun calls goUpOneMenu"));
@@ -356,13 +378,14 @@ MenuItem PROGMEM reverbDampMenu[1] = {
 };
 bool reverbDampFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_reverb[CCEFFECTSREVERBDAMP];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDAMP);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_reverb[CCEFFECTSREVERBDAMP] = std::clamp(Temp,54, 74);
+     setFxValue(std::clamp(Temp,54, 74), &current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDAMP);
      patchToEffectsReverbDamp(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_reverb[CCEFFECTSREVERBDAMP]-64);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", 
+             getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDAMP)-64);
      return true;
  }
  Serial8.println(F("reverbDampFun calls goUpOneMenu"));
@@ -374,14 +397,14 @@ MenuItem PROGMEM chorusOnMenu[1] = {
 };
 bool chorusOnFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_common1[CCCHORUSON];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPCOMMON1, CCCHORUSON);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_common1[CCCHORUSON] = std::clamp(Temp,0, 1);
+     setFxValue(std::clamp(Temp, 0, 1), &current_patch, EFFECTGROUPCOMMON1, CCCHORUSON);
      patchToChorusOn(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
      sprintf(myMenu.str_oledbuf,"   %s    ", 
-         current_patch.nrpn_msb_common1[CCCHORUSON]? " On": "Off");
+        getFxValue(&current_patch, EFFECTGROUPCOMMON1, CCCHORUSON)? " On": "Off");
      return true;
  }
  Serial8.println(F("chorusOnFun calls goUpOneMenu"));
@@ -392,13 +415,14 @@ MenuItem PROGMEM chorusDryMenu[1] = {
 };
 bool chorusDryFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDRYLEVEL);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp, 0, 127), &current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDRYLEVEL);
      patchToEffectsChorusDryLevel(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL]);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", 
+             getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDRYLEVEL));
      return true;
  }
  Serial8.println(F("chorusDryFun calls goUpOneMenu"));
@@ -409,13 +433,14 @@ MenuItem PROGMEM chorusLfoFMenu[1] = {
 };
 bool chorusLfoFFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSLFOFREQ);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp, 0, 127), &current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSLFOFREQ);
      patchToEffectsChorusLfoFreq(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"  %2.1fHz  ", (float)current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ]/10.0f);
+     sprintf(myMenu.str_oledbuf,"  %2.1fHz  ", 
+        (float)getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSLFOFREQ)/10.0);
      return true;
  }
  Serial8.println(F("chorusLfoFFun calls goUpOneMenu"));
@@ -426,13 +451,14 @@ MenuItem PROGMEM chorusFeedbackMenu[1] = {
 };
 bool chorusFeedbackFun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSFEEDBACK);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp, 0, 127), &current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSFEEDBACK);
      patchToEffectsChorusFeedback(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK]-64);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSFEEDBACK)-64);
      return true;
  }
  Serial8.println(F("chorusFeedbackFun calls goUpOneMenu"));
@@ -443,13 +469,14 @@ MenuItem PROGMEM chorusDelay1Menu[1] = {
 };
 bool chorusDelay1Fun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDELAY1];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY1);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDELAY1] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp, 0, 127), &current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY1);
      patchToEffectsChorusDelay1(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d mS ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDELAY1]);
+     sprintf(myMenu.str_oledbuf,"   %03d mS ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY1));
      return true;
  }
  Serial8.println(F("chorusDelay1Fun calls goUpOneMenu"));
@@ -460,13 +487,14 @@ MenuItem PROGMEM chorusMod1Menu[1] = {
 };
 bool chorusMod1Fun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSMOD1];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD1);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSMOD1] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp, 0, 127), &current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD1);
      patchToEffectsChorusMod1(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d mS ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSMOD1]-64);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD1)-64);
      return true;
  }
  Serial8.println(F("chorusMod1Fun calls goUpOneMenu"));
@@ -477,13 +505,14 @@ MenuItem PROGMEM chorusWet1Menu[1] = {
 };
 bool chorusWet1Fun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSWET1];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET1);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSWET1] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp, 0, 127), &current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET1);
      patchToEffectsChorusWet1(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d mS ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSWET1]-64);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET1)-64);
      return true;
  }
  Serial8.println(F("chorusWet1Fun calls goUpOneMenu"));
@@ -494,13 +523,14 @@ MenuItem PROGMEM chorusDelay2Menu[1] = {
 };
 bool chorusDelay2Fun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY2);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp, 0, 127), &current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY2);
      patchToEffectsChorusDelay2(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d mS ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2]);
+     sprintf(myMenu.str_oledbuf,"   %03d mS ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY2));
      return true;
  }
  Serial8.println(F("chorusDelay2Fun calls goUpOneMenu"));
@@ -511,13 +541,14 @@ MenuItem PROGMEM chorusMod2Menu[1] = {
 };
 bool chorusMod2Fun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSMOD2];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD2);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSMOD2] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp, 0, 127), &current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD2);
      patchToEffectsChorusMod2(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d mS ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSMOD2]-64);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD2)-64);
      return true;
  }
  Serial8.println(F("chorusMod2Fun calls goUpOneMenu"));
@@ -528,13 +559,14 @@ MenuItem PROGMEM chorusWet2Menu[1] = {
 };
 bool chorusWet2Fun(){ 
  if(myMenu.updateLeafValue){
-     int Temp = current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSWET2];
+     int Temp = getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET2);
      Temp += myMenu.updateLeafValue;
-     current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSWET2] = std::clamp(Temp,0, 127);
+     setFxValue(std::clamp(Temp, 0, 127), &current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET2);
      patchToEffectsChorusWet2(&current_patch);
      //preUpdateSynthVariablesFlag = true;
      updateSynthVariablesFlag = true;
-     sprintf(myMenu.str_oledbuf,"   %03d mS ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSWET2]-64);
+     sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET2)-64);
      return true;
  }
  Serial8.println(F("chorusWet2Fun calls goUpOneMenu"));
@@ -1171,7 +1203,7 @@ bool xFadeOsc2Fun(){
      int Temp = current_patch.nrpn_msb_common1[CCXFADE];
      Temp += myMenu.updateLeafValue;
      current_patch.nrpn_msb_common1[CCXFADE] = std::clamp(Temp,0, 1);
-     patchToLevelOsc2(&current_patch);
+     patchToXFade(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
      sprintf(myMenu.str_oledbuf,"   %s    ", 
@@ -1363,7 +1395,7 @@ bool lfoDepthOscFilter1Fun() {
      int Temp = current_patch.nrpn_msb_osc_filt1[CCLFODEPTHOSCFILTER1];
      Temp += myMenu.updateLeafValue;
      current_patch.nrpn_msb_osc_filt1[CCLFODEPTHOSCFILTER1] = std::clamp(Temp,0, 127); 
-     patchToLfoFreqOscFilter1(&current_patch);
+     patchToLfoDepthOscFilter1(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
      sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt1[CCLFODEPTHOSCFILTER1]);
@@ -1600,7 +1632,7 @@ bool lfoDepthOscFilter2Fun() {
      int Temp = current_patch.nrpn_msb_osc_filt2[CCLFODEPTHOSCFILTER2];
      Temp += myMenu.updateLeafValue;
      current_patch.nrpn_msb_osc_filt2[CCLFODEPTHOSCFILTER2] = std::clamp(Temp,0, 127); 
-     patchToLfoFreqOscFilter2(&current_patch);
+     patchToLfoDepthOscFilter2(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
      sprintf(myMenu.str_oledbuf,"%03d ", current_patch.nrpn_msb_osc_filt2[CCLFODEPTHOSCFILTER2]);
@@ -1859,7 +1891,7 @@ bool lfoDepthNoiseFilter3Fun() {
      int Temp = current_patch.nrpn_msb_noise_filt3[CCLFODEPTHNOISEFILTER3];
      Temp += myMenu.updateLeafValue;
      current_patch.nrpn_msb_noise_filt3[CCLFODEPTHNOISEFILTER3] = std::clamp(Temp,0, 127); 
-     patchToLfoFreqNoiseFilter3(&current_patch);
+     patchToLfoDepthNoiseFilter3(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
      sprintf(myMenu.str_oledbuf,"%03d ", current_patch.nrpn_msb_noise_filt3[CCLFODEPTHNOISEFILTER3]);
@@ -2096,7 +2128,7 @@ bool lfoDepthNoiseFilter4Fun() {
      int Temp = current_patch.nrpn_msb_noise_filt4[CCLFODEPTHNOISEFILTER4];
      Temp += myMenu.updateLeafValue;
      current_patch.nrpn_msb_noise_filt4[CCLFODEPTHNOISEFILTER4] = std::clamp(Temp,0, 127); 
-     patchToLfoFreqNoiseFilter4(&current_patch);
+     patchToLfoDepthNoiseFilter4(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
      sprintf(myMenu.str_oledbuf,"%03d ", current_patch.nrpn_msb_noise_filt4[CCLFODEPTHNOISEFILTER4]);
@@ -2457,15 +2489,16 @@ bool breathCCFun() {
   return goUpOneMenu(); 
 }
 
-MenuList listTopMenu(topMenu, 18);
+MenuList listTopMenu(topMenu, 17);
 MenuList listEscapeMenu(escapeMenu, 1);
 MenuList listVolAdjustMenu(volAdjustMenu, 1);
+MenuList listFxSourceMenu(fxSourceMenu, 1);
 MenuList listPatchSelectMenu(patchSelectMenu, 1);
 MenuList listPatchResetMenu(patchResetMenu, 2);
 MenuList listPatchCopyMenu(patchCopyMenu, 3);
 MenuList listPatchPasteMenu(patchPasteMenu, 1);
 MenuList listPatchSwapMenu(patchSwapMenu, 2);
-MenuList listPatchFxMenu(patchFxMenu, 23);
+MenuList listPatchFxMenu(patchFxMenu, 24);
 MenuList listPatchOsc1Menu(patchOsc1Menu, 18);
 MenuList listPatchOsc2Menu(patchOsc2Menu, 19);
 MenuList listPatchOscFilter1Menu(patchOscFilter1Menu, 14);
@@ -2822,6 +2855,17 @@ bool gotoTopMenu() {
 
 
 // patchFxMenu functions
+bool gotoFxSourceMenu(){
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  myMenu.setCurrentMenu(&listFxSourceMenu);
+  myMenu.knobAcceleration = 1;
+    sprintf(myMenu.str_oledbuf,"  %s  ", 
+          fxSourcePatch ? "Patch ":"Global");
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
+  return true;
+}
 bool gotoFxCopyMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
@@ -2846,7 +2890,8 @@ bool gotoDelayLevelMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayLevelMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYLEVEL]);
+  sprintf(myMenu.str_oledbuf,"  %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYLEVEL));
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2857,7 +2902,8 @@ bool gotoDelayTimeLMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayTimeLMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"  %04d    ", 10*current_patch.nrpn_msb_delay[CCEFFECTSDELAYTIME]);
+  sprintf(myMenu.str_oledbuf,"  %04d    ", 
+        10*getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYTIME));
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2867,7 +2913,8 @@ bool gotoDelayPongMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayPongMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYSPARE]);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        127 - getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYSPARE));
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2877,7 +2924,8 @@ bool gotoDelayFeedbackMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayFeedbackMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYFEEDBACK));
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2887,7 +2935,8 @@ bool gotoDelayDampMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listDelayDampMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_delay[CCEFFECTSDELAYDAMP]);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYDAMP));
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2897,7 +2946,8 @@ bool gotoReverbLevelMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbLevelMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_reverb[CCEFFECTSREVERBLEVEL]);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBLEVEL));
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2907,7 +2957,8 @@ bool gotoReverbTimeMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbTimeMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"  %04d    ", 100*current_patch.nrpn_msb_reverb[CCEFFECTSREVERBTIME]);//114,3,10,50,//1000 to 5000 ms
+  sprintf(myMenu.str_oledbuf,"  %04d    ", 
+        100*getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBTIME)); //114,3,10,50,//1000 to 5000 ms
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2917,7 +2968,8 @@ bool gotoReverbDensityMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listReverbDensityMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_reverb[CCEFFECTSREVERBDENSEEARLY]);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDENSEEARLY));
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2928,18 +2980,20 @@ bool gotoReverbDampMenu(){
   myMenu.setCurrentMenu(&listReverbDampMenu);
   myMenu.knobAcceleration = 1;
   // -10 to +10
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_reverb[CCEFFECTSREVERBDAMP]-64);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDAMP)-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
 }
+// gogoReverbSparemenu()
 bool gotoChorusOnMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusOnMenu);
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %s    ", 
-          current_patch.nrpn_msb_common1[CCCHORUSON]? " On": "Off");
+        getFxValue(&current_patch, EFFECTGROUPCOMMON1, CCCHORUSON)? " On": "Off");
   display.clearDisplay(); // erase display
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2949,7 +3003,8 @@ bool gotoChorusDryMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusDryMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL]);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDRYLEVEL));
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2959,7 +3014,8 @@ bool gotoChorusLfoFMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusLfoFMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"  %2.1fHz  ", (float)current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ]/10.0);
+  sprintf(myMenu.str_oledbuf,"  %2.1fHz  ", 
+        (float)getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSLFOFREQ)/10.0);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2969,7 +3025,8 @@ bool gotoChorusFeedbackMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusFeedbackMenu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK]-64);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSFEEDBACK)-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2979,7 +3036,8 @@ bool gotoChorusDelay1Menu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusDelay1Menu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d mS ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDELAY1]);
+  sprintf(myMenu.str_oledbuf,"   %03d mS ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY1));
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2989,7 +3047,8 @@ bool gotoChorusMod1Menu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusMod1Menu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSMOD1]-64);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD1)-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -2999,7 +3058,8 @@ bool gotoChorusWet1Menu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusWet1Menu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSWET1]-64);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET1)-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -3009,7 +3069,8 @@ bool gotoChorusDelay2Menu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusDelay2Menu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d mS ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2]);
+  sprintf(myMenu.str_oledbuf,"   %03d mS ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY2));
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -3019,7 +3080,8 @@ bool gotoChorusMod2Menu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusMod2Menu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSMOD2]-64);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD2)-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;
@@ -3029,7 +3091,8 @@ bool gotoChorusWet2Menu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listChorusWet2Menu);
   myMenu.knobAcceleration = 4;
-  sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_chorus[CCEFFECTSCHORUSWET2]-64);
+  sprintf(myMenu.str_oledbuf,"   %03d    ", 
+        getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET2)-64);
   display.clearDisplay();
   display.println(myMenu.str_oledbuf);
   return true;

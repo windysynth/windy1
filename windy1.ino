@@ -62,6 +62,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define TRANSPOSE_EEPROM_ADDR ( (int)16 )
 #define OCTAVE_EEPROM_ADDR ( (int)20 )
 #define BREATH_CC_EEPROM_ADDR ( (int)24 )
+#define FXSOURCE_EEPROM_ADDR ( (int)28 )
 
 //------------ includes -------------------------------
 //#include <MenuClass.h>
@@ -838,7 +839,7 @@ void setup() {
     //mix_delayFeedback.gain(1,pow(EffectsDelayFeedback, gammaDelayFeedback)); // finer adjustment at low end
     //mix_delayFeedback.gain(2,pow(EffectsDelayFeedback, gammaDelayFeedback)); // finer adjustment at low end
     //dly_delayEffects.delay(0, EffectsDelayTimeL);
-    EffectsDelayTimeR = EffectsDelayTimeL*0.85f;
+    //EffectsDelayTimeR = EffectsDelayTimeL*0.85f;
     //dly_delayEffects.delay(1, EffectsDelayTimeR);
     //dly_delayEffects.disable(2);
     //dly_delayEffects.disable(3);
@@ -862,7 +863,7 @@ void setup() {
     delay_F32.mix(EffectsDelayLevel);
     //delay_F32.delay(number_of_samples); //  
     //delay_F32.inertia(0.5f); // 0 for fastest update - 1.0 for slowest update of delay time
-    delay_F32.treble(1.0f - EffectsDelayDamp); // 0- 1.0 
+    delay_F32.treble(EffectsDelayDamp); // 0- 1.0 
     delay_F32.treble_cut(EffectsDelayDamp); // 0- 1.0 
     //delay_F32.bass(0.0f); // 0- 1.0 
     //delay_F32.bass_cut(0.0f); // 0- 1.0 
@@ -989,6 +990,16 @@ void setup() {
     //volf = ((float)vol)/50.0f;
     volf = ((float)vol)/100.0f;
     volf = (volf*volf)*2.0f;
+
+    EEPROM.get(FXSOURCE_EEPROM_ADDR, eeprom_fxSourcePatch);
+    sprintf(str_buf1, "read eeprom_fxSourcePatch (%03d)", eeprom_fxSourcePatch );     
+    Serial8.println(str_buf1);
+    if(eeprom_fxSourcePatch <0 || eeprom_fxSourcePatch > 1)
+    {
+        eeprom_fxSourcePatch = 1;
+        EEPROM.put(FXSOURCE_EEPROM_ADDR, eeprom_fxSourcePatch);
+    }
+    fxSourcePatch = eeprom_fxSourcePatch;
 
     amp_extraGainR_F32.setGain(extraAmpFactor);
     amp_extraGainL_F32.setGain(extraAmpFactor);
@@ -1237,7 +1248,7 @@ void loop()
         mix_Amp_gain_0 =  AmpLevel*Amp_HeadRoom;
 
         //dly_delayEffects.delay(0, EffectsDelayTimeL);
-        EffectsDelayTimeR = EffectsDelayTimeL*0.85f;  //TODO: create separate menu entries for left right disparity
+        //EffectsDelayTimeR = EffectsDelayTimeL*0.85f;  //TODO: create separate menu entries for left right disparity
         //dly_delayEffects.delay(1, EffectsDelayTimeR);  //TODO: adjust feedback gain lower as L/R times get similar
         //mix_delayFeedback.gain(1,pow(EffectsDelayFeedback, gammaDelayFeedback)); // finer adjustment at low end
         //mix_delayFeedback.gain(2,pow(EffectsDelayFeedback, gammaDelayFeedback)); // finer adjustment at low end
@@ -1247,6 +1258,8 @@ void loop()
       delay_F32.mix(EffectsDelayLevel);
       delay_F32.feedback(EffectsDelayFeedback); // 0 - 1.0 
       delay_F32.treble(1.0f - EffectsDelayDamp); // 0- 1.0 
+      delay_F32.treble_cut(EffectsDelayDamp); // 0- 1.0 
+      delay_F32.set_ping_pong_on( EffectsDelayPong > 0.0f); 
       delay_F32.treble_cut(EffectsDelayDamp); // 0- 1.0 
         updateSynthVariablesFlag = false;
         //PRINT_VALUES_FLAG = true;
@@ -1458,7 +1471,8 @@ void loop()
     if( !updateEpromFlag && ((current_patchNumber != eeprom_patchNumber)
                             ||(eeprom_mix_linein != mix_linein)||(eeprom_FineTuneCents != FineTuneCents)
                             ||(eeprom_vol != vol) || (eeprom_Transpose != Transpose) 
-                            || (eeprom_Octave != Octave) || (eeprom_breath_cc != breath_cc)  ))
+                            || (eeprom_Octave != Octave) || (eeprom_breath_cc != breath_cc)
+                            || (eeprom_fxSourcePatch != fxSourcePatch)  ))
     {
         updateEpromFlag = true;
         eepromCurrentMillis = millis();
@@ -1482,6 +1496,10 @@ void loop()
             sprintf(str_buf1, "Writing mix_linein (%03d) to EEPROM", eeprom_mix_linein );     
             Serial8.println(str_buf1);
             EEPROM_update(MIX_LINEIN_EEPROM_ADDR, eeprom_mix_linein);  
+            eeprom_fxSourcePatch = fxSourcePatch;
+            sprintf(str_buf1, "Writing fxSourcePatch (%03d) to EEPROM", eeprom_fxSourcePatch );     
+            Serial8.println(str_buf1);
+            EEPROM_update(FXSOURCE_EEPROM_ADDR, eeprom_fxSourcePatch);  
             eeprom_FineTuneCents = FineTuneCents;
             sprintf(str_buf1, "Writing FineTuneCents (%03d) to EEPROM", eeprom_FineTuneCents );     
             Serial8.println(str_buf1);
@@ -1633,7 +1651,7 @@ float thresh(float x, float th)
 }
 
 // function to theshold the control signal for lfo for filters
-//    dc_breathLfoFilter1_amp = lfoThresh(data2f,LfoThreshOscFilter1,LfoDepthOscFilter1,LfoBreathOscFilter1);
+//    dc_breathLfoFilter1_amp = lfoThresh(lastBreathf,LfoThreshOscFilter1,LfoDepthOscFilter1,LfoBreathOscFilter1);
 float lfoThresh(float x, float th, float depth, float breath)
 {
     if(breath < 0.0f)
@@ -2225,6 +2243,8 @@ void resetUITimeout(void)
 void EEPROM_update(int addr, int val){  
    int temp_var;
    EEPROM.get(addr, temp_var);
+   sprintf(str_buf, "addr: %d, temp_var: %d, val: %d", addr, temp_var, val);
+   Serial8.println(str_buf);
    if( temp_var != val ){
       EEPROM.put(addr, val);
     }

@@ -22,7 +22,7 @@ void patchToPulseOsc1(patch_t *patch) {PulseOsc1 = log_pot_curve( (float)patch->
 void patchToPwOsc1(patch_t *patch) {PwOsc1 = (float)patch->nrpn_msb_osc1[CCPWOSC1]*DIV127+PwOffsetOsc1;} //64,8,0,127,  GUI 0 = 50%
 void patchToPwmFreqOsc1(patch_t *patch) {PwmFreqOsc1 = (float)patch->nrpn_msb_osc1[CCPWMFREQOSC1]*DIV127*maxPwmLfoFreq;}  	//64,9,0,127,
 void patchToPwmDepthOsc1(patch_t *patch) {PwmDepthOsc1 = (float)patch->nrpn_msb_osc1[CCPWMDEPTHOSC1]*DIV127;} //64,10,0,127,  
-void patchToSweepDepthOsc1(patch_t *patch) {SweepDepthOsc1 = ((float)patch->nrpn_msb_osc1[CCSWEEPDEPTHOSC1]-64.0)/64.0;} //64,11,0,127,
+void patchToSweepDepthOsc1(patch_t *patch) {SweepDepthOsc1 = 0.5f*((float)patch->nrpn_msb_osc1[CCSWEEPDEPTHOSC1]-64.0)/64.0;} //64,11,0,127,
 void patchToSweepTimeOsc1(patch_t *patch) {SweepTimeOsc1 = sweepTimeOscCurve( (float)patch->nrpn_msb_osc1[CCSWEEPTIMEOSC1]*DIV127);} //64,12,0,127,
 void patchToBreathDepthOsc1(patch_t *patch) {BreathDepthOsc1 = ((float)patch->nrpn_msb_osc1[CCBREATHDEPTHOSC1]-64.0)/64.0;}	//64,13,0,127,
 void patchToBreathAttainOsc1(patch_t *patch) {BreathAttainOsc1 = (float)patch->nrpn_msb_osc1[CCBREATHATTAINOSC1]*DIV127;} //64,14,0,127,
@@ -40,7 +40,7 @@ void patchToPulseOsc2(patch_t *patch) {PulseOsc2 = log_pot_curve( (float)patch->
 void patchToPwOsc2(patch_t *patch) {PwOsc2 = (float)patch->nrpn_msb_osc2[CCPWOSC2]*DIV127+PwOffsetOsc2;} //64,8,0,127,  GUI 0 = 50%
 void patchToPwmFreqOsc2(patch_t *patch) {PwmFreqOsc2 = (float)patch->nrpn_msb_osc2[CCPWMFREQOSC2]*DIV127*maxPwmLfoFreq;}  	//64,9,0,127,
 void patchToPwmDepthOsc2(patch_t *patch) {PwmDepthOsc2 = (float)patch->nrpn_msb_osc2[CCPWMDEPTHOSC2]*DIV127;} //64,10,0,127,  
-void patchToSweepDepthOsc2(patch_t *patch) {SweepDepthOsc2 = ((float)patch->nrpn_msb_osc2[CCSWEEPDEPTHOSC2]-64.0f)/64.0f;} //64,11,0,127,
+void patchToSweepDepthOsc2(patch_t *patch) {SweepDepthOsc2 = 0.5f*((float)patch->nrpn_msb_osc2[CCSWEEPDEPTHOSC2]-64.0f)/64.0f;} //64,11,0,127,
 void patchToSweepTimeOsc2(patch_t *patch) {SweepTimeOsc2 = sweepTimeOscCurve( (float)patch->nrpn_msb_osc2[CCSWEEPTIMEOSC2]*DIV127);} //64,12,0,127,
 void patchToBreathDepthOsc2(patch_t *patch) {BreathDepthOsc2 = ((float)patch->nrpn_msb_osc2[CCBREATHDEPTHOSC2]-64.0)/64.0;}	//64,13,0,127,
 void patchToBreathAttainOsc2(patch_t *patch) {BreathAttainOsc2 = (float)patch->nrpn_msb_osc2[CCBREATHATTAINOSC2]*DIV127;} //64,14,0,127,
@@ -145,7 +145,9 @@ void patchToFormant(patch_t *patch) {Formant = patch->nrpn_msb_common1[CCFORMANT
 void patchToXFade(patch_t *patch) {XFade = (bool)patch->nrpn_msb_common1[CCXFADE];} //81,6,0,1,//0=off 1=on
 void patchToKeyTriggerSingle(patch_t *patch) {KeyTriggerSingle = (bool)patch->nrpn_msb_common1[CCKEYTRIGGER];} //81,7,0,1,//0=Multi 1=Single
 void patchTos81_8(patch_t *patch) {s81_8 = (float)patch->nrpn_msb_common1[CC81_8];} //81,8,0,1,// ? 
-void patchToChorusOn(patch_t *patch) {ChorusOn = (bool)patch->nrpn_msb_common1[CCCHORUSON];}  //81,9,0,1,// Chorus on off
+void patchToChorusOn(patch_t *patch) {
+    ChorusOn = (bool)getFxValue(patch, EFFECTGROUPCOMMON1, CCCHORUSON); //81,9,0,1,// Chorus on off
+}  
 void patchToVibratoAmp(patch_t *patch) {VibratoAmp = (float)patch->nrpn_msb_common2[CCVIBRATOAMP]*DIV127;} //88,0,0,127, (bite tremelo amount)
 //void patchToAmpLevel(patch_t *patch) {AmpLevel = (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127;} //88,1,0,127,
 //void patchToAmpLevel(patch_t *patch) {AmpLevel = log_pot_curve( (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127,logPotYmidLevelOscN);} //88,1,0,127,
@@ -157,38 +159,65 @@ void patchToOctButtonLevel(patch_t *patch) {OctButtonLevel = (float)patch->nrpn_
 void patchToEffectsChorusDelay1(patch_t *patch) {
     // flange cuts delay in half, so mult by 2.0 here 
     // 7.0ms*44.1s/ms for range of ChorusMod1 and 2
-    EffectsChorusDelay1 = 2.0f*44.1f*(float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY1]; //112,0,0,127, (0 to 127 ms)*44.1s/ms
+        EffectsChorusDelay1 = 2.0f*44.1f*(float)getFxValue(patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY1); 
 }  
-void patchToEffectsChorusMod1(patch_t *patch) {EffectsChorusMod1 = (2.0f*44.1f)*((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD1]-64.0f)/64.0f;} //112,1,0,127, (-50% to +50%)
-void patchToEffectsChorusWet1(patch_t *patch) {EffectsChorusWet1 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSWET1]-64.0f)/64.0f;} //112,2,0,127, neg vals are phase inverted
+void patchToEffectsChorusMod1(patch_t *patch) {
+        EffectsChorusMod1 = (2.0f*44.1f)*((float)getFxValue(patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD1)-64.0f)/64.0f; 
+}
+void patchToEffectsChorusWet1(patch_t *patch) {
+        EffectsChorusWet1 = ((float)getFxValue(patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET1)-64.0f)/64.0f; //112,2,0,127, neg vals are phase inverted
+}
 void patchToEffectsChorusDelay2(patch_t *patch) {
-    EffectsChorusDelay2 = 2.0f*44.1f*(float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDELAY2];
-} //112,3,0,127,
-void patchToEffectsChorusMod2(patch_t *patch) {EffectsChorusMod2 = (2.0f*44.1f)*((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSMOD2]-64.0)/64.0;} //112,4,0,127,
-void patchToEffectsChorusWet2(patch_t *patch) {EffectsChorusWet2 = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSWET2]-64.0f)/64.0f;} //112,5,0,127,
-void patchToEffectsChorusFeedback(patch_t *patch) {EffectsChorusFeedback = ((float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSFEEDBACK]-64.0f)/64.0f;} //112,6,0,127,
-void patchToEffectsChorusLfoFreq(patch_t *patch) {EffectsChorusLfoFreq = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSLFOFREQ]/10.0f;} //112,7,0,127,
-void patchToEffectsChorusDryLevel(patch_t *patch) {EffectsChorusDryLevel = (float)patch->nrpn_msb_chorus[CCEFFECTSCHORUSDRYLEVEL]*DIV127;} //112,8,0,127,
-//void patchToEffectsDelayTimeL(patch_t *patch) {EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*10.0f;}	//113,0,0,127, 0 to 1270 ms
+        EffectsChorusDelay2 = 2.0f*44.1f*(float)getFxValue(patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY2); //112,3,0,127,
+} 
+void patchToEffectsChorusMod2(patch_t *patch) {
+        EffectsChorusMod2 = (2.0f*44.1f)*((float)getFxValue(patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD2)-64.0)/64.0; //112,4,0,127,
+}
+void patchToEffectsChorusWet2(patch_t *patch) {
+        EffectsChorusWet2 = ((float)getFxValue(patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET2)-64.0f)/64.0f; //112,5,0,127,
+}
+void patchToEffectsChorusFeedback(patch_t *patch) {
+        EffectsChorusFeedback = ((float)getFxValue(patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSFEEDBACK)-64.0f)/64.0f; //112,6,0,127,
+}
+void patchToEffectsChorusLfoFreq(patch_t *patch) {
+        EffectsChorusLfoFreq = (float)getFxValue(patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSLFOFREQ)/10.0f; //112,7,0,127,
+}
+void patchToEffectsChorusDryLevel(patch_t *patch) {
+        EffectsChorusDryLevel = (float)getFxValue(patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDRYLEVEL)*DIV127; //112,8,0,127,
+}
 void patchToEffectsDelayTimeL(patch_t *patch) {
     // AudioEffectDelayStereo_F32::time() squares the number (for some reason), so i'll sqrt here first
-    EffectsDelayTimeL = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYTIME]*DIV127;
-    EffectsDelayTimeL = sqrt(EffectsDelayTimeL);
-}	//113,0,0,127, 1.0 = 1270 ms
-void patchToEffectsDelayFeedback(patch_t *patch) {EffectsDelayFeedback = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYFEEDBACK]*DIV127;} //113,1,0,127,
+        EffectsDelayTimeL = (float)getFxValue(patch, EFFECTGROUPDELAY, CCEFFECTSDELAYTIME)*DIV127;
+        EffectsDelayTimeL = sqrt(EffectsDelayTimeL);
+}	
+void patchToEffectsDelayFeedback(patch_t *patch) {
+        EffectsDelayFeedback = (float)getFxValue(patch, EFFECTGROUPDELAY, CCEFFECTSDELAYFEEDBACK)*DIV127; //113,1,0,127,
+}
 void patchToEffectsDelayDamp(patch_t *patch) {
-    //EffectsDelayDamp = maxDelayDamp*pow(2.0f, -( (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP])/24.0f );
-    //EffectsDelayDamp = EffectsDelayDamp/(2.0f*AUDIO_SAMPLE_RATE_EXACT);
-      EffectsDelayDamp = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYDAMP]*DIV127;
-} //113,2,0,127,
-void patchToEffectsDelayLevel(patch_t *patch) {EffectsDelayLevel = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYLEVEL]*DIV127*0.5f;}  //113,3,0,127,
-void patchToEffectsDelayPong(patch_t *patch) {EffectsDelayPong = (float)patch->nrpn_msb_delay[CCEFFECTSDELAYSPARE]*DIV127;} //113,3,0,127,
-void patchToEffectsReverbSpare(patch_t *patch) {EffectsReverbSpare = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBSPARE]*DIV127;} //114,1,0,127,
-void patchToEffectsReverbLevel(patch_t *patch) {EffectsReverbLevel = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBLEVEL]*DIV127*maxReverbLevel;} //114,1,0,127,
-void patchToEffectsReverbDenseEarly(patch_t *patch) {EffectsReverbDenseEarly = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDENSEEARLY]*DIV127*maxDenseEarly;} //114,2,0,127, (using this for roomsize)
+        EffectsDelayDamp = (float)getFxValue(patch, EFFECTGROUPDELAY, CCEFFECTSDELAYDAMP)*DIV127;
+} 
+void patchToEffectsDelayLevel(patch_t *patch) {
+        EffectsDelayLevel = (float)getFxValue(patch, EFFECTGROUPDELAY, CCEFFECTSDELAYLEVEL)*DIV127*0.5f;  //113,3,0,127,
+}
+void patchToEffectsDelayPong(patch_t *patch) {
+        EffectsDelayPong = (float)(127 - getFxValue(patch, EFFECTGROUPDELAY, CCEFFECTSDELAYSPARE))*DIV127;
+} 
+void patchToEffectsReverbSpare(patch_t *patch) {
+        EffectsReverbSpare = (float)getFxValue(patch, EFFECTGROUPREVERB, CCEFFECTSREVERBSPARE)*DIV127; //114,1,0,127,
+}
+void patchToEffectsReverbLevel(patch_t *patch) {
+        EffectsReverbLevel = (float)getFxValue(patch, EFFECTGROUPREVERB, CCEFFECTSREVERBLEVEL)*DIV127*maxReverbLevel; //114,1,0,127,
+}
+void patchToEffectsReverbDenseEarly(patch_t *patch) {
+        EffectsReverbDenseEarly = (float)getFxValue(patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDENSEEARLY)*DIV127*maxDenseEarly; //114,2,0,127, (using this for roomsize)
+}
 // EffectsReverbTime is from 1000ms to 5000ms, but the Plate reverb takes 0.0 to 1.0 as inputs, 0.1 to 0.6 is approximately 1sec to 5sec.
-void patchToEffectsReverbTime(patch_t *patch) {EffectsReverbTime = (float)patch->nrpn_msb_reverb[CCEFFECTSREVERBTIME]/100.0f+0.1f;} //114,3,10,50,//1000 to 5000 ms
-void patchToEffectsReverbDamp(patch_t *patch) {EffectsReverbDamp = ((float)patch->nrpn_msb_reverb[CCEFFECTSREVERBDAMP]-54.0f)/20.0f;}  	//114,4,54,74,//-10 to +10
+void patchToEffectsReverbTime(patch_t *patch) {
+        EffectsReverbTime = (float)getFxValue(patch, EFFECTGROUPREVERB, CCEFFECTSREVERBTIME)/100.0f+0.1f; //114,3,10,50,//1000 to 5000 ms
+}
+void patchToEffectsReverbDamp(patch_t *patch) {
+        EffectsReverbDamp = ((float)getFxValue(patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDAMP)-54.0f)/20.0f;  	//114,4,54,74,//-10 to +10
+}
 
 void patchToSynthVariables(patch_t *patch) {
     patchToOctOsc1(patch ); //64,0,62,66,
@@ -921,5 +950,57 @@ void patchSelect(){
   //      eepromCurrentMillis = millis();
   //      eepromPreviousMillis = eepromCurrentMillis; // reset timer every new program Change rx
   //  }
+}
+
+uint8_t getFxValue(patch_t *patch, uint32_t effectGroup, uint32_t effectIdx){
+    if (fxSourcePatch){
+        switch(effectGroup){
+            case EFFECTGROUPCHORUS:
+                return patch->nrpn_msb_chorus[effectIdx];
+            case EFFECTGROUPREVERB:
+                return patch->nrpn_msb_reverb[effectIdx];
+            case EFFECTGROUPDELAY:
+                return patch->nrpn_msb_delay[effectIdx];
+            case EFFECTGROUPCOMMON1:
+                return patch->nrpn_msb_common1[effectIdx];
+        }
+    } else {
+        switch(effectGroup){
+            case EFFECTGROUPCHORUS:
+                return global_buffer_fx.nrpn_msb_chorus[effectIdx];
+            case EFFECTGROUPREVERB:
+                return global_buffer_fx.nrpn_msb_reverb[effectIdx];
+            case EFFECTGROUPDELAY:
+                return global_buffer_fx.nrpn_msb_delay[effectIdx];
+            case EFFECTGROUPCOMMON1:
+                return global_buffer_fx.nrpn_msb_common1[effectIdx];
+        }
+    }
+    return 255; // should never get here.
+} 
+void setFxValue(uint8_t value, patch_t *patch, uint32_t effectGroup, uint32_t effectIdx){
+    if (fxSourcePatch){
+        switch(effectGroup){
+            case EFFECTGROUPCHORUS:
+                patch->nrpn_msb_chorus[effectIdx] = value;
+            case EFFECTGROUPREVERB:
+                patch->nrpn_msb_reverb[effectIdx] = value;
+            case EFFECTGROUPDELAY:
+                patch->nrpn_msb_delay[effectIdx] = value;
+            case EFFECTGROUPCOMMON1:
+                patch->nrpn_msb_common1[effectIdx] = value;
+        }
+    } else {
+        switch(effectGroup){
+            case EFFECTGROUPCHORUS:
+                global_buffer_fx.nrpn_msb_chorus[effectIdx] = value;
+            case EFFECTGROUPREVERB:
+                global_buffer_fx.nrpn_msb_reverb[effectIdx] = value;
+            case EFFECTGROUPDELAY:
+                global_buffer_fx.nrpn_msb_delay[effectIdx] = value;
+            case EFFECTGROUPCOMMON1:
+                global_buffer_fx.nrpn_msb_common1[effectIdx] = value;
+        }
+    }
 }
 
