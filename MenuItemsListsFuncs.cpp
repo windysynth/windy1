@@ -18,11 +18,11 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET);
  ******************************
  *****************************/
 
-MenuItem PROGMEM topMenu[17] = {
+MenuItem PROGMEM topMenu[16] = {
     { "VolAdj  " , gotoVolAdjMenu   }
   , { "PatchSel" , gotoPatchSelectMenu   }
 //  , { "PatchRst" , gotoPatchResetMenu   }
-  , { "PatchCpy" , gotoPatchCopyMenu   }
+//  , { "PatchCpy" , gotoPatchCopyMenu   }
   , { "PatchPst" , gotoPatchPasteMenu   }
   , { "PatchSwp" , gotoPatchSwapMenu   }
   , { "Fx      " , gotoPatchFxMenu   }
@@ -127,6 +127,7 @@ MenuItem PROGMEM patchResetMenu[2] = {
    ,{ "Reset   " , patchResetFun   }
 };
 bool patchResetFun(){ return goUpOneMenu(); }
+/*
 MenuItem PROGMEM patchCopyMenu[3] = {
     { "Back    " , goUpOneMenu   }
    ,{ "Copy    " , patchCopyFun   }
@@ -140,8 +141,8 @@ bool patchCopyEditsFun(){
     copyCurrentPatchToCopyBuffer();
     return goUpOneMenu(); 
 }
+*/
 MenuItem PROGMEM patchPasteMenu[1] = {
-//    { "Back    " , goUpOneMenu   }
    { "Paste   " , patchPasteFun   }
 };
 bool patchPasteFun(){ 
@@ -167,34 +168,64 @@ bool patchPasteFun(){
             loadPatchSD(paste_patchNumber);
         }
     }
-
-//    if (updateEpromFlag)
-//    {
-//        eepromCurrentMillis = millis();
-//        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
-//    }
     return true;
   }
   display.clearDisplay(); // erase display
   Serial8.println(F("patchPasteFun: goto TopMenu"));
   // NUMBER_OF_PATCHES is Exit w/o writing
   if(paste_patchNumber == NUMBER_OF_PATCHES){ return goUpOneMenu(); } 
+  copyCurrentPatchToCopyBuffer();
   saveCoppiedPatchSD(paste_patchNumber);
   loadPatchSD(paste_patchNumber);
   return goUpOneMenu();
 }
-MenuItem PROGMEM patchSwapMenu[2] = {
-    { "Back:\n " , goUpOneMenu   }
-   ,{ "Swap:\n " , patchSwapFun   }
+MenuItem PROGMEM patchSwapMenu[1] = {
+    { "Swap w/\n " , patchSwapFun   }
 };
-bool patchSwapFun(){ return goUpOneMenu(); }
+bool patchSwapFun(){
+  if(myMenu.updateLeafValue){
+      swap_patchNumber += myMenu.updateLeafValue;
+    if(swap_patchNumber > NUMBER_OF_PATCHES ){
+        swap_patchNumber = 0; 
+    }
+    else if(swap_patchNumber < 0 ) {
+        swap_patchNumber = NUMBER_OF_PATCHES; 
+    } 
+    if (swap_patchNumber == NUMBER_OF_PATCHES){
+        sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+    }
+    else { 
+        String ps( loadedPatches[swap_patchNumber].patch_string );
+        ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+        sprintf(myMenu.str_oledbuf, "%03d\n%s", swap_patchNumber+1, ps.c_str() );
+        Serial8.println(loadedPatches[swap_patchNumber].patch_string);
+        // load the patch 
+        if (!patchLoaded[swap_patchNumber])
+        {
+            loadPatchSD(swap_patchNumber);
+        }
+    }
+    return true;
+  }
+  display.clearDisplay(); // erase display
+  Serial8.println(F("patchPasteFun: goto TopMenu"));
+  // NUMBER_OF_PATCHES is Exit w/o writing
+  if(swap_patchNumber == NUMBER_OF_PATCHES){ return goUpOneMenu(); } 
+  copyCurrentPatchToCopyBuffer();
+  copyLoadedPatchToSwapBuffer(swap_patchNumber);
+  saveCoppiedPatchSD(swap_patchNumber);
+  saveSwappedPatchSD(current_patchNumber);
+  loadPatchSD(swap_patchNumber);
+  loadPatchSD(current_patchNumber);
+  return goUpOneMenu();
+}
 
-MenuItem PROGMEM patchFxMenu[24] = {
+MenuItem PROGMEM patchFxMenu[22] = {
     { "Back    " , goUpOneMenu   }
    ,{ "FxSource" , gotoFxSourceMenu   }
-   ,{ "FxCopy  " , gotoFxCopyMenu   }
+//   ,{ "FxCopy  " , gotoFxCopyMenu   }
    ,{ "FxPaste " , gotoFxPasteMenu   }
-   ,{ "FxSwap  " , gotoFxSwapMenu   }
+//   ,{ "FxSwap  " , gotoFxSwapMenu   }
    ,{ "DlyLevel" , gotoDelayLevelMenu   }
    ,{ "DlyTime " , gotoDelayTimeLMenu   }
    //,{ "DlyTimeR" , gotoDelayTimeRMenu   }
@@ -217,21 +248,63 @@ MenuItem PROGMEM patchFxMenu[24] = {
    ,{ "ChrsWet2" , gotoChorusWet2Menu   }
 };
 
+/*
 MenuItem PROGMEM fxCopyMenu[2] = {
     { "Back    " , goUpOneMenu   }
    ,{ "CopyFx  " , fxCopyFun   }
 };
 bool fxCopyFun(){ return goUpOneMenu(); }
+*/
 MenuItem PROGMEM fxPasteMenu[2] = {
-    { "Back    " , goUpOneMenu   }
-   ,{ "PasteFx " , fxPasteFun   }
+    { "PasteFx " , fxPasteFun   }
 };
-bool fxPasteFun(){ return goUpOneMenu(); }
+bool fxPasteFun(){ 
+  if(myMenu.updateLeafValue){
+      paste_FxNumber += myMenu.updateLeafValue;
+    if(paste_FxNumber > NUMBER_OF_PATCHES ){
+        paste_FxNumber = 0; 
+    }
+    else if(paste_FxNumber < 0 ) {
+        paste_FxNumber = NUMBER_OF_PATCHES; 
+    } 
+    if (paste_FxNumber == NUMBER_OF_PATCHES){
+        sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+    }
+    else { 
+        String ps( loadedPatches[paste_FxNumber].patch_string );
+        ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+        sprintf(myMenu.str_oledbuf, "%03d\n%s", paste_FxNumber+1, ps.c_str() );
+        Serial8.println(loadedPatches[paste_FxNumber].patch_string);
+        // load the patch 
+//        if (!patchLoaded[paste_FxNumber])
+//        {
+//            loadPatchSD(paste_FxNumber);
+//        }
+    }
+    return true;
+  }
+  display.clearDisplay(); // erase display
+  Serial8.println(F("fxPasteFun: goUpOneMenu"));
+  // NUMBER_OF_PATCHES is Exit w/o writing
+  if(paste_FxNumber == NUMBER_OF_PATCHES){ return goUpOneMenu(); } 
+  Serial8.println("try to copy current fx");
+  copyCurrentFxToCopyBufferFx();
+  Serial8.println("copyCurrentFxToCopyBufferFx()");
+  copyCopyBufferFxToPatch(paste_FxNumber);
+  Serial8.println("copyCopyBufferFxToPatch()");
+  savePatchSD(paste_FxNumber);
+  Serial8.println("savePatchSD()");
+  loadPatchSD(paste_FxNumber);
+  Serial8.println("loadPatchSD()");
+  return goUpOneMenu();
+}
+/*
 MenuItem PROGMEM fxSwapMenu[2] = {
     { "Back " , goUpOneMenu   }
    ,{ "SwapFx " , fxSwapFun   }
 };
 bool fxSwapFun(){ return goUpOneMenu(); }
+*/
 MenuItem PROGMEM delayLevelMenu[1] = {
     { "Dly Lev:\n " , delayLevelFun   }
 };
@@ -2489,16 +2562,16 @@ bool breathCCFun() {
   return goUpOneMenu(); 
 }
 
-MenuList listTopMenu(topMenu, 17);
+MenuList listTopMenu(topMenu, 16);
 MenuList listEscapeMenu(escapeMenu, 1);
 MenuList listVolAdjustMenu(volAdjustMenu, 1);
 MenuList listFxSourceMenu(fxSourceMenu, 1);
 MenuList listPatchSelectMenu(patchSelectMenu, 1);
 MenuList listPatchResetMenu(patchResetMenu, 2);
-MenuList listPatchCopyMenu(patchCopyMenu, 3);
+//MenuList listPatchCopyMenu(patchCopyMenu, 3);
 MenuList listPatchPasteMenu(patchPasteMenu, 1);
-MenuList listPatchSwapMenu(patchSwapMenu, 2);
-MenuList listPatchFxMenu(patchFxMenu, 24);
+MenuList listPatchSwapMenu(patchSwapMenu, 1);
+MenuList listPatchFxMenu(patchFxMenu, 22);
 MenuList listPatchOsc1Menu(patchOsc1Menu, 18);
 MenuList listPatchOsc2Menu(patchOsc2Menu, 19);
 MenuList listPatchOscFilter1Menu(patchOscFilter1Menu, 14);
@@ -2512,9 +2585,9 @@ MenuList listPatchCommonMenu(patchCommonMenu, 5);
 
 MenuList listSystemAdjMenu(systemAdjMenu, 6);
 
-MenuList listFxCopyMenu(fxCopyMenu,2);
-MenuList listFxPasteMenu(fxPasteMenu,2);
-MenuList listFxSwapMenu(fxSwapMenu,2);
+//MenuList listFxCopyMenu(fxCopyMenu,2);
+MenuList listFxPasteMenu(fxPasteMenu,1);
+//MenuList listFxSwapMenu(fxSwapMenu,2);
 MenuList listDelayLevelMenu(delayLevelMenu,1);
 MenuList listDelayTimeLMenu(delayTimeLMenu,1);
 MenuList listDelayPongMenu(delayPongMenu,1);
@@ -2690,19 +2763,21 @@ bool gotoPatchResetMenu(){
   myMenu.setCurrentMenu(&listPatchResetMenu);
   return true;
 }
+/*
 bool gotoPatchCopyMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchCopyMenu);
   return true;
 }
+*/
 bool gotoPatchPasteMenu(){
   display.clearDisplay(); // erase display
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchPasteMenu);
   myMenu.knobAcceleration = 4;
-      if (paste_patchNumber == NUMBER_OF_PATCHES){
+    if (paste_patchNumber == NUMBER_OF_PATCHES){
         sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
     }
     else { 
@@ -2716,14 +2791,29 @@ bool gotoPatchPasteMenu(){
             loadPatchSD(paste_patchNumber);
         }
     }
-  //display.println(myMenu.str_oledbuf);
-    return true;
+  return true;
 }
 bool gotoPatchSwapMenu(){
+  display.clearDisplay(); // erase display
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchSwapMenu);
-    return true;
+  myMenu.knobAcceleration = 4;
+    if (paste_patchNumber == NUMBER_OF_PATCHES){
+        sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+    }
+    else { 
+        String ps( loadedPatches[paste_patchNumber].patch_string );
+        ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+        sprintf(myMenu.str_oledbuf, "%03d\n%s", paste_patchNumber+1, ps.c_str() );
+        Serial8.println(loadedPatches[paste_patchNumber].patch_string);
+        // load the patch 
+        if (!patchLoaded[paste_patchNumber])
+        {
+            loadPatchSD(paste_patchNumber);
+        }
+    }
+  return true;
 }
 bool gotoPatchFxMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
@@ -2866,25 +2956,43 @@ bool gotoFxSourceMenu(){
   display.println(myMenu.str_oledbuf);
   return true;
 }
+/*
 bool gotoFxCopyMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFxCopyMenu);
   return true;
-  
 }
+*/
 bool gotoFxPasteMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFxPasteMenu);
+  myMenu.knobAcceleration = 4;
+  if (paste_patchNumber == NUMBER_OF_PATCHES){
+      sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+  }
+  else { 
+    String ps( loadedPatches[paste_patchNumber].patch_string );
+    ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+    sprintf(myMenu.str_oledbuf, "%03d\n%s", paste_patchNumber+1, ps.c_str() );
+    Serial8.println(loadedPatches[paste_patchNumber].patch_string);
+    // load the patch 
+//    if (!patchLoaded[paste_patchNumber])
+//    {
+//        loadPatchSD(paste_patchNumber);
+//    }
+  }
   return true;
 }
+/*
 bool gotoFxSwapMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listFxSwapMenu);
   return true;
 }
+*/
 bool gotoDelayLevelMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);

@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.1.05"};
+String verNum_str = {"0.1.07"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -260,6 +260,14 @@ fx_t global_buffer_fx = {
  {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01} // uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH] //10
 };  // 51 bytes long
 
+fx_t copy_buffer_fx = {
+ "Copied Fx",   // char fx_string[32];
+ {0x20, 0x3b, 0x6c, 0x48, 0x46, 0x5c, 0x60, 0x0f, 0x7f},  // uint8_t nrpn_msb_chorus[NRPN_MSB_CHORUS_LENGTH];  // 9 
+ {0x24, 0x2c, 0x20, 0x44, 0x00}, // uint8_t nrpn_msb_delay[NRPN_MSB_DELAY_LENGTH];    // 5 
+ {0x7f, 0x6c, 0x55, 0x16, 0x3a}, // uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH];   // 5
+ {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01} // uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH] //10
+};  // 51 bytes long
+
 
 const uint32_t eepromUpdateInterval = 120000;  // milliseconds (120,000 = 2min)
 uint32_t eepromPreviousMillis = 0;
@@ -270,9 +278,12 @@ bool updateEpromFlag = false;
 int current_patchNumber = 0;
 int sourcePatchNumber = 0;
 int paste_patchNumber = 0;
+int swap_patchNumber = 0;
 int eeprom_patchNumber = 0;
+int paste_FxNumber = 0;
 DMAMEM patch_t loadedPatches[NUMBER_OF_PATCHES];
 bool patchLoaded[NUMBER_OF_PATCHES] = {0};
+bool globalFxLoaded = 0;
 File dataFile;
 uint8_t sysexPresetSendBuffer[206] = {    // EWI_SYSEX_PRESET_DUMP_LEN
     0xF0, 0x47, 0x64, 0x00, 0x20, 0x00, 0x45, 0x34, 0x6B, 0x09, 0x26, 0x06, 0x53, 0x75, 0x6D, 0x6F,

@@ -222,6 +222,7 @@ extern patch_t current_patch;  // 154 bytes long
 extern patch_t copy_buffer_patch;  // 154 bytes long
 extern patch_t swap_buffer_patch;  // 154 bytes long
 extern fx_t global_buffer_fx;  // 51 bytes long
+extern fx_t copy_buffer_fx; 
 
 extern const uint32_t eepromUpdateInterval;  // milliseconds
 extern uint32_t eepromPreviousMillis;
@@ -231,10 +232,13 @@ extern int programChangeData; // value from midi_ho
 extern bool updateEpromFlag;
 extern int current_patchNumber;
 extern int paste_patchNumber;
+extern int swap_patchNumber;
 extern int sourcePatchNumber;
 extern int eeprom_patchNumber;
+extern int paste_FxNumber;
 extern patch_t loadedPatches[];
 extern bool patchLoaded[];
+extern bool globalFxLoaded;
 extern File dataFile;
 extern uint8_t sysexPresetSendBuffer[];
 

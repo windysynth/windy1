@@ -29,9 +29,9 @@ extern MenuItem patchSelectMenu[];
 extern bool patchSelectFun();
 extern MenuItem patchResetMenu[];
 extern bool patchResetFun();
-extern MenuItem patchCopyMenu[];
-extern bool patchCopyFun();
-extern bool patchCopyEditsFun();
+//extern MenuItem patchCopyMenu[];
+//extern bool patchCopyFun();
+//extern bool patchCopyEditsFun();
 extern MenuItem patchPasteMenu[];
 extern bool patchPasteFun();
 extern MenuItem patchSwapMenu[];
@@ -39,12 +39,12 @@ extern bool patchSwapFun();
 
 
 extern MenuItem patchFxMenu[];
-extern MenuItem fxCopyMenu[];
-extern bool fxCopyFun();
+//extern MenuItem fxCopyMenu[];
+//extern bool fxCopyFun();
 extern MenuItem fxPasteMenu[];
 extern bool fxPasteFun();
-extern MenuItem fxSwapMenu[];
-extern bool fxSwapFun();
+//extern MenuItem fxSwapMenu[];
+//extern bool fxSwapFun();
 extern MenuItem delayLevelMenu[];
 extern bool delayLevelFun();
 extern MenuItem delayTimeLMenu[];
@@ -308,7 +308,7 @@ extern MenuList listVolAdjustMenu;
 extern MenuList listFxSourceMenu;
 extern MenuList listPatchSelectMenu;
 extern MenuList listPatchResetMenu;
-extern MenuList listPatchCopyMenu;
+//extern MenuList listPatchCopyMenu;
 extern MenuList listPatchPasteMenu;
 extern MenuList listPatchSwapMenu;
 extern MenuList listPatchFxMenu;
@@ -325,7 +325,7 @@ extern MenuList listPatchCommonMenu;
 
 extern MenuList listSystemAdjMenu;
 
-extern MenuList listFxCopyMenu;
+//extern MenuList listFxCopyMenu;
 extern MenuList listFxPasteMenu;
 extern MenuList listFxSwapMenu;
 extern MenuList listDelayLevelMenu;
@@ -473,7 +473,7 @@ extern bool gotoVolAdjMenu();
 extern bool gotoFxSourceMenu();
 extern bool gotoPatchSelectMenu();
 extern bool gotoPatchResetMenu();
-extern bool gotoPatchCopyMenu();
+//extern bool gotoPatchCopyMenu();
 extern bool gotoPatchPasteMenu();
 extern bool gotoPatchSwapMenu();
 extern bool gotoPatchFxMenu();
@@ -495,9 +495,9 @@ extern bool goUpOneMenu();
 
 
 // patchFxMenu functions
-extern bool gotoFxCopyMenu();
+//extern bool gotoFxCopyMenu();
 extern bool gotoFxPasteMenu();
-extern bool gotoFxSwapMenu();
+//extern bool gotoFxSwapMenu();
 extern bool gotoDelayLevelMenu();
 extern bool gotoDelayTimeLMenu();
 extern bool gotoDelayPongMenu();

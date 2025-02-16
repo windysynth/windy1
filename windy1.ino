@@ -903,6 +903,7 @@ void setup() {
     myUSBHost.begin();
  
     loadAllPatches();
+    loadGlobalFxSD();
     EEPROM.get(PATCH_NUMBER_EEPROM_ADDR, eeprom_patchNumber);
     sprintf(str_buf1, "read eeprom_patchNumber (%03d)", eeprom_patchNumber );     
     Serial8.println(str_buf1);

@@ -337,12 +337,17 @@ void configureSD();
 void savePatchSD(int i);
 void saveCurrentPatchSD(int i); 
 void saveCoppiedPatchSD(int i); 
+void saveSwappedPatchSD(int i); 
 void copyPatchBuffToPatchBuff(patch_t *dest, patch_t *sourc); 
 void copyCurrentPatchToLoadedPatch(int patchNumber);
 void copyLoadedPatchToCopyBuffer(int sourcePatchNumber);
+void copyLoadedPatchToSwapBuffer(int sourcePatchNumber);
 void copyCurrentPatchToCopyBuffer(void);
+void copyCurrentFxToCopyBufferFx(void);
+void copyCopyBufferFxToPatch(int patchNumber);
 void loadPatchSD(int i);
 void loadAllPatches();
+void loadGlobalFxSD();
 
 
 
