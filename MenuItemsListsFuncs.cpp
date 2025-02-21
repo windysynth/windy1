@@ -73,7 +73,7 @@ bool fxSourceFun() {
      Temp += myMenu.updateLeafValue;
      fxSourcePatch = std::clamp(Temp,0, 1);
      // re-apply synth variables to update effects 
-     patchToSynthVariables(&current_patch);
+     patchToSynthVariables(&current_patch); // fxSourcePatch is checked in here
      sprintf(myMenu.str_oledbuf,"  %s  ", fxSourcePatch ? "Patch " : "Global" );
      return true;
  }
@@ -175,7 +175,7 @@ bool patchPasteFun(){
   // NUMBER_OF_PATCHES is Exit w/o writing
   if(paste_patchNumber == NUMBER_OF_PATCHES){ return goUpOneMenu(); } 
   copyCurrentPatchToCopyBuffer();
-  saveCoppiedPatchSD(paste_patchNumber);
+  saveCoppiedPatchSD(paste_patchNumber); //does copyPatchBuffToPatchBuff(&current_patch, &copy_buffer_patch) inside;
   loadPatchSD(paste_patchNumber);
   return goUpOneMenu();
 }
@@ -220,9 +220,10 @@ bool patchSwapFun(){
   return goUpOneMenu();
 }
 
-MenuItem PROGMEM patchFxMenu[22] = {
+MenuItem PROGMEM patchFxMenu[23] = {
     { "Back    " , goUpOneMenu   }
    ,{ "FxSource" , gotoFxSourceMenu   }
+   ,{ "SaveGlbl" , gotoSaveFxGlobalMenu }
 //   ,{ "FxCopy  " , gotoFxCopyMenu   }
    ,{ "FxPaste " , gotoFxPasteMenu   }
 //   ,{ "FxSwap  " , gotoFxSwapMenu   }
@@ -255,7 +256,37 @@ MenuItem PROGMEM fxCopyMenu[2] = {
 };
 bool fxCopyFun(){ return goUpOneMenu(); }
 */
-MenuItem PROGMEM fxPasteMenu[2] = {
+
+MenuItem PROGMEM saveFxGlobalMenu[1] = {
+    { "SaveGlbl" , saveFxGlobalFun  }
+};
+bool saveFxGlobalFun(){
+  static int bWrite = 0;
+  if(myMenu.updateLeafValue){
+    bWrite = getFxValue(&current_patch, EFFECTGROUPCOMMON1, CCCHORUSON);
+    bWrite += myMenu.updateLeafValue;
+    bWrite = std::clamp(bWrite, 0, 1);
+    if (!bWrite){
+        sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+    }
+    else { 
+        sprintf(myMenu.str_oledbuf, "Write\n Global Fx");
+        Serial8.println(myMenu.str_oledbuf);
+    }
+    return true;
+  }
+  display.clearDisplay(); // erase display
+  Serial8.println(F("fxPasteFun: goUpOneMenu"));
+  if(!bWrite){ // exit without saving 
+      bWrite = 0; // ensure next time in menu starts with exit
+      return goUpOneMenu(); 
+  } 
+  
+  bWrite = 0; // ensure next time in menu starts with exit
+  saveGlobalFxSD(); // no need to reload after, gobal_buffer_fx already correct
+  return goUpOneMenu();
+}
+MenuItem PROGMEM fxPasteMenu[1] = {
     { "PasteFx " , fxPasteFun   }
 };
 bool fxPasteFun(){ 
@@ -2435,7 +2466,7 @@ bool bendRangeFun() {
      int Temp = current_patch.nrpn_msb_common1[CCBENDRANGE];
      Temp += myMenu.updateLeafValue;
      current_patch.nrpn_msb_common1[CCBENDRANGE] = std::clamp(Temp,0, 127); 
-     patchToOctButtonLevel(&current_patch);
+     patchToBendRange(&current_patch);
      //preUpdateSynthVariablesFlag = true; // to use squelch
      updateSynthVariablesFlag = true;
      sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_common1[CCBENDRANGE]);
@@ -2571,7 +2602,7 @@ MenuList listPatchResetMenu(patchResetMenu, 2);
 //MenuList listPatchCopyMenu(patchCopyMenu, 3);
 MenuList listPatchPasteMenu(patchPasteMenu, 1);
 MenuList listPatchSwapMenu(patchSwapMenu, 1);
-MenuList listPatchFxMenu(patchFxMenu, 22);
+MenuList listPatchFxMenu(patchFxMenu, 23);
 MenuList listPatchOsc1Menu(patchOsc1Menu, 18);
 MenuList listPatchOsc2Menu(patchOsc2Menu, 19);
 MenuList listPatchOscFilter1Menu(patchOscFilter1Menu, 14);
@@ -2586,6 +2617,7 @@ MenuList listPatchCommonMenu(patchCommonMenu, 5);
 MenuList listSystemAdjMenu(systemAdjMenu, 6);
 
 //MenuList listFxCopyMenu(fxCopyMenu,2);
+MenuList listSaveFxGlobalMenu(saveFxGlobalMenu,1);
 MenuList listFxPasteMenu(fxPasteMenu,1);
 //MenuList listFxSwapMenu(fxSwapMenu,2);
 MenuList listDelayLevelMenu(delayLevelMenu,1);
@@ -2964,6 +2996,16 @@ bool gotoFxCopyMenu(){
   return true;
 }
 */
+bool gotoSaveFxGlobalMenu(){
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  myMenu.setCurrentMenu(&listSaveFxGlobalMenu);
+  myMenu.knobAcceleration = 1;
+    sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+  display.clearDisplay(); // erase display
+  display.println(myMenu.str_oledbuf);
+  return true;
+}
 bool gotoFxPasteMenu(){
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);

@@ -143,20 +143,25 @@ void processUsbMIDI(void)
       switch (data1){ 
         case CC_NRPN_DATA_ENTRY:
             usbMidiNrpnData = data2;
+            processNrpnMessage();
+            sprintf(str_buf1, "M:%d, L:%d, D:%d", usbMidiNrpnMsbOld, usbMidiNrpnLsbOld, usbMidiNrpnData );
+            Serial8.println(str_buf1);
             break;
         case CC_NRPN_LSB:
-            usbMidiNrpnLsbOld = usbMidiNrpnLsbNew;
-            usbMidiNrpnLsbNew = data2;
+            //usbMidiNrpnLsbOld = usbMidiNrpnLsbNew;
+            //usbMidiNrpnLsbNew = data2;
+            usbMidiNrpnLsbOld = data2;
             break;
         case CC_NRPN_MSB:
-            usbMidiNrpnMsbOld = usbMidiNrpnMsbNew;
-            usbMidiNrpnMsbNew = data2;
-            if (usbMidiNrpnMsbNew == 127 && usbMidiNrpnLsbNew == 127)
-            {
-                processNrpnMessage();
-                sprintf(str_buf1, "NRPN(M) %d, NRPN(L) %d, Data: %d", usbMidiNrpnMsbOld, usbMidiNrpnLsbOld, usbMidiNrpnData );
-                Serial8.println(str_buf1);
-            }
+            //usbMidiNrpnMsbOld = usbMidiNrpnMsbNew;
+            //usbMidiNrpnMsbNew = data2;
+            usbMidiNrpnMsbOld = data2;
+          //  if (usbMidiNrpnMsbNew == 127 && usbMidiNrpnLsbNew == 127)
+          //  {
+          //      processNrpnMessage();
+          //      sprintf(str_buf1, "NRPN(M) %d, NRPN(L) %d, Data: %d", usbMidiNrpnMsbOld, usbMidiNrpnLsbOld, usbMidiNrpnData );
+          //      Serial8.println(str_buf1);
+          //  }
             break;
         default:
             Serial8.print("Control Change, ch=");

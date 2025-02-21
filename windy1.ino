@@ -1357,8 +1357,6 @@ void loop()
         filter2.resonance(QFactorOscFilter1);   // Q factor
         mix_fcModFilter2.gain(0,  BreathModOscFilter1*FreqOscFilter1BModFactor); 
         mix_fcModFilter2.gain(3, modOffsetFilter1*FreqOscFilter1BModFactor); 
-        ModeOscFilter2_stored = ModeOscFilter2;    
-        ModeOscFilter2 = ModeOscFilter1;    
         dc_modOffsetOscFilter2.amplitude(-BreathModOscFilter1);
     }
     else
@@ -1380,8 +1378,6 @@ void loop()
         filter4.resonance(QFactorNoiseFilter3);   // Q factor
         mix_fcModFilter4.gain(0,  BreathModNoiseFilter3*FreqNoiseFilter3BModFactor); 
         mix_fcModFilter4.gain(3, modOffsetFilter3*FreqNoiseFilter3BModFactor); 
-        ModeNoiseFilter4_stored = ModeNoiseFilter4;    
-        ModeNoiseFilter4 = ModeNoiseFilter3;    
         dc_modOffsetNoiseFilter4.amplitude(-BreathModNoiseFilter3);
     }
     else
@@ -1668,9 +1664,6 @@ float lfoThresh(float x, float th, float depth, float breath)
 
 void changeFilterMode(void)
 {
-    //if (ModeOscFilter1 !=modeFilter1_old)
-    //{
-    //    modeFilter1_old = ModeOscFilter1;
         switch (ModeOscFilter1)
         {
             case THRU:
@@ -1710,11 +1703,8 @@ void changeFilterMode(void)
                 mix_ntcFilter1.gain(3,0.0);  // HP
                 break;
         }
-    //}   
-    //if (ModeOscFilter2 !=modeFilter2_old)
-    //{
-    //    modeFilter2_old = ModeOscFilter2;
-        switch (ModeOscFilter2)
+    filterMode_t link_test = LinkOscFilters ? ModeOscFilter1 : ModeOscFilter2;
+        switch (link_test)
         {
             case THRU:
                 mix_ntcFilter2.gain(0,maxMixNtcFilter);  // pass thru
@@ -1753,10 +1743,6 @@ void changeFilterMode(void)
                 mix_ntcFilter2.gain(3,0.0);  // HP
                 break;
         }
-    //}   
-    //if (ModeNoiseFilter3 !=modeFilter3_old)
-    //{
-    //    modeFilter3_old = ModeNoiseFilter3;
         switch (ModeNoiseFilter3)
         {
             case THRU:
@@ -1796,11 +1782,8 @@ void changeFilterMode(void)
                 mix_ntcFilter3.gain(3,0.0);  // HP
                 break;
         }
-    //}  
-    //if (ModeNoiseFilter4 !=modeFilter4_old)
-    //{
-    //    modeFilter4_old = ModeNoiseFilter4;
-        switch (ModeNoiseFilter4)
+        link_test = LinkNoiseFilters ? ModeNoiseFilter3 : ModeNoiseFilter4;
+        switch (link_test)
         {
             case THRU:
                 mix_ntcFilter4.gain(0,maxMixNtcFilter);  // pass thru
@@ -1839,7 +1822,6 @@ void changeFilterMode(void)
                 mix_ntcFilter4.gain(3,0.0);  // HP
                 break;
         }
-    //}    
 }
 
 

@@ -335,6 +335,7 @@ void printPatchValues();
 void setCurrentPatch(int patchNumber);
 void configureSD();
 void savePatchSD(int i);
+void saveGlobalFxSD();
 void saveCurrentPatchSD(int i); 
 void saveCoppiedPatchSD(int i); 
 void saveSwappedPatchSD(int i); 

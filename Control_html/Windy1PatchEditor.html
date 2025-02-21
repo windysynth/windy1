@@ -23,7 +23,6 @@
         </select>
         <button id="SerialConnectButton" type="button" disabled>Connect</button>
         Powered by <a href="https://github.com/benc-uk/touchmidi" target="_blank">TouchMIDI</a> and <a href="https://github.com/rafaelaroca/web-serial-terminal"target="_blank">web-serial-terminal</a>.
-       <!-- 
         MIDI channel:
         <select name="midich" id="MidiChannel">
             <option value="1">1</option>
@@ -42,23 +41,76 @@
             <option value="14">14</option>
             <option value="15">15</option>
             <option value="16">16</option>
-        </select>-->
+        </select>
     </div>
     <div class="header">
         <h2>Windy1 Synthesizer Patch Editor</h2>
         <h3>(c)02.2025 <a href="https://www.hexefx.com" target="_blank">www.hexefx.com</a></h3>
     </div>
-   
+  
+    <!-- 
+#define CCOCTOSC1 0
+#define CCSEMIOSC1 1
+#define CCFINEOSC1 2
+#define CCBEATOSC1 3
+#define CCSAWOSC1 5
+#define CCTRIOSC1 6
+#define CCPULSEOSC1 7
+#define CCPWOSC1 8
+#define CCPWMFREQOSC1 9
+#define CCPWMDEPTHOSC1 10
+#define CCSWEEPDEPTHOSC1 11
+#define CCSWEEPTIMEOSC1 12
+#define CCBREATHDEPTHOSC1 13
+#define CCBREATHATTAINOSC1 14
+#define CCBREATHCURVEOSC1 15
+#define CCBREATHTHRESHOSC1 16
+#define CCLEVELOSC1 17
+    -->
 <div class="controls">
-			<group-row margin="0.6">
-				<midi-button note="1" colour="#B3E5FC" label="Bypass" label-scale="0.5"></midi-button>
-                <midi-encoder label="Size\n%p" chan="1" cc="80" colour="#B3E5FC" label-scale="0.5"></midi-encoder>
-                <midi-encoder label="Lowpass\nFreq\n%p" chan="1" cc="81" colour="#B3E5FC" label-scale="0.5"></midi-encoder>
-                <midi-encoder label="Mix\n%p" chan="1" cc="82" colour="#B3E5FC" label-scale="0.5"></midi-encoder>
-				<midi-button note="2" colour="#C8E6C9" label="Freeze" label-scale="0.5"></midi-button>
-            </group-row>			
+    <group-column>
+    <group-row>
+        <p>Osc1</p>
+        <midi-slider horizontal label="Saw\n%v" chan="1" nrpn="5,64" colour="B3E5FC" label-scale="0.5"></midi-slider>
+        <midi-slider horizontal label="Tri\n%v" chan="1" nrpn="6,64" colour="B3E5FC" label-scale="0.5"></midi-slider>
+        <midi-slider horizontal label="Pulse\n%v" chan="1" nrpn="7,64" colour="B3E5FC" label-scale="0.5"></midi-slider>
+        <midi-button nrpn="6,81" toggle value="1" value-off="0" colour="#B3E5FC" label="XFade" label-scale="0.5"></midi-button>
+    </group-row>			
+    <group-row>
+        <midi-encoder label="Osc1Oct\n%v" chan="1" nrpn="0,64" min="61" max="67" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc1Semi\n%v" chan="1" nrpn="1,64" min="52" max="76" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc1Cents\n%v" chan="1" nrpn="2,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc1Beat\n%v" chan="1" nrpn="3,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc1PW\n%v" chan="1" nrpn="8,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc1Pwm\nFreq\n%v" chan="1" nrpn="9,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc1Pwm\nDepth\n%v" chan="1" nrpn="10,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc1Sweep\nTime\n%v" chan="1" nrpn="12,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc1Sweep\nDepth\n%v" chan="1" nrpn="11,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+    </group-row>			
+    <group-row>
+        <p>Osc2</p>
+        <midi-slider horizontal label="Saw\n%v" chan="1" nrpn="5,65" colour="B3E5FC" label-scale="0.5"></midi-slider>
+        <midi-slider horizontal label="Tri\n%v" chan="1" nrpn="6,65" colour="B3E5FC" label-scale="0.5"></midi-slider>
+        <midi-slider horizontal label="Pulse\n%v" chan="1" nrpn="6,65" colour="B3E5FC" label-scale="0.5"></midi-slider>
+        <midi-button nrpn="6,81" toggle value="1" value-off="0" colour="#B3E5FC" label="XFade" label-scale="0.5"></midi-button>
+    </group-row>			
+    <group-row>
+        <midi-encoder label="Osc2Oct\n%v" chan="1" nrpn="0,65" min="61" max="67" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc2Semi\n%v" chan="1" nrpn="1,65" min="52" max="76" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc2Cents\n%v" chan="1" nrpn="2,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc2Beat\n%v" chan="1" nrpn="3,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc2PW\n%v" chan="1" nrpn="8,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc2Pwm\nFreq\n%v" chan="1" nrpn="9,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc2Pwm\nDepth\n%v" chan="1" nrpn="10,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc2Sweep\nTime\n%v" chan="1" nrpn="12,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+        <midi-encoder label="Osc2Sweep\nDepth\n%v" chan="1" nrpn="11,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
+    </group-row>			
+    </group-column>
+
 </div>
-        <div class="term-wrapper"><div id="term"></div></div>
+<div class="term-wrapper">
+    <div id="term"></div>
+</div>
     <div class="footer"></div>
 </body>
 
@@ -66,7 +118,7 @@
     var term;
     function calculate_size(win) {
         var cols = Math.max(80, Math.min(150, (win.innerWidth - 280) / 7)) | 0;
-        var rows = Math.max(8, Math.min(80, (win.innerHeight - 180) / 12)) | 0;
+        var rows = Math.max(10, Math.min(80, (win.innerHeight - 180) / 12)) | 0;
         return [cols, rows];
     }
     (function () {

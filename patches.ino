@@ -820,7 +820,8 @@ void saveCoppiedPatchSD(int i) { // i is patch number to save it
     dataFile.write((byte*)&copy_buffer_patch, sizeof(loadedPatches[0]));
     dataFile.close();
     sprintf(str_buf1,"copy_buffer_patch written into %03d.PAT", i);
-    copyPatchBuffToPatchBuff(&current_patch, &copy_buffer_patch);
+    //copyPatchBuffToPatchBuff(&current_patch, &copy_buffer_patch);
+    //void setCurrentPatch(int patchNumber)
     Serial8.println(str_buf1);
   }
 }
@@ -1073,8 +1074,12 @@ uint8_t getFxValue(patch_t *patch, uint32_t effectGroup, uint32_t effectIdx){
                 return patch->nrpn_msb_delay[effectIdx];
             case EFFECTGROUPCOMMON1:
                 return patch->nrpn_msb_common1[effectIdx];
+            default:
+                sprintf(str_buf1, "invalid Patch effectGroup: %d", effectGroup);  	    
         }
     } else {
+        sprintf(str_buf1, "fxSourcPatch: %d", fxSourcePatch);  	    
+        Serial8.println(str_buf1);
         switch(effectGroup){
             case EFFECTGROUPCHORUS:
                 return global_buffer_fx.nrpn_msb_chorus[effectIdx];
@@ -1084,9 +1089,14 @@ uint8_t getFxValue(patch_t *patch, uint32_t effectGroup, uint32_t effectIdx){
                 return global_buffer_fx.nrpn_msb_delay[effectIdx];
             case EFFECTGROUPCOMMON1:
                 return global_buffer_fx.nrpn_msb_common1[effectIdx];
+            default:
+                sprintf(str_buf1, "invalid Global effectGroup: %d", effectGroup);  	    
+                return 0;
         }
     }
-    return 255; // should never get here.
+
+    Serial8.println(str_buf1);
+    return 0; // should never get here.
 } 
 void setFxValue(uint8_t value, patch_t *patch, uint32_t effectGroup, uint32_t effectIdx){
     if (fxSourcePatch){

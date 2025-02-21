@@ -41,6 +41,8 @@ extern bool patchSwapFun();
 extern MenuItem patchFxMenu[];
 //extern MenuItem fxCopyMenu[];
 //extern bool fxCopyFun();
+extern MenuItem saveFxGlobalMenu[];
+extern bool saveFxGlobalFun();
 extern MenuItem fxPasteMenu[];
 extern bool fxPasteFun();
 //extern MenuItem fxSwapMenu[];
@@ -326,6 +328,7 @@ extern MenuList listPatchCommonMenu;
 extern MenuList listSystemAdjMenu;
 
 //extern MenuList listFxCopyMenu;
+extern MenuList listSaveFxGlobalMenu;
 extern MenuList listFxPasteMenu;
 extern MenuList listFxSwapMenu;
 extern MenuList listDelayLevelMenu;
@@ -496,6 +499,7 @@ extern bool goUpOneMenu();
 
 // patchFxMenu functions
 //extern bool gotoFxCopyMenu();
+extern bool gotoSaveFxGlobalMenu();
 extern bool gotoFxPasteMenu();
 //extern bool gotoFxSwapMenu();
 extern bool gotoDelayLevelMenu();
