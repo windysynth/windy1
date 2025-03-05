@@ -72,7 +72,7 @@ void MenuClass::doMenu() {
       displayMenu();
       return; // only check for selection if menu not also updating
     } 
-    if (selectionMade()) { // selection made, run item function once now
+    if (NONE != selectionMade()) { // selection made, run item function once now
       if (!runFunction()) { // If item function returns false then it isn't done and we need to keep running it.
         runningFunction = true;
         Serial8.println("MenuClass::runningFuntion true");

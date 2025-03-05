@@ -77,6 +77,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include <OpenAudio_ArduinoLibrary.h> //for AudioConvert_I16toF32, AudioConvert_F32toI16, and AudioEffectGain_F32
 #include <hexefx_audiolib_F32.h> // for AudioEffectPlateReverb_F32 and AudioEffectDelayStereo_F32
+#include "effect_compressor.h"  
 
 //-------- paste below here Auto generated code from Audio System Design Tooll --------
 #include <Audio.h>
@@ -213,6 +214,8 @@ AudioConvert_I16toF32           Int2FloatR; //xy=1769.949951171875,1688.65002441
 AudioConvert_I16toF32           Int2FloatL;           //xy=1775.8499755859375,1622.8499755859375
 AudioFilterStateVariable filter4;        //xy=1799.333251953125,1128
 AudioMixer4              mix_oscLevels;  //xy=1861.333251953125,234
+AudioEffectCompressor    compress_oscLevels;
+AudioSynthWaveformDc     dc_compress;
 AudioEffectMultiply      mult_sqLimter; //xy=1523.1333618164062,471.8833312988281
 AudioMixer4              mix_limiter; //xy=1897.716552734375,450.8833312988281
 AudioEffectMultiply      mult_cubicLimter; //xy=1710.949951171875,461.8833312988281
@@ -411,6 +414,11 @@ AudioConnection          patchCord138(mix_oscLevels, 0, mult_sqLimter, 1);
 AudioConnection          patchCord171(mix_oscLevels, 0, mix_limiter, 0);
 AudioConnection          patchCord172(mix_oscLevels, 0, mix_limiter, 1);
 AudioConnection          patchCord173(mix_oscLevels, 0, mult_cubicLimter, 0);
+AudioConnection          patchCord173a(mix_oscLevels, 0, compress_oscLevels, 1);
+AudioConnection          patchCord173b(mix_oscLevels, 0, compress_oscLevels, 2);
+AudioConnection          patchCord173c(mix_oscLevels, 0, compress_oscLevels, 0);
+//AudioConnection          patchCord173c(dc_compress, 0, compress_oscLevels, 0);
+AudioConnection          patchCord173d(compress_oscLevels, 0, mix_limiter,3);
 AudioConnection          patchCord174(mult_sqLimter, 0, mult_cubicLimter, 1);
 AudioConnection          patchCord175(mult_cubicLimter, 0, mix_limiter, 2);
 AudioConnection          patchCord176(mix_limiter, 0, mix_ntcFilter1, 0);
@@ -484,31 +492,14 @@ Bounce topButton(topButtonPin, debounceDelay);
 Bounce botButton(botButtonPin, debounceDelay);
 
 
-//const int patchNextButton = 29;
-//uint32_t patchNextButtonPressedTime = 0;
-//uint32_t knobButtonPressedTime = 0;
-//int oldKnobButtonState = 0;
-
-//int currentKnobButtonState = 0;
-//bool longKnobButtonPressPending = false;
-//bool longKnobButtonPress = false;
-//bool shortKnobButtonPress = false;
-//bool firstKnobButtonPress = true;
-//bool KnobButtonRising = false;
-//bool submenu_active = false;
 const uint32_t UITimeoutInterval = 7000;  // milliseconds
-//typedef enum {SPLASH_SCREEN, VOL_ADJ, PATCH_SEL, MENU} uism_t;
-//uism_t UISM = SPLASH_SCREEN;
-//typedef enum {MENU_EXIT, MENU_MIX, MENU_TUNING, MENU_TRANS, MENU_OCT, MENU_BR,
-//              MENU_RVB_PATCH, MENU_DLY_PATCH, MENU_CHRS_PATCH, MENU_WR_PATCH_FX } menusm_t;
-//menusm_t MENUSM = MENU_EXIT;
 
 bool patchFxWriteFlag = false;
 
 // squelched after squelchRelease and before squelchRelease + squelchDelay
 // synth variables update after updateSynthDelay which should occur while squelched
 // squechAttack starts at updateSynthDelay + squelchDelay
-const uint32_t readKnobInterval = 50;  // ms
+const uint32_t readKnobInterval = 33;  // ms
 const uint32_t updateSynthDelay = 70;  // ms > squelchRelease
 const float squelchRelease = 30.0f;  // ms
 const float squelchDelay = 60.0f;  // ms 
@@ -536,7 +527,7 @@ void setup() {
     //init str buffers
     sprintf(str_buf, version_str.c_str());
     sprintf(str_buf1, version_str.c_str());
-    sprintf(str_oledbuf, splashScreen_str.c_str());
+    sprintf(myMenu.str_oledbuf, splashScreen_str.c_str());
 
     pinMode(knobButtonPin, INPUT_PULLUP);
     pinMode(topButtonPin, INPUT_PULLUP);
@@ -569,7 +560,7 @@ void setup() {
     }
     else{
         String test_str= verNum_str +  "\n sgtl:\n 0x%04X";
-        sprintf(str_oledbuf, test_str.c_str(), sgtl_val);
+        sprintf(myMenu.str_oledbuf, test_str.c_str(), sgtl_val);
     }
     #else
         sgtl5000_1.enable();
@@ -661,13 +652,13 @@ void setup() {
     filter_osc1.resonance(0.7f);   // Q factor
     filter_osc1.octaveControl(1.0f); // not using this control 
     filter_osc1b.frequency(noteFreqFilterOsc1); // Freq of osc1 
-    filter_osc1b.resonance(2.0f);   // Q factor
+    filter_osc1b.resonance(1.0f);   // Q factor
     filter_osc1b.octaveControl(1.0f); // not using this control 
     filter_osc2.frequency(noteFreqFilterOsc2); // Freq of osc1 
     filter_osc2.resonance(0.7f);   // Q factor
     filter_osc2.octaveControl(1.0f); // not using this control 
     filter_osc2b.frequency(noteFreqFilterOsc2); // Freq of osc1 
-    filter_osc2b.resonance(2.0f);   // Q factor
+    filter_osc2b.resonance(1.0f);   // Q factor
     filter_osc2b.octaveControl(1.0f); // not using this control 
     //onepole_osc1.highpassOn(true);    
     //onepole_osc1.frequency(noteFreqOsc1);   // highpass for osc1 before  mix_oscLevels 
@@ -736,10 +727,32 @@ void setup() {
     //cacluateHeadRoom();
     mix_oscLevels.gain(0, LevelOsc1*LevelOscN_HeadRoom);
     mix_oscLevels.gain(1, LevelOsc2*LevelOscN_HeadRoom);
-    
-    mix_limiter.gain(0, 1.0);
+  
+    /*
+        It offers the following controls:
+        Attack rates 0.1 - 2000 mS
+        Release rates 0.1 - 2000mS
+        Ratio between 1 to 32767
+        Knee width between 0 to 40dB (soft to hard knee control)
+        Threshold between 0 to -40dB
+        Makeup Gain between 0 to 40dB
+        Multiple side chain inputs that can be selected at run time.
+    */ 
+    compress_oscLevels.enable();
+    compress_oscLevels.setAttack( 0.10f);  
+    compress_oscLevels.setRelease( 20.0f);  
+    compress_oscLevels.setRatio( 6.0f);  
+    compress_oscLevels.setThreshold( -10.0f);  
+    compress_oscLevels.setKnee( 10.0f);  
+    compress_oscLevels.setMakeupGain(4.0f);  
+    compress_oscLevels.setSideChain(0);
+    dc_compress.amplitude(0.5f);
+    //compress_oscLevels.disable();
+    //mix_limiter.gain(0, 1.0);
+    mix_limiter.gain(0, 0.0);
     mix_limiter.gain(1, LimiterAmount); 
     mix_limiter.gain(2, -LimiterAmount);
+    mix_limiter.gain(3, 1.0);
 
     mix_levelNoise.gain(0, 1.0); // pass thru for now
     //mix_levelNoise.gain(1, 1.0); // Debug path. 
@@ -813,9 +826,10 @@ void setup() {
     mix_Amp.gain(1, 1.0f);  // 4000s AmpLevel doesn't control Noise Level
 
     flange1.begin(delayline_flange1,FLANGE_DELAY_LENGTH,
-                (int)EffectsChorusDelay1 % 93,(int)EffectsChorusMod1,EffectsChorusLfoFreq);
+                (int)EffectsChorusDelay1 % (int)(93.0f*88.1f),(int)EffectsChorusMod1,EffectsChorusLfoFreq);
+                //(int)EffectsChorusDelay1 % 93,(int)EffectsChorusMod1,EffectsChorusLfoFreq);
     flange2.begin(delayline_flange2,FLANGE_DELAY_LENGTH,
-                (int)EffectsChorusDelay2 % 93,(int)EffectsChorusMod2,EffectsChorusLfoFreq);
+                (int)EffectsChorusDelay2 % (int)(93.0f*88.1f),(int)EffectsChorusMod2,EffectsChorusLfoFreq);
     flange3.begin(delayline_flange3,FLANGE_DELAY_LENGTH,
                 FLANGE_DELAY_PASSTHRU,0,0.0);
     mix_chorus_fb.gain(0,1.0*EffectsChorusFBHeadroom);
@@ -1060,13 +1074,13 @@ void setup() {
         display.setTextColor(WHITE,BLACK);
         display.display(); // refresh display
         display.setCursor(0,5);
-        display.println(str_oledbuf);
+        display.println(myMenu.str_oledbuf);
         display.display();
         //resetUITimeout();
     }
 
     myMenu.setCurrentMenu(&listTopMenu);
-    Serial8.println(str_oledbuf);
+    Serial8.println(myMenu.str_oledbuf);
     myMenu.resetButtonsAndKnobs(); // to clear spurios activity form power up
     env_squelch.delay(squelchDelay);
     env_squelch.attack(squelchAttack);
@@ -1219,8 +1233,8 @@ void loop()
         pink_Noise.amplitude(NoiseLevel);  //
         
         // wrap EffectsChorusDelay1 & 2 at 93ms (44.1*93 = 4101.3) (ewi 4k wraps like this)
-        flange1.voices( (int)EffectsChorusDelay1 % 93,(int)EffectsChorusMod1,EffectsChorusLfoFreq);
-        flange2.voices( (int)EffectsChorusDelay2 % 93,(int)EffectsChorusMod2,EffectsChorusLfoFreq);
+        flange1.voices( (int)EffectsChorusDelay1 % (int)(93.0f*88.1f),(int)EffectsChorusMod1,EffectsChorusLfoFreq);
+        flange2.voices( (int)EffectsChorusDelay2 % (int)(93.0f*88.1f),(int)EffectsChorusMod2,EffectsChorusLfoFreq);
         mix_chorus_fb.gain(0,1.0*EffectsChorusFBHeadroom);
         mix_chorus_fb.gain(1,EffectsChorusFeedback*EffectsChorusFBHeadroom);
         mix_chorus_wet.gain(0,EffectsChorusWet1);

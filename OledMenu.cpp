@@ -56,7 +56,8 @@ void OledMenu::doMenu(){
     display.display();
     return; 
   } 
-  if (selectionMade()) { // selection made, run item function once now
+  knobButtonSelType = selectionMade();
+  if (NONE != knobButtonSelType) { // selection made, run item function once now
     Serial8.println("selectionMade()");
     if (!runFunction()) { // If item function returns false then it isn't done and we need to keep running it.
       runningFunction = true;
@@ -85,9 +86,7 @@ void OledMenu::resetButtonsAndKnobs(){
         break; 
     }
   }
-  longKnobButtonPressPending = false;
-  longKnobButtonPress = false; 
-  shortKnobButtonPress = false; 
+  _knobButtonSelType = NONE;
   sprintf(str_serial8buf, "knobCount: %d, buttonCount: %d ", knobCount, buttonCount);
   Serial8.println(str_serial8buf);
 }
@@ -124,22 +123,30 @@ bool OledMenu::checkButtonsAndKnobs(){
     knobButton.update();
     bool knobButtonState = knobButton.read(); ;// false means pressed
     int32_t newKnob_temp = 0;
+    uint32_t currentTime = millis();
     if (knobButton.rose()){
-        if (!longKnobButtonPressPending){
-            longKnobButtonPress = false; 
-            shortKnobButtonPress = true; 
+        if(knobButton.previousDuration() > knobButtonLongPressInterval){
+            knobButtonPossibleSingleClick = false;
+            _knobButtonSelType = LONG_PRESS;
+            lastClickTime = 0;
+        } else if(currentTime - lastClickTime < knobButtonDoubleClickInterval){
+            knobButtonPossibleSingleClick = false;
+            _knobButtonSelType = DOUBLE_CLICK;
+            lastClickTime = 0;
+        } else  {
+            _knobButtonSelType = NONE;
+            knobButtonPossibleSingleClick = true;
+            lastClickTime = currentTime;
         }
-        else
-        {
-            longKnobButtonPress = true; 
-            shortKnobButtonPress = false; 
-        }
-        longKnobButtonPressPending = false; 
         knob.write(0); // reset knob position to zero ignore new 
         return true;
     }
-    else if ( knobButtonState == false && knobButton.currentDuration() > longKnobButtonPressTime ) {
-        longKnobButtonPressPending = true; 
+    else if (knobButtonPossibleSingleClick && 
+            ( currentTime - lastClickTime > knobButtonSingleClickInterval) ){
+        knobButtonPossibleSingleClick = false;
+        _knobButtonSelType = SINGLE_CLICK;
+        lastClickTime = 0;
+        knob.write(0); // reset knob position to zero ignore new 
         return true;
     }
     if (!knobButtonState) { 
@@ -175,21 +182,21 @@ int OledMenu::updateSelection() {
 bool OledMenu::escape() {
     if (updateEpromFlag){
         eepromCurrentMillis = millis();
-        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+        eepromPreviousMillis = eepromCurrentMillis; // reset timer every button press 
     }
     bool shortTopButtonPress_temp = shortTopButtonPress;
     shortTopButtonPress = false;
     return shortTopButtonPress_temp;
 }
 
-bool OledMenu::selectionMade() {
+selection_t OledMenu::selectionMade() {
     if (updateEpromFlag){
         eepromCurrentMillis = millis();
-        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+        eepromPreviousMillis = eepromCurrentMillis; // reset timer every button press
     }
-    bool shortKnobButtonPress_temp = shortKnobButtonPress;
-    shortKnobButtonPress = false;
-    return shortKnobButtonPress_temp;
+    selection_t knobButtonSelType_temp = _knobButtonSelType;
+    _knobButtonSelType = NONE;
+    return knobButtonSelType_temp;
 }
 
 void OledMenu::displayMenu() {
@@ -201,7 +208,7 @@ void OledMenu::displayMenu() {
     int botScreenIndex = topScreenIndex + itemsPerScreen; 
 
     if (menuSize == 1) {
-        display.print("  ");
+        //display.print("  ");
         getText(outBuf, 0);
         display.println(outBuf);
         display.setCursor(0,18);

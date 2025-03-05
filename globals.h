@@ -28,7 +28,6 @@ extern Encoder knob;
 extern Bounce knobButton;
 extern Bounce topButton;
 extern Bounce botButton;
-extern float longKnobButtonPressTime; 
 extern int32_t newKnob;
 
 
@@ -52,10 +51,16 @@ extern String verTxt_str;
 extern String splashTxt; 
 extern String version_str;
 extern String splashScreen_str;
+extern bool PRINT_VALUES_FLAG;
 extern char str_buf[];
 extern char str_buf1[];
-extern char str_oledbuf[];
-extern bool PRINT_VALUES_FLAG;
+
+// globals for display
+//extern char str_oledbuf[];
+extern char str_namingbuf[];
+extern const String alphaNumString;
+
+
 
 // globals for loop control
 extern uint32_t previousMillis;
@@ -66,7 +71,7 @@ extern uint32_t currentUITimeoutTime;
 extern uint32_t previousDebugPrintTime;
 extern bool ALREADY_TIMED_OUT;
 
-// globals for synth control parameters
+// globals for synth control parametears
 extern uint8_t currentMidiNote;  // A0
 extern bool note_is_on;
 extern float DIV8192;

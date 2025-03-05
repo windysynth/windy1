@@ -15,7 +15,6 @@ extern bool patchLoaded[];
 
 extern Encoder knob;
 extern Bounce knobButton;
-extern float longKnobButtonPressTime; 
 
 //extern OledMenu myMenu;
 
@@ -29,11 +28,10 @@ extern MenuItem patchSelectMenu[];
 extern bool patchSelectFun();
 extern MenuItem patchResetMenu[];
 extern bool patchResetFun();
-//extern MenuItem patchCopyMenu[];
-//extern bool patchCopyFun();
-//extern bool patchCopyEditsFun();
 extern MenuItem patchPasteMenu[];
+extern MenuItem namingMenu[];
 extern bool patchPasteFun();
+extern bool namingFun();
 extern MenuItem patchSwapMenu[];
 extern bool patchSwapFun();
 
@@ -310,8 +308,8 @@ extern MenuList listVolAdjustMenu;
 extern MenuList listFxSourceMenu;
 extern MenuList listPatchSelectMenu;
 extern MenuList listPatchResetMenu;
-//extern MenuList listPatchCopyMenu;
 extern MenuList listPatchPasteMenu;
+extern MenuList listNamingMenu;
 extern MenuList listPatchSwapMenu;
 extern MenuList listPatchFxMenu;
 extern MenuList listPatchOsc1Menu;
@@ -478,6 +476,7 @@ extern bool gotoPatchSelectMenu();
 extern bool gotoPatchResetMenu();
 //extern bool gotoPatchCopyMenu();
 extern bool gotoPatchPasteMenu();
+extern bool gotoNamingMenu();
 extern bool gotoPatchSwapMenu();
 extern bool gotoPatchFxMenu();
 extern bool gotoPatchOsc1Menu();

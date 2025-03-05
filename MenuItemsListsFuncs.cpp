@@ -5,6 +5,8 @@
 #include "globals.h"
 #include "MenuItemsListsFuncs.h"
 #include "patches.h"
+#include "helpers.h"
+#include "helpers.hpp"
 
 extern AudioEffectEnvelope      env_squelch;
 
@@ -38,6 +40,79 @@ MenuItem PROGMEM topMenu[16] = {
   , { "P Common" , gotoPatchCommonMenu   }
   , { "System  " , gotoSystemAdjMenu   }
 };
+
+MenuItem PROGMEM namingMenu[1] = {
+     {"Edit Name:", namingFun}
+};
+bool namingFun(){
+    //TODO: allow name_length to grow up to 20
+    char str_withcursorbuf[32] = {0};
+    int name_length = strlen(myMenu.str_namingbuf)-1; 
+    if(myMenu.updateLeafValue){
+        switch (myMenu.namingState)
+         {
+             case ALPHANUM:
+                 // TODO: code to character of string at cursor
+                myMenu.alphaNumIdx += myMenu.updateLeafValue;
+                myMenu.alphaNumIdx = wrap( (int)myMenu.alphaNumIdx, 0, (int)alphaNumString.length()-1);
+                myMenu.str_namingbuf[myMenu.namingPos] = alphaNumString.charAt(myMenu.alphaNumIdx);
+                sprintf(myMenu.str_oledbuf, "LngPrs2wr\n%s",myMenu.str_namingbuf);
+                return true;
+             case POSITION:
+                myMenu.namingPos += myMenu.updateLeafValue; 
+                myMenu.namingPos = wrap(myMenu.namingPos, 0, name_length );  // 20 characters max
+                memcpy((byte*)str_withcursorbuf, (byte*)myMenu.str_namingbuf, sizeof(myMenu.str_namingbuf));
+                str_withcursorbuf[myMenu.namingPos] = ']';
+                sprintf(myMenu.str_oledbuf, "LngPrs2wr\n%s",str_withcursorbuf);
+                return true;
+             default:
+                return true;
+        }
+    }
+    if (myMenu.knobButtonSelType == LONG_PRESS){
+        Serial8.println(F("writing patch with new Name"));
+        trim_ws(myMenu.str_namingbuf);
+        copyCurrentPatchToCopyBuffer();
+        memcpy((byte*)copy_buffer_patch.patch_string, (byte*)myMenu.str_namingbuf,
+              sizeof(myMenu.str_namingbuf));
+        //saveCoppiedPatchSD does 
+        // copyPatchBuffToPatchBuff(&current_patch, &copy_buffer_patch);
+        saveCoppiedPatchSD(paste_patchNumber); 
+        loadPatchSD(paste_patchNumber);
+        return goUpOneMenu();
+    }
+    switch (myMenu.namingState)
+    {
+        case ALPHANUM:
+            if (myMenu.knobButtonSelType == SINGLE_CLICK){
+                myMenu.namingPos++ ; 
+                myMenu.namingPos = wrap(myMenu.namingPos, 0, name_length);  // 20 characters max
+                sprintf(myMenu.str_oledbuf, "LngPrs2wr\n%s",myMenu.str_namingbuf);
+                return true;
+            }
+            if (myMenu.knobButtonSelType == DOUBLE_CLICK){
+                myMenu.namingState = POSITION;
+                //myMenu.namingPos-- ; 
+                //myMenu.namingPos = wrap(myMenu.namingPos, 0, name_length);  // 20 characters max
+                memcpy((byte*)str_withcursorbuf, (byte*)myMenu.str_namingbuf, sizeof(myMenu.str_namingbuf));
+                str_withcursorbuf[myMenu.namingPos] = ']';
+                sprintf(myMenu.str_oledbuf, "LngPrs2wr\n%s",str_withcursorbuf);
+            }
+            return true; 
+        case POSITION:
+            if (myMenu.knobButtonSelType == SINGLE_CLICK){
+                myMenu.namingState = ALPHANUM;
+                sprintf(myMenu.str_oledbuf, "LngPrs2wr\n%s",myMenu.str_namingbuf);
+                return true;
+            }
+            if (myMenu.knobButtonSelType == DOUBLE_CLICK){
+               sprintf(myMenu.str_namingbuf, "Noname              ");
+            }
+            return goUpOneMenu(); 
+        default:
+            return true;
+    }
+}
 
 MenuItem PROGMEM escapeMenu[1] = { 
     { "Escaping..", goUpOneMenu    }
@@ -127,21 +202,7 @@ MenuItem PROGMEM patchResetMenu[2] = {
    ,{ "Reset   " , patchResetFun   }
 };
 bool patchResetFun(){ return goUpOneMenu(); }
-/*
-MenuItem PROGMEM patchCopyMenu[3] = {
-    { "Back    " , goUpOneMenu   }
-   ,{ "Copy    " , patchCopyFun   }
-   ,{ "CpyEdits" , patchCopyEditsFun   }
-};
-bool patchCopyFun(){
-    copyLoadedPatchToCopyBuffer(current_patchNumber);
-    return goUpOneMenu(); 
-}
-bool patchCopyEditsFun(){
-    copyCurrentPatchToCopyBuffer();
-    return goUpOneMenu(); 
-}
-*/
+
 MenuItem PROGMEM patchPasteMenu[1] = {
    { "Paste   " , patchPasteFun   }
 };
@@ -170,14 +231,20 @@ bool patchPasteFun(){
     }
     return true;
   }
-  display.clearDisplay(); // erase display
-  Serial8.println(F("patchPasteFun: goto TopMenu"));
   // NUMBER_OF_PATCHES is Exit w/o writing
-  if(paste_patchNumber == NUMBER_OF_PATCHES){ return goUpOneMenu(); } 
+  if(paste_patchNumber == NUMBER_OF_PATCHES){
+      display.clearDisplay(); // erase display
+      Serial8.println(F("patchPasteFun: goUpOneMenu"));
+      return goUpOneMenu(); 
+  } 
+  copyCurrentPatchToCopyBuffer();
+  return gotoNamingMenu();
+/*//---
   copyCurrentPatchToCopyBuffer();
   saveCoppiedPatchSD(paste_patchNumber); //does copyPatchBuffToPatchBuff(&current_patch, &copy_buffer_patch) inside;
   loadPatchSD(paste_patchNumber);
   return goUpOneMenu();
+//--- */
 }
 MenuItem PROGMEM patchSwapMenu[1] = {
     { "Swap w/\n " , patchSwapFun   }
@@ -2599,8 +2666,8 @@ MenuList listVolAdjustMenu(volAdjustMenu, 1);
 MenuList listFxSourceMenu(fxSourceMenu, 1);
 MenuList listPatchSelectMenu(patchSelectMenu, 1);
 MenuList listPatchResetMenu(patchResetMenu, 2);
-//MenuList listPatchCopyMenu(patchCopyMenu, 3);
 MenuList listPatchPasteMenu(patchPasteMenu, 1);
+MenuList listNamingMenu(namingMenu, 1);
 MenuList listPatchSwapMenu(patchSwapMenu, 1);
 MenuList listPatchFxMenu(patchFxMenu, 23);
 MenuList listPatchOsc1Menu(patchOsc1Menu, 18);
@@ -2803,6 +2870,20 @@ bool gotoPatchCopyMenu(){
   return true;
 }
 */
+bool gotoNamingMenu(){
+  display.clearDisplay(); // erase display
+  //myMenu.previousMenuStack.push(myMenu.currentMenu);
+  //myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  myMenu.setCurrentMenu(&listNamingMenu);
+  myMenu.knobAcceleration = 1;
+  memcpy((byte*)myMenu.str_namingbuf,(byte*)copy_buffer_patch.patch_string, 
+          sizeof(myMenu.str_namingbuf));
+  sprintf(myMenu.str_oledbuf, "LngPrs2wr\n%s",myMenu.str_namingbuf);
+  myMenu.namingPos = 0; 
+  myMenu.alphaNumIdx = alphaNumString.indexOf(myMenu.str_namingbuf[0]); 
+  myMenu.namingState = ALPHANUM;
+  return true;
+}
 bool gotoPatchPasteMenu(){
   display.clearDisplay(); // erase display
   myMenu.previousMenuStack.push(myMenu.currentMenu);

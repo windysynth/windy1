@@ -6,7 +6,7 @@
 #include "MenuItemsListsFuncs.h"
 #include "patches.h"
 
-//float longKnobButtonPressTime = 500;  // milliiseconds
+
 int32_t newKnob = 0;
 
 // globls for midi
@@ -22,14 +22,15 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.1.09"};
+String verNum_str = {"0.1.12"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
 String splashScreen_str = {splashTxt + verNum_str};
 char str_buf[64] = {0};
 char str_buf1[64] = {0};
-char str_oledbuf[64] = {0};
+//char str_oledbuf[64] = {0}; // see OledMenu.h
+
 bool PRINT_VALUES_FLAG = false;
 
 // globals for loop control
@@ -268,8 +269,10 @@ fx_t copy_buffer_fx = {
  {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01} // uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH] //10
 };  // 51 bytes long
 
+const String alphaNumString(F("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()_+-`'|/ "));
 
-const uint32_t eepromUpdateInterval = 120000;  // milliseconds (120,000 = 2min)
+
+const uint32_t eepromUpdateInterval = 60000;  // milliseconds (120,000 = 2min)
 uint32_t eepromPreviousMillis = 0;
 uint32_t eepromCurrentMillis = 0;
 bool programChangeFlag = false; // new programChange is happening

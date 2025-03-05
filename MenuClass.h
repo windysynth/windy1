@@ -10,6 +10,8 @@
 #define USING_PROGMEM
 
 #include "Arduino.h"
+#include "helpers.h"
+
 
 typedef boolean (*Item_Function)();
 
@@ -51,7 +53,7 @@ public:
  virtual void displayMenu() = 0;
  virtual boolean checkForCancel();
  virtual int updateSelection() = 0;
- virtual boolean selectionMade() = 0;
+ virtual selection_t selectionMade() = 0;
 
 };
 
