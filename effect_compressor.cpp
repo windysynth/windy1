@@ -22,10 +22,10 @@ void AudioEffectCompressor::sideChain(const int16_t *in, int16_t *out) {
 	// This avoids the need to have a log_to_lin LUT from log to lenear conversion that extends positvely above 0dB.
 	// Make-up gain is a user user defined variable and the conversion from its log to linear value can be done in none real-time.
 	const int16_t *end = in + AUDIO_BLOCK_SAMPLES;
-	const int16_t *dwnSamBlkStart;
-	int16_t *outBlkStart = out;
 	int32_t input, peakDetOutput, peakDetFeedback, release_cur, release_to_input, intermediate;
-	int16_t inLevel;
+	//const int16_t *dwnSamBlkStart;
+	//int16_t *outBlkStart = out;
+	//int16_t inLevel;
 	
     	
     	uint32_t blockCnt = 1;

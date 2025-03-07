@@ -60,6 +60,16 @@ inline std::string trim_copy(std::string s) {
     return s;
 }
 
-
+// extend char string till new_length
+void extend_with_spaces(char str[], int new_length){
+    if (str == nullptr || str[0] == '\0') { return; }
+    int null_pos = strlen(str);
+    while (null_pos < new_length ){
+        str[null_pos] = ' ';
+        null_pos++;
+    }
+    str[null_pos] = '\0'; 
+    return; 
+}
 
 

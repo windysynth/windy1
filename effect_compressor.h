@@ -135,7 +135,7 @@ private:
 	void sideChain(const int16_t *in, int16_t *out);
 
         audio_block_t *inputQueueArray[3];
-        uint8_t sideChainSel, downSample;
+        uint8_t sideChainSel = 0, downSample = 1;
         uint8_t gainMakeup_exp;
         int32_t release_prev, peakDet_prev;
         int32_t alphaAttack, alphaAttackComp;
@@ -143,12 +143,12 @@ private:
         int16_t atten = 0x7FFF;
         int16_t gainMakeup_frac;
         int32_t makeupGain;
-        float knee, th_plus_kn_div2, knee_x_2, knee_div_2;
-        float ratio, ratio_resip;
-        float thresh;
-        float release_f;
-        float attack_f;
-        float makeupGain_f;
+        float knee = 0.0f, th_plus_kn_div2, knee_x_2, knee_div_2;
+        float ratio = 1.0f, ratio_resip;
+        float thresh = 0.0f;
+        float release_f = 0.1f;
+        float attack_f = 0.1f;
+        float makeupGain_f = 0.0f;
         bool active = false;
         bool enabled = false;
              

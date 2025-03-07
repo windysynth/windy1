@@ -537,8 +537,10 @@ void setup() {
     uint32_t boatLoaderCatchTime = millis();
     do{
         delay(200);
-        bool topButtonState = topButton.update();
-        bool botButtonState = botButton.update();
+        //bool topButtonState = topButton.update();
+        //bool botButtonState = botButton.update();
+        topButton.update();
+        botButton.update();
     }while( !topButton.read() && !botButton.read() ); // false is pressed because of PULLUP
     if (millis() - boatLoaderCatchTime >= 5000){
         asm("bkpt #251"); // run bootloader
@@ -1507,7 +1509,7 @@ void loop()
             sprintf(str_buf1, "Writing mix_linein (%03d) to EEPROM", eeprom_mix_linein );     
             Serial8.println(str_buf1);
             EEPROM_update(MIX_LINEIN_EEPROM_ADDR, eeprom_mix_linein);  
-            eeprom_fxSourcePatch = fxSourcePatch;
+            eeprom_fxSourcePatch = fxSourcePatch;  // one if Patch, zero if global
             sprintf(str_buf1, "Writing fxSourcePatch (%03d) to EEPROM", eeprom_fxSourcePatch );     
             Serial8.println(str_buf1);
             EEPROM_update(FXSOURCE_EEPROM_ADDR, eeprom_fxSourcePatch);  

@@ -1075,10 +1075,10 @@ uint8_t getFxValue(patch_t *patch, uint32_t effectGroup, uint32_t effectIdx){
             case EFFECTGROUPCOMMON1:
                 return patch->nrpn_msb_common1[effectIdx];
             default:
-                sprintf(str_buf1, "invalid Patch effectGroup: %d", effectGroup);  	    
+                sprintf(str_buf1, "invalid Patch effectGroup: %lu", effectGroup);  	    
         }
     } else {
-        sprintf(str_buf1, "fxSourcPatch: %d", fxSourcePatch);  	    
+        sprintf(str_buf1, "fxSourcPatch: %ld", fxSourcePatch);  	    
         Serial8.println(str_buf1);
         switch(effectGroup){
             case EFFECTGROUPCHORUS:
@@ -1090,7 +1090,7 @@ uint8_t getFxValue(patch_t *patch, uint32_t effectGroup, uint32_t effectIdx){
             case EFFECTGROUPCOMMON1:
                 return global_buffer_fx.nrpn_msb_common1[effectIdx];
             default:
-                sprintf(str_buf1, "invalid Global effectGroup: %d", effectGroup);  	    
+                sprintf(str_buf1, "invalid Global effectGroup: %lu", effectGroup);  	    
                 return 0;
         }
     }

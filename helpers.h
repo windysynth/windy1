@@ -29,5 +29,7 @@ std::string rtrim_copy(std::string s);
 // trim from both ends (copying)
 std::string trim_copy(std::string s);
 
+void extend_with_spaces(char str[], int new_end);
+
 template <typename T> T wrap(T value, T min, T max) ;
 

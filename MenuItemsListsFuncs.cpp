@@ -47,7 +47,8 @@ MenuItem PROGMEM namingMenu[1] = {
 bool namingFun(){
     //TODO: allow name_length to grow up to 20
     char str_withcursorbuf[32] = {0};
-    int name_length = strlen(myMenu.str_namingbuf)-1; 
+    //int name_length = strlen(myMenu.str_namingbuf)-1; 
+    int name_length = 20; 
     if(myMenu.updateLeafValue){
         switch (myMenu.namingState)
          {
@@ -60,7 +61,7 @@ bool namingFun(){
                 return true;
              case POSITION:
                 myMenu.namingPos += myMenu.updateLeafValue; 
-                myMenu.namingPos = wrap(myMenu.namingPos, 0, name_length );  // 20 characters max
+                myMenu.namingPos = wrap(myMenu.namingPos, 0, name_length-1 );  // 20 characters max
                 memcpy((byte*)str_withcursorbuf, (byte*)myMenu.str_namingbuf, sizeof(myMenu.str_namingbuf));
                 str_withcursorbuf[myMenu.namingPos] = ']';
                 sprintf(myMenu.str_oledbuf, "LngPrs2wr\n%s",str_withcursorbuf);
@@ -85,15 +86,17 @@ bool namingFun(){
     {
         case ALPHANUM:
             if (myMenu.knobButtonSelType == SINGLE_CLICK){
+                extend_with_spaces(myMenu.str_namingbuf, 20); // 20 char max: TODO based on font size
                 myMenu.namingPos++ ; 
-                myMenu.namingPos = wrap(myMenu.namingPos, 0, name_length);  // 20 characters max
+                myMenu.namingPos = wrap(myMenu.namingPos, 0, name_length-1);  // 20 characters max
                 sprintf(myMenu.str_oledbuf, "LngPrs2wr\n%s",myMenu.str_namingbuf);
                 return true;
             }
             if (myMenu.knobButtonSelType == DOUBLE_CLICK){
+                extend_with_spaces(myMenu.str_namingbuf, 20);
                 myMenu.namingState = POSITION;
                 //myMenu.namingPos-- ; 
-                //myMenu.namingPos = wrap(myMenu.namingPos, 0, name_length);  // 20 characters max
+                //myMenu.namingPos = wrap(myMenu.namingPos, 0, name_length-1);  // 20 characters max
                 memcpy((byte*)str_withcursorbuf, (byte*)myMenu.str_namingbuf, sizeof(myMenu.str_namingbuf));
                 str_withcursorbuf[myMenu.namingPos] = ']';
                 sprintf(myMenu.str_oledbuf, "LngPrs2wr\n%s",str_withcursorbuf);
