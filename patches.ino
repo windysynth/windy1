@@ -958,7 +958,7 @@ void loadGlobalFxSD(){
       dataFile.close();
       globalFxLoaded = true;
     } else {
-      sprintf(str_buf1,"Fx: %03d does not exist. create one from copy_buffer_patch", 0);
+      sprintf(str_buf1,"Fx: %03d does not exist. create one from global_buffer_fx", 0);
       Serial8.println(str_buf1);
       dataFile = SD.open(str_buf_sd, FILE_WRITE);
       if(!dataFile) {

@@ -53,12 +53,13 @@
     -->
 <div class="controls">
         <group-column margin="0.3" border colour="#333333">
-            <group-column margin="0.3" border colour="#181818">
+            <group-row margin="0.3" border colour="#303080">
+            <group-column margin="0.3" border colour="#308030">
                 <group-row>
                     <p>   Oscillator 1 </p>
                 </group-row>			
                 <group-row>
-                    <group-column margin="0.3" border colour="#333333">
+                    <group-column margin="0.3" border colour="#333345">
                         <group-row>
                             <midi-encoder label="Oct\n%v" chan="1" nrpn="0,64" min="61" max="67" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
                             <midi-encoder label="Semi\n%v" chan="1" nrpn="1,64" min="52" max="76" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
@@ -68,14 +69,14 @@
                             <midi-encoder label="Beat\n%v" chan="1" nrpn="3,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
                         </group-row>			
                     </group-column>			
-                    <group-column margin="0.3" border colour="#333333">
+                    <group-column margin="0.3" border colour="#334533">
                         <group-row>
                             <midi-slider label="Saw\n%v" chan="1" nrpn="5,64" colour="B3E5FC" label-scale="1.5"></midi-slider>
                             <midi-slider label="Tri\n%v" chan="1" nrpn="6,64" colour="B3E5FC" label-scale="1.5"></midi-slider>
                             <midi-slider label="Pulse\n%v" chan="1" nrpn="7,64" colour="B3E5FC" label-scale="1.5"></midi-slider>
                         </group-row>			
                     </group-column>			
-                    <group-column margin="0.3" border colour="#333333">
+                    <group-column margin="0.3" border colour="#453333">
                         <group-row>
                             <midi-button colour="#101010" label="Pulse\nWidth" label-scale="0.75"></midi-button>
                             <midi-encoder label="PWM\nFreq\n%v" chan="1" nrpn="9,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
@@ -87,7 +88,7 @@
                             <midi-encoder label="Sweep\nDepth\n%v" chan="1" nrpn="11,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
                         </group-row>			
                     </group-column>			
-                    <group-column margin="0.3" border colour="#555555">
+                    <group-column margin="0.3" border colour="#335555">
                         <group-row>
                             <midi-encoder label="Breath\nAttain\n%v" chan="1" nrpn="14,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
                             <midi-encoder label="Breath\nThresh\n%v" chan="1" nrpn="16,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
@@ -97,7 +98,7 @@
                             <midi-encoder label="Breath\nCurve\n%v" chan="1" nrpn="15,64" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
                         </group-row>			
                     </group-column>			
-                    <group-column margin="0.3" border colour="#555555">
+                    <group-column margin="0.3" border colour="#553355">
                         <group-row>
                             <midi-slider vertical label="Level\n%v" chan="1" nrpn="17,64" colour="B3E5FC" label-scale="1.0"></midi-slider>
                         </group-row>			
@@ -117,11 +118,13 @@
                     <group-column margin="0.3" border colour="#101010">
                     </group-column>			
                 </group-row>			
+            </group-column>			
+            <group-column margin="0.3" border colour="#308030">
                 <group-row>
                     <p>   Oscillator 2 </p>
                 </group-row>			
                 <group-row>
-                    <group-column margin="0.3" border colour="#333333">
+                    <group-column margin="0.3" border colour="#333355">
                         <group-row>
                             <midi-encoder label="Oct\n%v" chan="1" nrpn="0,65" min="61" max="67" value="64" value-offset="-64" colour="#B3E5FC" ></midi-encoder>
                             <midi-encoder label="Semi\n%v" chan="1" nrpn="1,65" min="52" max="76" value="64" colour="#B3E5FC" ></midi-encoder>
@@ -131,14 +134,14 @@
                             <midi-encoder label="Beat\n%v" chan="1" nrpn="3,65" colour="#B3E5FC" value="64" label-scale="0.8"></midi-encoder>
                         </group-row>			
                     </group-column>			
-                    <group-column margin="0.3" border colour="#333333">
+                    <group-column margin="0.3" border colour="#335533">
                         <group-row grow="2">
                             <midi-slider label="Saw\n%v" chan="1" nrpn="5,65" colour="F08080" label-scale="1.5"></midi-slider>
                             <midi-slider label="Tri\n%v" chan="1" nrpn="6,65" colour="80F080" label-scale="1.5"></midi-slider>
                             <midi-slider label="Pulse\n%v" chan="1" nrpn="7,65" colour="8080F0" label-scale="1.5"></midi-slider>
                         </group-row>			
                     </group-column>			
-                    <group-column margin="0.3" border colour="#333333">
+                    <group-column margin="0.3" border colour="#553333">
                         <group-row>
                             <midi-button colour="#101010" label="Pulse\nWidth" label-scale="0.75"></midi-button>
                             <midi-encoder label="PWM\nFreq\n%v" chan="1" nrpn="9,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
@@ -150,7 +153,7 @@
                             <midi-encoder label="Sweep\nDepth\n%v" chan="1" nrpn="11,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
                         </group-row>			
                     </group-column>			
-                    <group-column margin="0.3" border colour="#555555">
+                    <group-column margin="0.3" border colour="#335555">
                         <group-row>
                             <midi-encoder label="Breath\nAttain\n%v" chan="1" nrpn="14,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
                             <midi-encoder label="Breath\nThresh\n%v" chan="1" nrpn="16,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
@@ -160,7 +163,7 @@
                             <midi-encoder label="Breath\nCurve\n%v" chan="1" nrpn="15,65" colour="#B3E5FC" label-scale="0.8"></midi-encoder>
                         </group-row>			
                     </group-column>			
-                    <group-column margin="0.3" border colour="#555555">
+                    <group-column margin="0.3" border colour="#553355">
                         <group-row>
                             <midi-slider vertical label="Level\n%v" chan="1" nrpn="17,65" colour="B3E5FC" label-scale="1.0"></midi-slider>
                         </group-row>			
@@ -178,8 +181,12 @@
                     <group-column margin="0.3" border colour="#101010">
                     </group-column>			
                     <!-- <midi-button nrpn="6,81" toggle value="1" value-off="0" colour="#B3E5FC" label="XFade" label-scale="0.5" ></midi-button>  -->
-                    <midi-slider vertical nrpn="6,81" min="0" max="1" colour="#B3E5FC" label="XFade" label-scale="0.5" ></midi-button>
+                        <midi-slider vertical nrpn="6,81" min="0" max="1" colour="#B3E5FC" label="XFade" label-scale="0.5" ></midi-slider>
                 </group-row>			
+            </group-column>			
+            </group-row>
+            <group-row margin="0.3" border colour="#808030">
+            <group-column margin="0.3" border colour="#803030">
                 <group-row>
                     <p>   Oscillator Filter 1 </p>
                 </group-row>			
@@ -209,6 +216,8 @@
                         </group-row>			
                     </group-column>			
                 </group-row>			
+            </group-column>
+            <group-column margin="0.3" border colour="#803030">
                 <group-row>
                     <p>   Oscillator Filter 2 </p>
                 </group-row>			
@@ -236,6 +245,7 @@
                     </group-column>			
                 </group-row>			
             </group-column>			
+            </group-row>
         </group-column>			
 </div>
 <div class="term-wrapper">

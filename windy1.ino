@@ -214,6 +214,7 @@ AudioConvert_I16toF32           Int2FloatR; //xy=1769.949951171875,1688.65002441
 AudioConvert_I16toF32           Int2FloatL;           //xy=1775.8499755859375,1622.8499755859375
 AudioFilterStateVariable filter4;        //xy=1799.333251953125,1128
 AudioMixer4              mix_oscLevels;  //xy=1861.333251953125,234
+AudioMixer4              mix_oscPreComp;  
 AudioEffectCompressor    compress_oscLevels;
 AudioSynthWaveformDc     dc_compress;
 AudioEffectMultiply      mult_sqLimter; //xy=1523.1333618164062,471.8833312988281
@@ -393,6 +394,8 @@ AudioConnection          patchCord125(mix_fcModFilter4_sweep, 0, filter4, 1);
 AudioConnection          patchCord126(mix_chorus_dry, Int2FloatR);
 AudioConnection          patchCord127(mix_chorus_dry, Int2FloatL);
 AudioConnection          patchCord128a(mult_thCurveOsc1, 0, filter_osc1, 0);
+AudioConnection          patchCord124c(mult_thCurveOsc1, 0 ,mix_oscPreComp, 0);
+AudioConnection          patchCord124d(mult_thCurveOsc2, 0 ,mix_oscPreComp, 1);
 AudioConnection          patchCord128b(filter_osc1, 2, filter_osc1b, 0);
 AudioConnection          patchCord128(filter_osc1b, 2, mix_oscLevels, 0);
 AudioConnection          patchCord129(mix_ntcFilter1, 0, filter2, 0);
@@ -414,8 +417,8 @@ AudioConnection          patchCord138(mix_oscLevels, 0, mult_sqLimter, 1);
 AudioConnection          patchCord171(mix_oscLevels, 0, mix_limiter, 0);
 AudioConnection          patchCord172(mix_oscLevels, 0, mix_limiter, 1);
 AudioConnection          patchCord173(mix_oscLevels, 0, mult_cubicLimter, 0);
-AudioConnection          patchCord173a(mix_oscLevels, 0, compress_oscLevels, 1);
-AudioConnection          patchCord173b(mix_oscLevels, 0, compress_oscLevels, 2);
+AudioConnection          patchCord173a(mix_oscPreComp, 0, compress_oscLevels, 1);
+AudioConnection          patchCord173b(mix_oscPreComp, 0, compress_oscLevels, 2);
 AudioConnection          patchCord173c(mix_oscLevels, 0, compress_oscLevels, 0);
 //AudioConnection          patchCord173c(dc_compress, 0, compress_oscLevels, 0);
 AudioConnection          patchCord173d(compress_oscLevels, 0, mix_limiter,3);
@@ -729,6 +732,8 @@ void setup() {
     //cacluateHeadRoom();
     mix_oscLevels.gain(0, LevelOsc1*LevelOscN_HeadRoom);
     mix_oscLevels.gain(1, LevelOsc2*LevelOscN_HeadRoom);
+    mix_oscPreComp.gain(0, LevelOsc1*LevelOscN_HeadRoom);
+    mix_oscPreComp.gain(1, LevelOsc2*LevelOscN_HeadRoom);
   
     /*
         It offers the following controls:
@@ -743,10 +748,10 @@ void setup() {
     compress_oscLevels.enable();
     compress_oscLevels.setAttack( 0.10f);  
     compress_oscLevels.setRelease( 20.0f);  
-    compress_oscLevels.setRatio( 6.0f);  
-    compress_oscLevels.setThreshold( -10.0f);  
-    compress_oscLevels.setKnee( 10.0f);  
-    compress_oscLevels.setMakeupGain(4.0f);  
+    compress_oscLevels.setRatio( 12.0f);  
+    compress_oscLevels.setThreshold( -16.0f);  
+    compress_oscLevels.setKnee( 8.0f);  
+    compress_oscLevels.setMakeupGain(14.0f);  
     compress_oscLevels.setSideChain(0);
     dc_compress.amplitude(0.5f);
     //compress_oscLevels.disable();
@@ -1201,6 +1206,8 @@ void loop()
         //cacluateHeadRoom();
         mix_oscLevels.gain(0, LevelOsc1*LevelOscN_HeadRoom);
         mix_oscLevels.gain(1, LevelOsc2*LevelOscN_HeadRoom);
+        mix_oscPreComp.gain(0, LevelOsc1*LevelOscN_HeadRoom);
+        mix_oscPreComp.gain(1, LevelOsc2*LevelOscN_HeadRoom);
         sine_lfoOsc1.amplitude(PwmDepthOsc1);
         sine_lfoOsc1.frequency(PwmFreqOsc1);
         sine_lfoOsc2.amplitude(PwmDepthOsc2);

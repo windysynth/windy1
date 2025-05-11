@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.1.13"};
+String verNum_str = {"0.1.14"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -258,16 +258,16 @@ fx_t global_buffer_fx = {
  {0x20, 0x3b, 0x6c, 0x48, 0x46, 0x5c, 0x60, 0x0f, 0x7f},  // uint8_t nrpn_msb_chorus[NRPN_MSB_CHORUS_LENGTH];  // 9 
  {0x24, 0x2c, 0x20, 0x44, 0x00}, // uint8_t nrpn_msb_delay[NRPN_MSB_DELAY_LENGTH];    // 5 
  {0x7f, 0x6c, 0x55, 0x16, 0x3a}, // uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH];   // 5
- {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01} // uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH] //10
-};  // 51 bytes long
+ {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01} // uint8_t nrpn_msb_common1[NRPN_MSB_COMMON1_LENGTH] //10
+};  // 61 bytes long
 
 fx_t copy_buffer_fx = {
  "Copied Fx",   // char fx_string[32];
  {0x20, 0x3b, 0x6c, 0x48, 0x46, 0x5c, 0x60, 0x0f, 0x7f},  // uint8_t nrpn_msb_chorus[NRPN_MSB_CHORUS_LENGTH];  // 9 
  {0x24, 0x2c, 0x20, 0x44, 0x00}, // uint8_t nrpn_msb_delay[NRPN_MSB_DELAY_LENGTH];    // 5 
  {0x7f, 0x6c, 0x55, 0x16, 0x3a}, // uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH];   // 5
- {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01} // uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH] //10
-};  // 51 bytes long
+ {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01} // uint8_t nrpn_msb_common1[NRPN_MSB_COMMON1_LENGTH] //10
+};  // 61 bytes long
 
 const String alphaNumString(F("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()_+-`'|/ "));
 

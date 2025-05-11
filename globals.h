@@ -20,7 +20,7 @@
 #define CC_NRPN_LSB                       98
 #define CC_NRPN_MSB                       99
 
-extern Adafruit_SSD1306 display;
+extern Adafruit_SSD1306 display;  // MenuItemsListFuncs.cpp
 
 extern int currentPatch;
 
@@ -226,7 +226,7 @@ extern float mix_lineInLR_gain_1;
 extern patch_t current_patch;  // 154 bytes long
 extern patch_t copy_buffer_patch;  // 154 bytes long
 extern patch_t swap_buffer_patch;  // 154 bytes long
-extern fx_t global_buffer_fx;  // 51 bytes long
+extern fx_t global_buffer_fx;  // 61 bytes long
 extern fx_t copy_buffer_fx; 
 
 extern const uint32_t eepromUpdateInterval;  // milliseconds
