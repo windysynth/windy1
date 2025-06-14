@@ -152,7 +152,8 @@ void patchToVibratoAmp(patch_t *patch) {VibratoAmp = (float)patch->nrpn_msb_comm
 //void patchToAmpLevel(patch_t *patch) {AmpLevel = (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127;} //88,1,0,127,
 //void patchToAmpLevel(patch_t *patch) {AmpLevel = log_pot_curve( (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127,logPotYmidLevelOscN);} //88,1,0,127,
 void patchToAmpLevel(patch_t *patch) {
-    AmpLevel = amp_curve( (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127 );
+    //AmpLevel = amp_curve( (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127 );
+    AmpLevel =  (float)patch->nrpn_msb_common2[CCAMPLEVEL]*DIV127 ;
     patchToNoiseLevel(patch);
 } //88,1,0,127,
 void patchToOctButtonLevel(patch_t *patch) {OctButtonLevel = (float)patch->nrpn_msb_common2[CCOCTBUTTONLEVEL]*DIV127;} //88,2,0,127,
@@ -218,6 +219,18 @@ void patchToEffectsReverbTime(patch_t *patch) {
 void patchToEffectsReverbDamp(patch_t *patch) {
         EffectsReverbDamp = ((float)getFxValue(patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDAMP)-54.0f)/20.0f;  	//114,4,54,74,//-10 to +10
 }
+
+/*
+    compress_oscLevels.setAttack( 0.10f);  
+    compress_oscLevels.setRelease( 20.0f);  
+    compress_oscLevels.setRatio( 12.0f);  
+    compress_oscLevels.setThreshold( -16.0f);  
+    compress_oscLevels.setKnee( 8.0f);  
+    compress_oscLevels.setMakeupGain(14.0f);  
+    compress_oscLevels.setSideChain(0);
+    //TODO: functions to set compressor levels from NPRN messages 
+    ExtCompAttack
+*/
 
 void patchToSynthVariables(patch_t *patch) {
     patchToOctOsc1(patch ); //64,0,62,66,

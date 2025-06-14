@@ -442,8 +442,8 @@ AudioConnection_F32          patchCord170(mix_pongL_F32, 0, Float2IntL, 0);
 AudioConnection          patchCord145(mix_ntcFilter2, fir_formant);
 //AudioConnection          patchCord146(fir_formant, 0, mix_Amp, 0);
 AudioConnection          patchCord146(fir_formant, 0, filter5, 0);
-//AudioConnection          patchCord150(filter5, 2, mix_Amp, 0);
-AudioConnection          patchCord150(fir_formant, 0, mix_Amp, 0);
+AudioConnection          patchCord150(filter5, 2, mix_Amp, 0);
+//AudioConnection          patchCord150(fir_formant, 0, mix_Amp, 0);
 AudioConnection          patchCord147(mix_Amp, 0, env_squelch, 0);
 //AudioConnection          patchCord148(Float2IntR, 0, filterPreMixLPR, 0);
 //AudioConnection          patchCord149(Float2IntL, 0, filterPreMixLPL, 0);
@@ -649,10 +649,11 @@ void setup() {
     filter4.frequency(FreqNoiseFilter4); // Freq slider
     filter4.resonance(QFactorNoiseFilter4);   // Q factor
     filter4.octaveControl(octaveControlFilter4); // sets range of control from mix_fcModFilter4 
-    //filter5.frequency(noteFreqFilter5); // Freq slider
+    filter5.frequency(noteFreqFilter5); // Freq slider
     //filter5.frequency(1.0f); // Freq slider
-    //filter5.resonance(QFactorFilter5);   // Q factor
+    filter5.resonance(QFactorFilter5);   // Q factor
     //filter5.octaveControl(octaveControlFilter5); // sets range of control from mix_fcModFilter4 
+    filter5.octaveControl(0.0f); // sets range of control from mix_fcModFilter4 
     filter_osc1.frequency(noteFreqFilterOsc1); // Freq of osc1 
     filter_osc1.resonance(0.7f);   // Q factor
     filter_osc1.octaveControl(1.0f); // not using this control 
@@ -748,10 +749,10 @@ void setup() {
     compress_oscLevels.enable();
     compress_oscLevels.setAttack( 0.10f);  
     compress_oscLevels.setRelease( 20.0f);  
-    compress_oscLevels.setRatio( 12.0f);  
+    compress_oscLevels.setRatio( 16.0f/(-16.0f+9.0f));  
     compress_oscLevels.setThreshold( -16.0f);  
-    compress_oscLevels.setKnee( 8.0f);  
-    compress_oscLevels.setMakeupGain(14.0f);  
+    compress_oscLevels.setKnee( 16.0f);  
+    compress_oscLevels.setMakeupGain(9.0f);  
     compress_oscLevels.setSideChain(0);
     dc_compress.amplitude(0.5f);
     //compress_oscLevels.disable();
@@ -1232,11 +1233,11 @@ void loop()
         
         sine_lfoFilter3.frequency(LfoFreqNoiseFilter3);    
         wfmod_sawOsc1.amplitude(SawOsc1);
-        wfmod_triOsc1.amplitude(TriOsc1);
+        wfmod_triOsc1.amplitude(TriOsc1 + std::max(0.0f,TriOsc1-SawOsc1)); // x2.0 hack to make Tri louder
         wfmod_pulseOsc1.amplitude(PulseOsc1);
         wfmod_pulseOsc1.pulsewidth_offset(PwOsc1); // ws added this to synth_waveform.cpp .h
         wfmod_sawOsc2.amplitude(SawOsc2);
-        wfmod_triOsc2.amplitude(TriOsc2);
+        wfmod_triOsc2.amplitude(TriOsc2 + std::max(0.0f,TriOsc2-SawOsc2)); // x2.0 hack to make Tri louder
         wfmod_pulseOsc2.amplitude(PulseOsc2);
         wfmod_pulseOsc2.pulsewidth_offset(PwOsc2); // ws added this to synth_waveform.cpp .h
         pink_Noise.amplitude(NoiseLevel);  //
@@ -1270,6 +1271,31 @@ void loop()
         //filterPostDelayL.frequency(EffectsDelayDamp);
         //filterPostDelayR.frequency(EffectsDelayDamp);
         mix_Amp_gain_0 =  AmpLevel*Amp_HeadRoom;
+        float compAmp;
+        float makeUp;
+        float rat;
+        float thresh;
+
+        compAmp = AmpLevel > 0.1f ? std::min(20.0f, abs(log10f(AmpLevel))*20.0f*2.0f) : 20.0f;
+        makeUp = compAmp > 3.0f ? compAmp - 3.0f : 0.0f;
+        rat =  compAmp > 3.0f ? compAmp/(3.0f): 1.0f ;
+        thresh = (-compAmp);
+        //rat =  thresh/(thresh + makeUp) ;
+        compress_oscLevels.setRatio(rat);  
+        compress_oscLevels.setThreshold(thresh);  
+        compress_oscLevels.setKnee( abs(thresh) );  
+        compress_oscLevels.setMakeupGain(makeUp);
+
+//    compress_oscLevels.setRatio( 16.0f/(16.0f-12.0f));  
+//    compress_oscLevels.setThreshold( -16.0f);  
+//    compress_oscLevels.setKnee( 16.0f);  
+//    compress_oscLevels.setMakeupGain(12.0f);  
+//    compress_oscLevels.setSideChain(0);
+
+
+
+          
+
 
         //dly_delayEffects.delay(0, EffectsDelayTimeL);
         //EffectsDelayTimeR = EffectsDelayTimeL*0.85f;  //TODO: create separate menu entries for left right disparity
@@ -1421,7 +1447,8 @@ void loop()
     //onepole_osc2.frequency(noteFreqOsc2);   // highpass for osc1 before  mix_oscLevels 
     //filter5.frequency(noteFreqFilter5*keyfollowFilter5); // HP filter post mix_Amp
     //filter5.frequency(noteFreqFilter5); // HP filter post mix_Amp
-    filter5.frequency(1.0f); // HP filter post mix_Amp (1.0Hz to get it out of the way for now)
+    filter5.frequency(noteNumberFilter1+24.0f); // HP filter post mix_Amp
+    //filter5.frequency(1.0f); // HP filter post mix_Amp (1.0Hz to get it out of the way for now)
     //filterPreMixHPL.frequency(noteFreqFilter5);
     //filterPreMixHPR.frequency(noteFreqFilter5);
     filterPreMixHPL.frequency(0.1f); //(62.5f);

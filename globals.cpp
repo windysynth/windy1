@@ -22,7 +22,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.1.14"};
+String verNum_str = {"0.1.15"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
@@ -268,6 +268,12 @@ fx_t copy_buffer_fx = {
  {0x7f, 0x6c, 0x55, 0x16, 0x3a}, // uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH];   // 5
  {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01} // uint8_t nrpn_msb_common1[NRPN_MSB_COMMON1_LENGTH] //10
 };  // 61 bytes long
+
+// TODO: fill this in 
+ext_t extensions_buffer_ext = {
+    "Extensions", 
+    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //uint8_t nrpn_msb_compressor[NRPN_MSB_COMP_LENGTH];  // 7
+};
 
 const String alphaNumString(F("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()_+-`'|/ "));
 

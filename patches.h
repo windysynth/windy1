@@ -59,6 +59,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define NRPN_MSB_REVERB 114
 #define NRPN_MSB_REVERB_LENGTH 5 
 
+#define NRPN_MSB_COMP 115
+#define NRPN_MSB_COMP_LENGTH 7
+
 
 
 #define CCOCTOSC1 0
@@ -185,6 +188,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define EFFECTGROUPREVERB 2
 #define EFFECTGROUPCOMMON1 3
 
+#define CCCOMPATTACK 0
+#define CCCOMPRELEASE 1
+#define CCCOMPRATIO 2
+#define CCCOMPTHRESHOLD 3
+#define CCCOMPKNEE 4
+#define CCCOMPMAKEUPGAIN 5
+#define CCCOMPSIDECHAIN 6
+
+
 typedef struct __attribute__((packed)) Patch{
     char patch_string[32]; 
     uint8_t nrpn_msb_osc1[NRPN_MSB_OSC1_LENGTH];  // 18
@@ -209,6 +221,12 @@ typedef struct __attribute__((packed)) Fx{
     uint8_t nrpn_msb_reverb[NRPN_MSB_REVERB_LENGTH];   // 5
     uint8_t nrpn_msb_common1[NRPN_MSB_COMMON1_LENGTH];   // 10
 } fx_t;
+
+typedef struct __attribute__((packed)) Ext{
+    char ext_string[32]; 
+    uint8_t nrpn_msb_compressor[NRPN_MSB_COMP_LENGTH];  // 7
+} ext_t;
+
 
 uint8_t getFxValue(patch_t *patch, uint32_t effectGroup, uint32_t effectIdx);
 void setFxValue(uint8_t value, patch_t *patch, uint32_t effectGroup, uint32_t effectIdx);
