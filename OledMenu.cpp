@@ -42,7 +42,7 @@ void OledMenu::doMenu(){
     return; // skip displaying the menu if we're going to run item function again.
   }
   updateLeafValue = updateSelection(); // leaf funcs update values
-  if(updateLeafValue){   // knob moved, update value and fill str_oledbuf
+  if(updateLeafValue){   // knobBot moved, update value and fill str_oledbuf
     Serial8.println("updateLeafValue true");
     //if(!runFunction()) { display.print("updateLeafValue ERROR!"); return;} 
     runningFunction = !runFunction();
@@ -72,19 +72,23 @@ void OledMenu::doMenu(){
 void OledMenu::resetButtonsAndKnobs(){
   static int knobCount = 0;
   static int buttonCount = 0;
-  while(knob.read()){
-      knob.write(0); // reset knob position to zero ignore new 
+  while(knobBot.read()){
+      knobBot.write(0); // reset knobBot position to zero ignore new 
       knobCount++; 
   }
   newKnob = 0;
-  // button pin capacitance must be keeping knobButton low at power up
+  // button pin capacitance must be keeping knobBotButton low at power up
   // This waits here till the knob is high
-  while(!knobButton.update()){
-    buttonCount = 1;  
-    if(knobButton.rose()) { 
-        buttonCount = 2; // shouldn't reach here 
-        break; 
-    }
+  knobBotButton.update();
+  if (knobBotButton.read()){
+      sprintf(str_serial8buf, "knobCount: %d, buttonCount: %d ", knobCount, buttonCount);
+  }
+  else{
+      do{
+        buttonCount += 1;  
+        delay(50);
+        knobBotButton.update();
+      }while( !knobBotButton.rose());
   }
   _knobButtonSelType = NONE;
   sprintf(str_serial8buf, "knobCount: %d, buttonCount: %d ", knobCount, buttonCount);
@@ -119,13 +123,13 @@ bool OledMenu::checkButtons(){
 }
 
 bool OledMenu::checkButtonsAndKnobs(){
-    //bool knobButtonChanged = knobButton.update();
-    knobButton.update();
-    bool knobButtonState = knobButton.read(); ;// false means pressed
+    //bool knobButtonChanged = knobBotButton.update();
+    knobBotButton.update();
+    bool knobButtonState = knobBotButton.read(); ;// false means pressed
     int32_t newKnob_temp = 0;
     uint32_t currentTime = millis();
-    if (knobButton.rose()){
-        if(knobButton.previousDuration() > knobButtonLongPressInterval){
+    if (knobBotButton.rose()){
+        if(knobBotButton.previousDuration() > knobButtonLongPressInterval){
             knobButtonPossibleSingleClick = false;
             _knobButtonSelType = LONG_PRESS;
             lastClickTime = 0;
@@ -138,7 +142,7 @@ bool OledMenu::checkButtonsAndKnobs(){
             knobButtonPossibleSingleClick = true;
             lastClickTime = currentTime;
         }
-        knob.write(0); // reset knob position to zero ignore new 
+        knobBot.write(0); // reset knobBot position to zero ignore new 
         return true;
     }
     else if (knobButtonPossibleSingleClick && 
@@ -146,18 +150,18 @@ bool OledMenu::checkButtonsAndKnobs(){
         knobButtonPossibleSingleClick = false;
         _knobButtonSelType = SINGLE_CLICK;
         lastClickTime = 0;
-        knob.write(0); // reset knob position to zero ignore new 
+        knobBot.write(0); // reset knobBot position to zero ignore new 
         return true;
     }
     if (!knobButtonState) { 
-        knob.write(0); // ignore knob event if knobButton is currently pressed
+        knobBot.write(0); // ignore knobBot event if knobBotButton is currently pressed
         return false;
     }
     if (newKnob != 0) { return false; } // don't read again if not done with last time
-    newKnob_temp = knob.read()/4; //don't need 4X counting mode, so integer div by 4
+    newKnob_temp = knobBot.read()/4; //don't need 4X counting mode, so integer div by 4
     newKnob = newKnob_temp > 0 ? 1 : newKnob_temp < 0 ? -1 : 0; 
     if (newKnob != 0){
-        knob.write(0);
+        knobBot.write(0);
         uint32_t tNOW = millis();
         if(tNOW - lastTimeKnobMoved > knobSlowTime){
             lastTimeKnobMoved = tNOW;
@@ -172,7 +176,7 @@ bool OledMenu::checkButtonsAndKnobs(){
 int OledMenu::updateSelection() {
     if (updateEpromFlag){
       eepromCurrentMillis = millis();
-      eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+      eepromPreviousMillis = eepromCurrentMillis; // reset timer every knobBot turn 
     }
     int32_t newKnob_temp = newKnob;
     newKnob = 0; 

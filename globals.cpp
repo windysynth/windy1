@@ -6,10 +6,38 @@
 #include "MenuItemsListsFuncs.h"
 #include "patches.h"
 
+// globals for Encoder knobs, buttons and UI state machine stuff----------------
+
+const uint32_t debounceDelay = 10; //  ms
+#ifdef HW_VERSION_DUAL_ENCODER
+    // KNOB1
+    const int knobTopButtonPin = 29;  // teensy4.1 pin
+    const int knobTopEncoderPin1 = 31;  // teensy4.1 pin these encoders wired backwards?
+    const int knobTopEncoderPin2 = 30;  // teensy4.1 pin
+    Encoder knobTop(knobTopEncoderPin1, knobTopEncoderPin2);
+    Bounce knobTopButton(knobTopButtonPin, debounceDelay);
+    // KNOB2
+    const int knobBotButtonPin = 32;  // teensy4.1 pin
+    const int knobBotEncoderPin1 = 36;  // teensy4.1 pin to KNOB2B
+    const int knobBotEncoderPin2 = 37;  // teensy4.1 pin to KNOB2A
+    Encoder knobBot(knobBotEncoderPin1, knobBotEncoderPin2);
+    Bounce knobBotButton(knobBotButtonPin, debounceDelay);
+#else // old one knob version
+    // KNOB2
+    const int knobBotButtonPin = 32;  // teensy4.1 pin
+    const int knobBotEncoderPin1 = 30;  // teensy4.1 pin
+    const int knobBotEncoderPin2 = 31;  // teensy4.1 pin
+    Encoder knobBot(knobBotEncoderPin1, knobBotEncoderPin2);
+    Bounce knobBotButton(knobBotButtonPin, debounceDelay);
+#endif
+const int topButtonPin = 27;  // teensy4.1 pin
+const int botButtonPin = 26;  // teensy4.1 pin
+Bounce topButton(topButtonPin, debounceDelay);
+Bounce botButton(botButtonPin, debounceDelay);
 
 int32_t newKnob = 0;
 
-// globls for midi
+// globals for midi
 uint8_t type = 0;
 uint8_t data1 = 0;
 uint8_t data2 = 0;  
@@ -22,7 +50,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.1.15"};
+String verNum_str = {"0.2.1x"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;

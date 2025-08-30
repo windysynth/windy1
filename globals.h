@@ -24,12 +24,35 @@ extern Adafruit_SSD1306 display;  // MenuItemsListFuncs.cpp
 
 extern int currentPatch;
 
-extern Encoder knob;
-extern Bounce knobButton;
+#define HW_VERSION_DUAL_ENCODER
+#ifdef HW_VERSION_DUAL_ENCODER
+    // KNOB1
+    extern const int knobTopButtonPin;  
+    extern const int knobTopEncoderPin1;  
+    extern const int knobTopEncoderPin2;  
+    extern Encoder knobTop;
+    extern Bounce knobTopButton;
+    // KNOB2
+    extern const int knobBotButtonPin;  
+    extern const int knobBotEncoderPin1;  // teensy4.1 pin to KNOB2A
+    extern const int knobBotEncoderPin2;  // teensy4.1 pin to KNOB2B
+    extern Encoder knobBot;
+    extern Bounce knobBotButton;
+#else // old one knob version
+    // KNOB2
+    extern const int knobBotButtonPin;  
+    extern const int knobBotEncoderPin1;  
+    extern const int knobBotEncoderPin2;  
+    extern Encoder knobBot;
+    extern Bounce knobBotButton;
+#endif
+extern const int topButtonPin;  
+extern const int botButtonPin;  
+
 extern Bounce topButton;
 extern Bounce botButton;
-extern int32_t newKnob;
 
+extern int32_t newKnob;
 
 extern OledMenu myMenu;
 

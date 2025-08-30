@@ -13,9 +13,6 @@ extern int currentPatch;
 extern int current_patchNumber;
 extern bool patchLoaded[];
 
-extern Encoder knob;
-extern Bounce knobButton;
-
 //extern OledMenu myMenu;
 
 extern MenuItem topMenu[]; 

@@ -51,6 +51,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 //------------some define statements --------------------
+
+
 // #define FREQQ (440)
 
 #define PSRAM_INSTALLED
@@ -481,18 +483,7 @@ AudioControlSGTL5000     sgtl5000_1;     //xy=346.333251953125,219
 //------------------- ssd1306_128x32_i2c OLED --------------------------
 // see OledMenu.h
 
-//------- Encoder knob, button and UI state machine stuff----------------
 
-const int knobButtonPin = 32;  // teensy4.1 pin
-const int knobEncoderPin1 = 30;  // teensy4.1 pin
-const int knobEncoderPin2 = 31;  // teensy4.1 pin
-const int topButtonPin = 27;  // teensy4.1 pin
-const int botButtonPin = 27;  // teensy4.1 pin
-const uint32_t debounceDelay = 10; //  ms
-Encoder knob(knobEncoderPin1, knobEncoderPin2);
-Bounce knobButton(knobButtonPin, debounceDelay);
-Bounce topButton(topButtonPin, debounceDelay);
-Bounce botButton(botButtonPin, debounceDelay);
 
 
 const uint32_t UITimeoutInterval = 7000;  // milliseconds
@@ -532,19 +523,27 @@ void setup() {
     sprintf(str_buf1, version_str.c_str());
     sprintf(myMenu.str_oledbuf, splashScreen_str.c_str());
 
-    pinMode(knobButtonPin, INPUT_PULLUP);
+#ifdef HW_VERSION_DUAL_ENCODER
+    pinMode(knobTopButtonPin, INPUT_PULLUP);
+    pinMode(knobBotButtonPin, INPUT_PULLUP);
+#else
+    pinMode(knobBotButtonPin, INPUT_PULLUP);
+#endif
     pinMode(topButtonPin, INPUT_PULLUP);
     pinMode(botButtonPin, INPUT_PULLUP);
-
-    // Enter Bootloader if topButton and botButton held down for 5 sec
+    // Enter Bootloader if <knob>topButton and <knob>botButton held down for 5 sec
     uint32_t boatLoaderCatchTime = millis();
     do{
         delay(200);
-        //bool topButtonState = topButton.update();
-        //bool botButtonState = botButton.update();
+#ifdef HW_VERSION_DUAL_ENCODER
+        knobTopButton.update();
+        knobBotButton.update();
+    }while( !knobTopButton.read() && !knobBotButton.read() ); // false is pressed because of PULLUP
+#else
         topButton.update();
         botButton.update();
     }while( !topButton.read() && !botButton.read() ); // false is pressed because of PULLUP
+#endif
     if (millis() - boatLoaderCatchTime >= 5000){
         asm("bkpt #251"); // run bootloader
     }
@@ -1068,7 +1067,7 @@ void setup() {
     AudioProcessorUsageMaxReset();
     AudioMemoryUsageMaxReset();
     //readPot();
-    knob.write(0); // reset knob position to zero
+    knobBot.write(0); // reset knobBot position to zero
 
     // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
     if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {

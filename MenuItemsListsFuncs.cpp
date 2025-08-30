@@ -190,7 +190,7 @@ bool patchSelectFun() {
 //    if (updateEpromFlag)
 //    {
 //        eepromCurrentMillis = millis();
-//        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knob turn 
+//        eepromPreviousMillis = eepromCurrentMillis; // reset timer every knobBot turn 
 //    }
     return true;
  }
