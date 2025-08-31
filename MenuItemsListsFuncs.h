@@ -6,9 +6,6 @@
 #include "OledMenu.h"
 #include "patches.h"
 
-
-extern Adafruit_SSD1306 display;
-
 extern int currentPatch;
 extern int current_patchNumber;
 extern bool patchLoaded[];

@@ -67,7 +67,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define FXSOURCE_EEPROM_ADDR ( (int)28 )
 
 //------------ includes -------------------------------
-//#include <MenuClass.h>
 #include "MenuClass.h"
 #include "OledMenu.h"
 #include "globals.h"

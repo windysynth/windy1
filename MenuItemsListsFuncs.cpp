@@ -10,8 +10,6 @@
 
 extern AudioEffectEnvelope      env_squelch;
 
-// Wire1: clk 16, data 17
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET);
 
 /*****************************
  ******************************

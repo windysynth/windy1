@@ -6,6 +6,11 @@
 #include "MenuItemsListsFuncs.h"
 #include "patches.h"
 
+// display
+// Wire1: clk 16, data 17
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET);
+
+
 // globals for Encoder knobs, buttons and UI state machine stuff----------------
 
 const uint32_t debounceDelay = 10; //  ms
@@ -50,7 +55,7 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.2.1x"};
+String verNum_str = {"0.2.2"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
