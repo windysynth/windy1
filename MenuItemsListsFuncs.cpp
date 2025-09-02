@@ -134,7 +134,8 @@ bool volAdjustFun() {
     Serial8.println(F("volAdjustFun: updated vol "));
     return true;
  }
-  display.clearDisplay(); // erase display
+  //display.clearBuffer(); // erase display
+  //display.clearDisplay(); // erase display
   //display.display(); // refresh display
   Serial8.println(F("volAdjustFun: goto TopMenu"));
   //myMenu.setCurrentMenu(&listTopMenu);
@@ -192,7 +193,8 @@ bool patchSelectFun() {
 //    }
     return true;
  }
-  display.clearDisplay(); // erase display
+  //display.clearBuffer(); // erase display
+  //display.clearDisplay(); // erase display
   //display.display(); // refresh display
   Serial8.println(F("patchSelectFun: goto TopMenu"));
   //myMenu.setCurrentMenu(&listTopMenu);
@@ -235,7 +237,8 @@ bool patchPasteFun(){
   }
   // NUMBER_OF_PATCHES is Exit w/o writing
   if(paste_patchNumber == NUMBER_OF_PATCHES){
-      display.clearDisplay(); // erase display
+      //display.clearBuffer(); // erase display
+      //display.clearDisplay(); // erase display
       Serial8.println(F("patchPasteFun: goUpOneMenu"));
       return goUpOneMenu(); 
   } 
@@ -276,7 +279,8 @@ bool patchSwapFun(){
     }
     return true;
   }
-  display.clearDisplay(); // erase display
+  //display.clearBuffer(); // erase display
+  //display.clearDisplay(); // erase display
   Serial8.println(F("patchPasteFun: goto TopMenu"));
   // NUMBER_OF_PATCHES is Exit w/o writing
   if(swap_patchNumber == NUMBER_OF_PATCHES){ return goUpOneMenu(); } 
@@ -344,7 +348,8 @@ bool saveFxGlobalFun(){
     }
     return true;
   }
-  display.clearDisplay(); // erase display
+  //display.clearBuffer(); // erase display
+  //display.clearDisplay(); // erase display
   Serial8.println(F("fxPasteFun: goUpOneMenu"));
   if(!bWrite){ // exit without saving 
       bWrite = 0; // ensure next time in menu starts with exit
@@ -383,7 +388,8 @@ bool fxPasteFun(){
     }
     return true;
   }
-  display.clearDisplay(); // erase display
+  //display.clearBuffer(); // erase display
+  //display.clearDisplay(); // erase display
   Serial8.println(F("fxPasteFun: goUpOneMenu"));
   // NUMBER_OF_PATCHES is Exit w/o writing
   if(paste_FxNumber == NUMBER_OF_PATCHES){ return goUpOneMenu(); } 
@@ -2836,25 +2842,29 @@ MenuList listBreathCCMenu(breathCCMenu, 1);
 bool gotoVolAdjMenu() {
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
-  display.clearDisplay(); // erase display
+  display.clearBuffer(); // erase display
+  //display.clearDisplay(); // erase display
   //display.display(); // refresh display
   myMenu.setCurrentMenu(&listVolAdjustMenu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %ld   ", vol);
-  display.println(myMenu.str_oledbuf);
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
+  //display.println(myMenu.str_oledbuf);
   return true;
 }
 bool gotoPatchSelectMenu() {
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
-  display.clearDisplay(); // erase display
+  display.clearBuffer(); // erase display
+  //display.clearDisplay(); // erase display
   //display.display(); // refresh display
   myMenu.setCurrentMenu(&listPatchSelectMenu);
   myMenu.knobAcceleration = 1;
   String ps( current_patch.patch_string );
   ps.setCharAt( ps.indexOf(' '), '\n'); 
   sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
-  display.println(myMenu.str_oledbuf);
+  //display.println(myMenu.str_oledbuf);
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   Serial8.println(myMenu.str_oledbuf);
   return true;
 }
@@ -2873,7 +2883,8 @@ bool gotoPatchCopyMenu(){
 }
 */
 bool gotoNamingMenu(){
-  display.clearDisplay(); // erase display
+  //display.clearDisplay(); // erase display
+  display.clearBuffer(); // erase display
   //myMenu.previousMenuStack.push(myMenu.currentMenu);
   //myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listNamingMenu);
@@ -2887,7 +2898,8 @@ bool gotoNamingMenu(){
   return true;
 }
 bool gotoPatchPasteMenu(){
-  display.clearDisplay(); // erase display
+  //display.clearDisplay(); // erase display
+  display.clearBuffer(); // erase display
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchPasteMenu);
@@ -2909,7 +2921,8 @@ bool gotoPatchPasteMenu(){
   return true;
 }
 bool gotoPatchSwapMenu(){
-  display.clearDisplay(); // erase display
+  //display.clearDisplay(); // erase display
+  display.clearBuffer(); // erase display
   myMenu.previousMenuStack.push(myMenu.currentMenu);
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchSwapMenu);
@@ -3001,8 +3014,10 @@ bool gotoPatchFormantMenu(){
      default:
          sprintf(myMenu.str_oledbuf,"  %s", "OFF     "); break; 
    }
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  display.clearBuffer(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.drawStr(0,14,myMenu.str_oledbuf);
     return true;
 }
 bool gotoPatchAmpMenu(){
@@ -3011,8 +3026,10 @@ bool gotoPatchAmpMenu(){
   myMenu.setCurrentMenu(&listPatchAmpMenu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_common2[CCAMPLEVEL]);
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  display.clearBuffer(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.drawStr(0,14,myMenu.str_oledbuf);
     return true;
 }
 bool gotoPatchCommonMenu(){
@@ -3032,8 +3049,10 @@ bool gotoSystemAdjMenu() {
 }
 
 bool goUpOneMenu() {
-  display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  //display.clearDisplay(); // erase display
+  display.clearBuffer(); // erase display
+  //display.display(); // refresh display
+  display.sendBuffer();
   if(!myMenu.previousMenuStack.empty() 
           && !myMenu.previousItemIndexStack.empty()){
       myMenu.setCurrentMenu(myMenu.previousMenuStack.top());
@@ -3051,8 +3070,10 @@ bool gotoTopMenu() {
   while(!myMenu.previousItemIndexStack.empty()){
       myMenu.previousItemIndexStack.pop();
   }
-  display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  //display.clearDisplay(); // erase display
+  display.clearBuffer(); // erase display
+  //display.display(); // refresh display
+  display.sendBuffer();
   myMenu.setCurrentMenu(&listTopMenu);
   myMenu.knobAcceleration = 1;
   return true;
@@ -3067,8 +3088,10 @@ bool gotoFxSourceMenu(){
   myMenu.knobAcceleration = 1;
     sprintf(myMenu.str_oledbuf,"  %s  ", 
           fxSourcePatch ? "Patch ":"Global");
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 /*
@@ -3085,8 +3108,10 @@ bool gotoSaveFxGlobalMenu(){
   myMenu.setCurrentMenu(&listSaveFxGlobalMenu);
   myMenu.knobAcceleration = 1;
     sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoFxPasteMenu(){
@@ -3125,8 +3150,10 @@ bool gotoDelayLevelMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYLEVEL));
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoDelayTimeLMenu(){
@@ -3137,8 +3164,10 @@ bool gotoDelayTimeLMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %04d    ", 
         10*getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYTIME));
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoDelayPongMenu(){
@@ -3148,8 +3177,10 @@ bool gotoDelayPongMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         127 - getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYSPARE));
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoDelayFeedbackMenu(){
@@ -3159,8 +3190,10 @@ bool gotoDelayFeedbackMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYFEEDBACK));
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoDelayDampMenu(){
@@ -3170,8 +3203,10 @@ bool gotoDelayDampMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPDELAY, CCEFFECTSDELAYDAMP));
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoReverbLevelMenu(){
@@ -3181,8 +3216,10 @@ bool gotoReverbLevelMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBLEVEL));
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoReverbTimeMenu(){
@@ -3192,8 +3229,10 @@ bool gotoReverbTimeMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %04d    ", 
         100*getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBTIME)); //114,3,10,50,//1000 to 5000 ms
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoReverbDensityMenu(){
@@ -3203,8 +3242,10 @@ bool gotoReverbDensityMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDENSEEARLY));
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoReverbDampMenu(){
@@ -3215,8 +3256,10 @@ bool gotoReverbDampMenu(){
   // -10 to +10
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPREVERB, CCEFFECTSREVERBDAMP)-64);
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 // gogoReverbSparemenu()
@@ -3227,8 +3270,10 @@ bool gotoChorusOnMenu(){
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %s    ", 
         getFxValue(&current_patch, EFFECTGROUPCOMMON1, CCCHORUSON)? " On": "Off");
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase //display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoChorusDryMenu(){
@@ -3238,8 +3283,10 @@ bool gotoChorusDryMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDRYLEVEL));
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoChorusLfoFMenu(){
@@ -3249,8 +3296,10 @@ bool gotoChorusLfoFMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %2.1fHz  ", 
         (float)getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSLFOFREQ)/10.0);
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoChorusFeedbackMenu(){
@@ -3260,8 +3309,10 @@ bool gotoChorusFeedbackMenu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSFEEDBACK)-64);
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoChorusDelay1Menu(){
@@ -3271,8 +3322,10 @@ bool gotoChorusDelay1Menu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d mS ", 
         getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY1));
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoChorusMod1Menu(){
@@ -3282,8 +3335,10 @@ bool gotoChorusMod1Menu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD1)-64);
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoChorusWet1Menu(){
@@ -3293,8 +3348,10 @@ bool gotoChorusWet1Menu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET1)-64);
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoChorusDelay2Menu(){
@@ -3304,8 +3361,10 @@ bool gotoChorusDelay2Menu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d mS ", 
         getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSDELAY2));
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoChorusMod2Menu(){
@@ -3315,8 +3374,10 @@ bool gotoChorusMod2Menu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSMOD2)-64);
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoChorusWet2Menu(){
@@ -3326,8 +3387,10 @@ bool gotoChorusWet2Menu(){
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", 
         getFxValue(&current_patch, EFFECTGROUPCHORUS, CCEFFECTSCHORUSWET2)-64);
-  display.clearDisplay();
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay();
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 
@@ -3338,8 +3401,10 @@ bool gotoOctOsc1Menu(){
   myMenu.setCurrentMenu(&listOscOsc1Menu);
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCOCTOSC1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSemiOsc1Menu(){
@@ -3348,8 +3413,10 @@ bool gotoSemiOsc1Menu(){
   myMenu.setCurrentMenu(&listSemiOsc1Menu);
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSEMIOSC1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoCentsOsc1Menu(){
@@ -3358,8 +3425,10 @@ bool gotoCentsOsc1Menu(){
   myMenu.setCurrentMenu(&listCentsOsc1Menu);
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCFINEOSC1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBeatOsc1Menu(){
@@ -3368,8 +3437,10 @@ bool gotoBeatOsc1Menu(){
   myMenu.setCurrentMenu(&listBeatOsc1Menu);
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBEATOSC1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSawOsc1Menu(){
@@ -3378,8 +3449,10 @@ bool gotoSawOsc1Menu(){
   myMenu.setCurrentMenu(&listSawOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSAWOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoTriOsc1Menu(){
@@ -3388,8 +3461,10 @@ bool gotoTriOsc1Menu(){
   myMenu.setCurrentMenu(&listTriOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCTRIOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoPulseOsc1Menu(){
@@ -3398,8 +3473,10 @@ bool gotoPulseOsc1Menu(){
   myMenu.setCurrentMenu(&listPulseOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPULSEOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoPWOsc1Menu(){
@@ -3408,8 +3485,10 @@ bool gotoPWOsc1Menu(){
   myMenu.setCurrentMenu(&listPWOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoPwmFreqOsc1Menu(){
@@ -3418,8 +3497,10 @@ bool gotoPwmFreqOsc1Menu(){
   myMenu.setCurrentMenu(&listPwmFreqOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWMFREQOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoPwmDepthOsc1Menu(){
@@ -3428,8 +3509,10 @@ bool gotoPwmDepthOsc1Menu(){
   myMenu.setCurrentMenu(&listPwmDepthOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCPWMDEPTHOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepTimeOsc1Menu(){
@@ -3438,8 +3521,10 @@ bool gotoSweepTimeOsc1Menu(){
   myMenu.setCurrentMenu(&listSweepTimeOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSWEEPTIMEOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepDepthOsc1Menu(){
@@ -3448,8 +3533,10 @@ bool gotoSweepDepthOsc1Menu(){
   myMenu.setCurrentMenu(&listSweepDepthOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCSWEEPDEPTHOSC1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathAttainOsc1Menu(){
@@ -3458,8 +3545,10 @@ bool gotoBreathAttainOsc1Menu(){
   myMenu.setCurrentMenu(&listBreathAttainOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHATTAINOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathDepthOsc1Menu(){
@@ -3468,8 +3557,10 @@ bool gotoBreathDepthOsc1Menu(){
   myMenu.setCurrentMenu(&listBreathDepthOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHDEPTHOSC1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathThresholdOsc1Menu(){
@@ -3478,8 +3569,10 @@ bool gotoBreathThresholdOsc1Menu(){
   myMenu.setCurrentMenu(&listBreathThresholdOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHTHRESHOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathCurveOsc1Menu(){
@@ -3488,8 +3581,10 @@ bool gotoBreathCurveOsc1Menu(){
   myMenu.setCurrentMenu(&listBreathCurveOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCBREATHCURVEOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLevelOsc1Menu(){
@@ -3498,8 +3593,10 @@ bool gotoLevelOsc1Menu(){
   myMenu.setCurrentMenu(&listLevelOsc1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc1[CCLEVELOSC1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 
@@ -3512,8 +3609,10 @@ bool gotoOctOsc2Menu(){
   myMenu.setCurrentMenu(&listOscOsc2Menu);
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCOCTOSC2]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSemiOsc2Menu(){
@@ -3522,8 +3621,10 @@ bool gotoSemiOsc2Menu(){
   myMenu.setCurrentMenu(&listSemiOsc2Menu);
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSEMIOSC2]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoCentsOsc2Menu(){
@@ -3532,8 +3633,10 @@ bool gotoCentsOsc2Menu(){
   myMenu.setCurrentMenu(&listCentsOsc2Menu);
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCFINEOSC2]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBeatOsc2Menu(){
@@ -3542,8 +3645,10 @@ bool gotoBeatOsc2Menu(){
   myMenu.setCurrentMenu(&listBeatOsc2Menu);
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBEATOSC2]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+ // display.clearDisplay(); // erase display
+ // display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSawOsc2Menu(){
@@ -3552,8 +3657,10 @@ bool gotoSawOsc2Menu(){
   myMenu.setCurrentMenu(&listSawOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSAWOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoTriOsc2Menu(){
@@ -3562,8 +3669,10 @@ bool gotoTriOsc2Menu(){
   myMenu.setCurrentMenu(&listTriOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCTRIOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoPulseOsc2Menu(){
@@ -3572,8 +3681,10 @@ bool gotoPulseOsc2Menu(){
   myMenu.setCurrentMenu(&listPulseOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPULSEOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoPWOsc2Menu(){
@@ -3582,8 +3693,10 @@ bool gotoPWOsc2Menu(){
   myMenu.setCurrentMenu(&listPWOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoPwmFreqOsc2Menu(){
@@ -3592,8 +3705,10 @@ bool gotoPwmFreqOsc2Menu(){
   myMenu.setCurrentMenu(&listPwmFreqOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWMFREQOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoPwmDepthOsc2Menu(){
@@ -3602,8 +3717,10 @@ bool gotoPwmDepthOsc2Menu(){
   myMenu.setCurrentMenu(&listPwmDepthOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCPWMDEPTHOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepTimeOsc2Menu(){
@@ -3612,8 +3729,10 @@ bool gotoSweepTimeOsc2Menu(){
   myMenu.setCurrentMenu(&listSweepTimeOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSWEEPTIMEOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepDepthOsc2Menu(){
@@ -3622,8 +3741,10 @@ bool gotoSweepDepthOsc2Menu(){
   myMenu.setCurrentMenu(&listSweepDepthOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCSWEEPDEPTHOSC2]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathAttainOsc2Menu(){
@@ -3632,8 +3753,10 @@ bool gotoBreathAttainOsc2Menu(){
   myMenu.setCurrentMenu(&listBreathAttainOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHATTAINOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathDepthOsc2Menu(){
@@ -3642,8 +3765,10 @@ bool gotoBreathDepthOsc2Menu(){
   myMenu.setCurrentMenu(&listBreathDepthOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHDEPTHOSC2]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathThresholdOsc2Menu(){
@@ -3652,8 +3777,10 @@ bool gotoBreathThresholdOsc2Menu(){
   myMenu.setCurrentMenu(&listBreathThresholdOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHTHRESHOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathCurveOsc2Menu(){
@@ -3662,8 +3789,10 @@ bool gotoBreathCurveOsc2Menu(){
   myMenu.setCurrentMenu(&listBreathCurveOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCBREATHCURVEOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLevelOsc2Menu(){
@@ -3672,8 +3801,10 @@ bool gotoLevelOsc2Menu(){
   myMenu.setCurrentMenu(&listLevelOsc2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc2[CCLEVELOSC2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoXFadeOsc2Menu(){
@@ -3683,8 +3814,10 @@ bool gotoXFadeOsc2Menu(){
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %s    ", 
           current_patch.nrpn_msb_common1[CCXFADE]? " On": "Off");
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 
@@ -3697,8 +3830,10 @@ bool gotoLinkOscFiltersMenu(){
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf," %s ", 
     current_patch.nrpn_msb_common1[CCLINKOSCFILTERS]%2 ? " Linkded": "UnLinked"); //1 Linked, 2 UnLinked
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoModeOscFilter1Menu(){
@@ -3720,8 +3855,10 @@ bool gotoModeOscFilter1Menu(){
      default:
          sprintf(myMenu.str_oledbuf,"   %s    ", " LP"); break; 
    }
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoFreqOscFilter1Menu(){
@@ -3732,8 +3869,10 @@ bool gotoFreqOscFilter1Menu(){
   float FreqFilterNN = (float)current_patch.nrpn_msb_osc_filt1[CCFREQOSCFILTER1];
   float FreqFilter = 440.0*pow(2, (FreqFilterNN-69.0)/12 );
   sprintf(myMenu.str_oledbuf,"%5.1fHz", FreqFilter);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoQOscFilter1Menu(){
@@ -3743,8 +3882,10 @@ bool gotoQOscFilter1Menu(){
   myMenu.knobAcceleration = 4;
   float QFactor = (float)current_patch.nrpn_msb_osc_filt1[CCQFACTOROSCFILTER1]/10.0;
   sprintf(myMenu.str_oledbuf,"   %2.1f   ", QFactor);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoKeyFollowOscFilter1Menu(){
@@ -3753,8 +3894,10 @@ bool gotoKeyFollowOscFilter1Menu(){
   myMenu.setCurrentMenu(&listKeyFollowOscFilter1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt1[CCKEYFOLLOWOSCFILTER1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathModOscFilter1Menu(){
@@ -3763,8 +3906,10 @@ bool gotoBreathModOscFilter1Menu(){
   myMenu.setCurrentMenu(&listBreathModOscFilter1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt1[CCBREATHMODOSCFILTER1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathCurveOscFilter1Menu(){
@@ -3773,8 +3918,10 @@ bool gotoBreathCurveOscFilter1Menu(){
   myMenu.setCurrentMenu(&listBreathCurveOscFilter1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt1[CCBREATHCURVEOSCFILTER1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoFreqOscFilter1Menu(){
@@ -3783,8 +3930,10 @@ bool gotoLfoFreqOscFilter1Menu(){
   myMenu.setCurrentMenu(&listLfoFreqOscFilter1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt1[CCLFOFREQOSCFILTER1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoDepthOscFilter1Menu(){
@@ -3793,8 +3942,10 @@ bool gotoLfoDepthOscFilter1Menu(){
   myMenu.setCurrentMenu(&listLfoDepthOscFilter1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt1[CCLFODEPTHOSCFILTER1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoBreathOscFilter1Menu(){
@@ -3803,8 +3954,10 @@ bool gotoLfoBreathOscFilter1Menu(){
   myMenu.setCurrentMenu(&listLfoBreathOscFilter1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt1[CCLFOBREATHOSCFILTER1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoThresholdOscFilter1Menu(){
@@ -3813,8 +3966,10 @@ bool gotoLfoThresholdOscFilter1Menu(){
   myMenu.setCurrentMenu(&listLfoThresholdOscFilter1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt1[CCLFOTHRESHOSCFILTER1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepTimeOscFilter1Menu(){
@@ -3823,8 +3978,10 @@ bool gotoSweepTimeOscFilter1Menu(){
   myMenu.setCurrentMenu(&listSweepTimeOscFilter1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt1[CCSWEEPTIMEOSCFILTER1]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepDepthOscFilter1Menu(){
@@ -3833,8 +3990,10 @@ bool gotoSweepDepthOscFilter1Menu(){
   myMenu.setCurrentMenu(&listSweepDepthOscFilter1Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt1[CCSWEEPDEPTHOSCFILTER1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 
@@ -3858,8 +4017,10 @@ bool gotoModeOscFilter2Menu(){
      default:
          sprintf(myMenu.str_oledbuf,"   %s    ", " LP"); break; 
    }
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoFreqOscFilter2Menu(){
@@ -3870,8 +4031,10 @@ bool gotoFreqOscFilter2Menu(){
   float FreqFilterNN = (float)current_patch.nrpn_msb_osc_filt2[CCFREQOSCFILTER2];
   float FreqFilter = 440.0*pow(2, (FreqFilterNN-69.0)/12 );
   sprintf(myMenu.str_oledbuf,"%5.1fHz", FreqFilter);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoQOscFilter2Menu(){
@@ -3881,8 +4044,10 @@ bool gotoQOscFilter2Menu(){
   myMenu.knobAcceleration = 4;
   float QFactor = (float)current_patch.nrpn_msb_osc_filt2[CCQFACTOROSCFILTER2]/10.0;
   sprintf(myMenu.str_oledbuf,"   %2.1f   ", QFactor);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoKeyFollowOscFilter2Menu(){
@@ -3891,8 +4056,10 @@ bool gotoKeyFollowOscFilter2Menu(){
   myMenu.setCurrentMenu(&listKeyFollowOscFilter2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt2[CCKEYFOLLOWOSCFILTER2]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathModOscFilter2Menu(){
@@ -3901,8 +4068,10 @@ bool gotoBreathModOscFilter2Menu(){
   myMenu.setCurrentMenu(&listBreathModOscFilter2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt2[CCBREATHMODOSCFILTER2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);  
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);  
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathCurveOscFilter2Menu(){
@@ -3911,8 +4080,10 @@ bool gotoBreathCurveOscFilter2Menu(){
   myMenu.setCurrentMenu(&listBreathCurveOscFilter2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt2[CCBREATHCURVEOSCFILTER1]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoFreqOscFilter2Menu(){
@@ -3921,8 +4092,10 @@ bool gotoLfoFreqOscFilter2Menu(){
   myMenu.setCurrentMenu(&listLfoFreqOscFilter2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_osc_filt2[CCLFOFREQOSCFILTER2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoDepthOscFilter2Menu(){
@@ -3931,8 +4104,10 @@ bool gotoLfoDepthOscFilter2Menu(){
   myMenu.setCurrentMenu(&listLfoDepthOscFilter2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt2[CCLFODEPTHOSCFILTER2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoBreathOscFilter2Menu(){
@@ -3941,8 +4116,10 @@ bool gotoLfoBreathOscFilter2Menu(){
   myMenu.setCurrentMenu(&listLfoBreathOscFilter2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt2[CCLFOBREATHOSCFILTER2]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoThresholdOscFilter2Menu(){
@@ -3951,8 +4128,10 @@ bool gotoLfoThresholdOscFilter2Menu(){
   myMenu.setCurrentMenu(&listLfoThresholdOscFilter2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt2[CCLFOTHRESHOSCFILTER2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepTimeOscFilter2Menu(){
@@ -3961,8 +4140,10 @@ bool gotoSweepTimeOscFilter2Menu(){
   myMenu.setCurrentMenu(&listSweepTimeOscFilter2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt2[CCSWEEPTIMEOSCFILTER2]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepDepthOscFilter2Menu(){
@@ -3971,8 +4152,10 @@ bool gotoSweepDepthOscFilter2Menu(){
   myMenu.setCurrentMenu(&listSweepDepthOscFilter2Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_osc_filt2[CCSWEEPDEPTHOSCFILTER2]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 
@@ -3985,8 +4168,10 @@ bool gotoLinkNoiseFiltersMenu(){
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf," %s ", 
     current_patch.nrpn_msb_common1[CCLINKNOISEFILTERS]%2 ? " Linkded": "UnLinked"); //1 Linked, 2 UnLinked
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoModeNoiseFilter3Menu(){
@@ -4008,8 +4193,10 @@ bool gotoModeNoiseFilter3Menu(){
      default:
          sprintf(myMenu.str_oledbuf,"   %s    ", " LP"); break; 
    }
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoFreqNoiseFilter3Menu(){
@@ -4020,8 +4207,10 @@ bool gotoFreqNoiseFilter3Menu(){
   float FreqFilterNN = (float)current_patch.nrpn_msb_noise_filt3[CCFREQNOISEFILTER3];
   float FreqFilter = 440.0*pow(2, (FreqFilterNN-69.0)/12 );
   sprintf(myMenu.str_oledbuf,"%5.1fHz", FreqFilter);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoQNoiseFilter3Menu(){
@@ -4031,8 +4220,10 @@ bool gotoQNoiseFilter3Menu(){
   myMenu.knobAcceleration = 4;
   float QFactor = (float)current_patch.nrpn_msb_noise_filt3[CCQFACTORNOISEFILTER3]/10.0;
   sprintf(myMenu.str_oledbuf,"   %2.1f   ", QFactor);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoKeyFollowNoiseFilter3Menu(){
@@ -4041,8 +4232,10 @@ bool gotoKeyFollowNoiseFilter3Menu(){
   myMenu.setCurrentMenu(&listKeyFollowNoiseFilter3Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCKEYFOLLOWNOISEFILTER3]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathModNoiseFilter3Menu(){
@@ -4051,8 +4244,10 @@ bool gotoBreathModNoiseFilter3Menu(){
   myMenu.setCurrentMenu(&listBreathModNoiseFilter3Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCBREATHMODNOISEFILTER3]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);    
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);    
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathCurveNoiseFilter3Menu(){
@@ -4061,8 +4256,10 @@ bool gotoBreathCurveNoiseFilter3Menu(){
   myMenu.setCurrentMenu(&listBreathCurveNoiseFilter3Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCBREATHCURVENOISEFILTER3]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoFreqNoiseFilter3Menu(){
@@ -4071,8 +4268,10 @@ bool gotoLfoFreqNoiseFilter3Menu(){
   myMenu.setCurrentMenu(&listLfoFreqNoiseFilter3Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCLFOFREQNOISEFILTER3]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoDepthNoiseFilter3Menu(){
@@ -4081,8 +4280,10 @@ bool gotoLfoDepthNoiseFilter3Menu(){
   myMenu.setCurrentMenu(&listLfoDepthNoiseFilter3Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt3[CCLFODEPTHNOISEFILTER3]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoBreathNoiseFilter3Menu(){
@@ -4091,8 +4292,10 @@ bool gotoLfoBreathNoiseFilter3Menu(){
   myMenu.setCurrentMenu(&listLfoBreathNoiseFilter3Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCLFOBREATHNOISEFILTER3]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoThresholdNoiseFilter3Menu(){
@@ -4101,8 +4304,10 @@ bool gotoLfoThresholdNoiseFilter3Menu(){
   myMenu.setCurrentMenu(&listLfoThresholdNoiseFilter3Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCLFOTHRESHNOISEFILTER3]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepTimeNoiseFilter3Menu(){
@@ -4111,8 +4316,10 @@ bool gotoSweepTimeNoiseFilter3Menu(){
   myMenu.setCurrentMenu(&listSweepTimeNoiseFilter3Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCSWEEPTIMENOISEFILTER3]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepDepthNoiseFilter3Menu(){
@@ -4121,8 +4328,10 @@ bool gotoSweepDepthNoiseFilter3Menu(){
   myMenu.setCurrentMenu(&listSweepDepthNoiseFilter3Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt3[CCSWEEPDEPTHNOISEFILTER3]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 
@@ -4146,8 +4355,10 @@ bool gotoModeNoiseFilter4Menu(){
      default:
          sprintf(myMenu.str_oledbuf,"   %s    ", " LP"); break; 
    }
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoFreqNoiseFilter4Menu(){
@@ -4158,8 +4369,10 @@ bool gotoFreqNoiseFilter4Menu(){
   float FreqFilterNN = (float)current_patch.nrpn_msb_noise_filt4[CCFREQNOISEFILTER4];
   float FreqFilter = 440.0*pow(2, (FreqFilterNN-69.0)/12 );
   sprintf(myMenu.str_oledbuf,"%5.1fHz", FreqFilter);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoQNoiseFilter4Menu(){
@@ -4169,8 +4382,10 @@ bool gotoQNoiseFilter4Menu(){
   myMenu.knobAcceleration = 4;
   float QFactor = (float)current_patch.nrpn_msb_noise_filt4[CCQFACTORNOISEFILTER4]/10.0;
   sprintf(myMenu.str_oledbuf,"   %2.1f   ", QFactor);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoKeyFollowNoiseFilter4Menu(){
@@ -4179,8 +4394,10 @@ bool gotoKeyFollowNoiseFilter4Menu(){
   myMenu.setCurrentMenu(&listKeyFollowNoiseFilter4Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt4[CCKEYFOLLOWNOISEFILTER4]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathModNoiseFilter4Menu(){
@@ -4189,8 +4406,10 @@ bool gotoBreathModNoiseFilter4Menu(){
   myMenu.setCurrentMenu(&listBreathModNoiseFilter4Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt4[CCBREATHMODNOISEFILTER4]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);    
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);    
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBreathCurveNoiseFilter4Menu(){
@@ -4199,8 +4418,10 @@ bool gotoBreathCurveNoiseFilter4Menu(){
   myMenu.setCurrentMenu(&listBreathCurveNoiseFilter4Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt4[CCBREATHCURVENOISEFILTER4]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoFreqNoiseFilter4Menu(){
@@ -4209,8 +4430,10 @@ bool gotoLfoFreqNoiseFilter4Menu(){
   myMenu.setCurrentMenu(&listLfoFreqNoiseFilter4Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise_filt4[CCLFOFREQNOISEFILTER4]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoDepthNoiseFilter4Menu(){
@@ -4219,8 +4442,10 @@ bool gotoLfoDepthNoiseFilter4Menu(){
   myMenu.setCurrentMenu(&listLfoDepthNoiseFilter4Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt4[CCLFODEPTHNOISEFILTER4]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoBreathNoiseFilter4Menu(){
@@ -4229,8 +4454,10 @@ bool gotoLfoBreathNoiseFilter4Menu(){
   myMenu.setCurrentMenu(&listLfoBreathNoiseFilter4Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt4[CCLFOBREATHNOISEFILTER4]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoLfoThresholdNoiseFilter4Menu(){
@@ -4239,8 +4466,10 @@ bool gotoLfoThresholdNoiseFilter4Menu(){
   myMenu.setCurrentMenu(&listLfoThresholdNoiseFilter4Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt4[CCLFOTHRESHNOISEFILTER4]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepTimeNoiseFilter4Menu(){
@@ -4249,8 +4478,10 @@ bool gotoSweepTimeNoiseFilter4Menu(){
   myMenu.setCurrentMenu(&listSweepTimeNoiseFilter4Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt4[CCSWEEPTIMENOISEFILTER4]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoSweepDepthNoiseFilter4Menu(){
@@ -4259,8 +4490,10 @@ bool gotoSweepDepthNoiseFilter4Menu(){
   myMenu.setCurrentMenu(&listSweepDepthNoiseFilter4Menu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_noise_filt4[CCSWEEPDEPTHNOISEFILTER4]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 
@@ -4271,8 +4504,10 @@ bool gotoNoiseTimeMenu(){
   myMenu.setCurrentMenu(&listNoiseTimeMenu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise[CCNOISETIME]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoNoiseBreathMenu(){
@@ -4281,8 +4516,10 @@ bool gotoNoiseBreathMenu(){
   myMenu.setCurrentMenu(&listNoiseBreathMenu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise[CCNOISEBREATHCURVE]-64);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoNoiseLevelMenu(){
@@ -4291,8 +4528,10 @@ bool gotoNoiseLevelMenu(){
   myMenu.setCurrentMenu(&listNoiseLevelMenu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"   %03d    ", current_patch.nrpn_msb_noise[CCNOISELEVEL]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 
@@ -4303,8 +4542,10 @@ bool gotoKeyTriggerMenu(){
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"  %s  ", 
       current_patch.nrpn_msb_common1[CCKEYTRIGGER]? "Single": "  Mult");
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoOctButtonLevelMenu(){
@@ -4313,8 +4554,10 @@ bool gotoOctButtonLevelMenu(){
   myMenu.setCurrentMenu(&listOctButtonLevelMenu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_common2[CCOCTBUTTONLEVEL]);
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBendRangeMenu(){
@@ -4323,8 +4566,10 @@ bool gotoBendRangeMenu(){
   myMenu.setCurrentMenu(&listBendRangeMenu);
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"  %03d    ", current_patch.nrpn_msb_common1[CCBENDRANGE]); // 0 12 semitones
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 bool gotoBendStepMenu(){
@@ -4334,21 +4579,30 @@ bool gotoBendStepMenu(){
   myMenu.knobAcceleration = 1;
   sprintf(myMenu.str_oledbuf,"   %s    ", 
       current_patch.nrpn_msb_common1[CCBENDSTEP]? " On": "Off");
-  display.clearDisplay(); // erase display
-  display.println(myMenu.str_oledbuf);
+  //display.clearDisplay(); // erase display
+  //display.println(myMenu.str_oledbuf);
+  display.clearBuffer(); // erase display
+  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
   return true;
 }
 
 
 
+void helpSysAdjGoto(){
+  myMenu.previousMenuStack.push(myMenu.currentMenu);
+  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  display.clearBuffer(); // erase display
+  display.sendBuffer(); // refresh display
 
+}
 
 // systemAdjMenu Menu functions
 bool gotoAuxInMenu() {
-  myMenu.previousMenuStack.push(myMenu.currentMenu);
-  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
-  display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  helpSysAdjGoto();
+  //myMenu.previousMenuStack.push(myMenu.currentMenu);
+  //myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  //display.clearDisplay(); // erase display
+  //display.display(); // refresh display
   myMenu.setCurrentMenu(&listAuxInMenu);
   sprintf(myMenu.str_oledbuf,"  %ld   ", mix_linein);
   display.println(myMenu.str_oledbuf);
@@ -4356,10 +4610,11 @@ bool gotoAuxInMenu() {
 }
 
 bool gotoOctaveMenu() {
-  myMenu.previousMenuStack.push(myMenu.currentMenu);
-  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
-  display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  helpSysAdjGoto();
+  //myMenu.previousMenuStack.push(myMenu.currentMenu);
+  //myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  //display.clearDisplay(); // erase display
+  //display.display(); // refresh display
   myMenu.setCurrentMenu(&listOctaveMenu);
   sprintf(myMenu.str_oledbuf,"  %ld   ", Octave);
   display.println(myMenu.str_oledbuf);
@@ -4367,10 +4622,11 @@ bool gotoOctaveMenu() {
 }
 
 bool gotoSemiMenu() {
-  myMenu.previousMenuStack.push(myMenu.currentMenu);
-  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
-  display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  helpSysAdjGoto();
+  //myMenu.previousMenuStack.push(myMenu.currentMenu);
+  //myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  //display.clearDisplay(); // erase display
+  //display.display(); // refresh display
   myMenu.setCurrentMenu(&listSemiMenu);
   sprintf(myMenu.str_oledbuf,"  %ld   ", Transpose);
   display.println(myMenu.str_oledbuf);
@@ -4378,10 +4634,11 @@ bool gotoSemiMenu() {
 }
 
 bool gotoCentsMenu() {
-  myMenu.previousMenuStack.push(myMenu.currentMenu);
-  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
-  display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  helpSysAdjGoto();
+  //myMenu.previousMenuStack.push(myMenu.currentMenu);
+  //myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  //display.clearDisplay(); // erase display
+  //display.display(); // refresh display
   myMenu.setCurrentMenu(&listCentsMenu);
   sprintf(myMenu.str_oledbuf,"  %ld   ", FineTuneCents);
   display.println(myMenu.str_oledbuf);
@@ -4389,10 +4646,11 @@ bool gotoCentsMenu() {
 }
 
 bool gotoBreathCCMenu() {
-  myMenu.previousMenuStack.push(myMenu.currentMenu);
-  myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
-  display.clearDisplay(); // erase display
-  display.display(); // refresh display
+  helpSysAdjGoto();
+  //myMenu.previousMenuStack.push(myMenu.currentMenu);
+  //myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
+  //display.clearDisplay(); // erase display
+  //display.display(); // refresh display
   myMenu.setCurrentMenu(&listBreathCCMenu);
   //TODO: handle Channel Aftertouch
   sprintf(myMenu.str_oledbuf,"  %ld   ", breath_cc);

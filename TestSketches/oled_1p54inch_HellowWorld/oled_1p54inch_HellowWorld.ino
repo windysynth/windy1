@@ -86,11 +86,17 @@
 //U8G2_SSD1306_128X64_NONAME_1_3W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* reset=*/ 8);
 //U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 //U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE, &Wire1);
+//U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* clock=*/ 16, /* data=*/ 17, /* reset=*/ U8X8_PIN_NONE);
 //U8G2_SSD1306_128X64_ALT0_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);   // same as the NONAME variant, but may solve the "every 2nd line skipped" problem
 //U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ 13, /* data=*/ 11, /* reset=*/ 8);
 //U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE, &Wire1);   // All Boards without Reset of the Display
-U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ 16, /* data=*/ 17, /* reset=*/ U8X8_PIN_NONE);   // ESP32 Thing, pure SW emulated I2C
+
+//this one works, but it is SLOW!!!
+//U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ 16, /* data=*/ 17, /* reset=*/ U8X8_PIN_NONE);   // ESP32 Thing, pure SW emulated I2C
+
+//U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE, /* clock=*/ SCL1, /* data=*/ SDA1);
 //U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE, /* clock=*/ 16, /* data=*/ 17);   // ESP32 Thing, HW I2C with pin remapping
+
 //U8G2_SSD1306_128X64_NONAME_1_6800 u8g2(U8G2_R0, 13, 11, 2, 3, 4, 5, 6, A4, /*enable=*/ 7, /*cs=*/ 10, /*dc=*/ 9, /*reset=*/ 8);
 //U8G2_SSD1306_128X64_NONAME_1_8080 u8g2(U8G2_R0, 13, 11, 2, 3, 4, 5, 6, A4, /*enable=*/ 7, /*cs=*/ 10, /*dc=*/ 9, /*reset=*/ 8);
 //U8G2_SSD1306_128X64_VCOMH0_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);	// same as the NONAME variant, but maximizes setContrast() range
@@ -410,8 +416,12 @@ U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ 16, /* data=*/ 17,
 //U8G2_GU800_160X16_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);
 //U8G2_GP1294AI_256X48_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/10, /* dc=*/U8X8_PIN_NONE, /* reset=*/8);
 
+//U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE, U8X8_PIN_NONE, U8X8_PIN_NONE, &Wire1); 
+
+U8G2_SSD1306_128X64_NONAME_F_2ND_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
 
+char str_buf[64] = {0};
 
 // End of constructor list
 
@@ -438,26 +448,50 @@ void setup(void) {
   /* U8g2 Project: Pax Instruments Shield: Enable Backlight */
   //pinMode(6, OUTPUT);
   //digitalWrite(6, 0);	
-  Wire1.begin();
+ Wire1.begin();
+ //Wire1.setSDA(17);
+ //Wire1.setSCL(16);
+  Wire1.setClock(1000000);
   u8g2.begin();  //begin calls ug82.cleardispaly();
 
 }
 
+void drawStrNl(int x, int y, const char* str){
+    int bufIdx = 0;
+    //str_buf using global so we allocate it statically
+    for (int i = 0; str[i] != '\0'; i++){
+        if ( str[i] == '\n') {
+            str_buf[bufIdx] = '\0'; 
+            u8g2.drawStr(x, y, str_buf);
+            y += u8g2.getMaxCharHeight(); // Move to next line
+            bufIdx = 0;         // reset buffer index
+        } else {
+            str_buf[bufIdx++] = str[i]; 
+        }
+    }
+    // Print any remaining text after the last \n or if no \n was present
+    str_buf[bufIdx] = '\0'; // Null-terminatet t
+    u8g2.drawStr(x, y, str_buf);
+}
+
+
 void loop(void) {
-  
-  std::vector<int> numbers = {7,14,21,28,35,42,49,56,63};
-  for(int num : numbers){
+  u8g2.setFont(u8g2_font_spleen6x12_mn );
+  int fontV = u8g2.getMaxCharHeight();
+  int itemsPerScreen = u8g2.getDisplayHeight()/fontV; 
+  std::vector<int> numbers = {8,16,24,32,40,48,56,64};
+  for(int line = 1; line<itemsPerScreen; line++){
     u8g2.firstPage();
     do {
       //u8g2.drawHLine(0,0,10);
       //u8g2.drawHLine(0,31,10);    
 
       //u8g2.setFont(u8g2_font_ncenB10_tr);
-      u8g2.setFont(u8g2_font_5x7_mf );
-      u8g2.drawStr(0,num,"0123456789ABCDEFGHIJKLMNOP");
+      drawStrNl(0,line*fontV,"0123456789\nABCDEFGHIJKLMNOP");
     } while ( u8g2.nextPage() );
-    delay(50);
+    delay(1);
   }
-  delay(100);
+  delay(300);
 }
+
 

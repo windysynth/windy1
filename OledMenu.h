@@ -4,7 +4,7 @@
 //#include "globals.h"
 
 
-#define ENCODER_DO_NOT_USE_INTERRUPTS
+//#define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h> 
 #include <Bounce2.h>
 
@@ -51,6 +51,7 @@ public:
   selection_t selectionMade(); // Checks if a selection has been made
   void doMenu(); // overiding MenuClass::doMenu() to handle leaf menus
   void displayMenu(); // 
+  void drawStrNl(int x, int y, const char* str);
   char str_oledbuf[64] = {0};
   char str_namingbuf[32] = {0};
   int namingPos = 0;

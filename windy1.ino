@@ -518,7 +518,7 @@ void setup() {
     // put your setup code here, to run once:
     
     //init str buffers
-    sprintf(str_buf, version_str.c_str());
+    //sprintf(str_buf, version_str.c_str());
     sprintf(str_buf1, version_str.c_str());
     sprintf(myMenu.str_oledbuf, splashScreen_str.c_str());
 
@@ -1068,6 +1068,7 @@ void setup() {
     //readPot();
     knobBot.write(0); // reset knobBot position to zero
 
+/*
     // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
     if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
         Serial8.println("SSD1306 allocation failed");
@@ -1084,6 +1085,17 @@ void setup() {
         display.display();
         //resetUITimeout();
     }
+*/
+    Wire1.begin();
+    if(!display.begin()) { // begin() will reset, configure, clear and disable power save
+        // should never get here
+        Serial8.println("u8g2 allocation failed");
+    }
+    //display.setFont(u8g2_font_5x7_mf); // lines start at {7,14,21,28,35,42,49,56,63};
+    display.setFont(u8g2_font_6x10_mf  ); // lines start at {8,16,24,32,40,48,56,64};
+    //display.drawStr(0,display.getMaxCharHeight(),myMenu.str_oledbuf);
+    myMenu.drawStrNl(0,display.getMaxCharHeight(),myMenu.str_oledbuf);
+    display.sendBuffer();
 
     myMenu.setCurrentMenu(&listTopMenu);
     Serial8.println(myMenu.str_oledbuf);
@@ -1894,16 +1906,16 @@ void processMIDI(bool midi_from_host_flag)
       channel =    MIDIs1.getChannel();
     } 
      // const uint8_t *sys = midi_ho.getSysExArray();
-     //sprintf(str_buf, "type: %d, data1: %d, data2: %d, channel: %d", type,data1, data2, channel);
-     //Serial8.println(str_buf);
+     //sprintf(str_buf1, "type: %d, data1: %d, data2: %d, channel: %d", type,data1, data2, channel);
+     //Serial8.println(str_buf1);
 
     switch (type) 
     {
         case midi_ho.ProgramChange: //0xC0
             programChangeData = data1;
             programChangeFlag = true; // used in UISM
-            sprintf(str_buf, "type: %d, data1: %d, channel: %d", type,data1, channel);
-            Serial8.println(str_buf);
+            sprintf(str_buf1, "type: %d, data1: %d, channel: %d", type,data1, channel);
+            Serial8.println(str_buf1);
             if (midi_from_host_flag)
                 MIDIs1.sendProgramChange(data1,channel);
             break;
@@ -2214,8 +2226,8 @@ void processMIDI(bool midi_from_host_flag)
             dc_pitchbend.amplitude((data1+data2*128.0-8192.0)*DIV8192, dc_pitchbend_ramp_rate);
             break;
         default: 
-            sprintf(str_buf, "Default! type: %d, data1: %d, channel: %d", type,data1, channel);
-            Serial8.println(str_buf);
+            sprintf(str_buf1, "Default! type: %d, data1: %d, channel: %d", type,data1, channel);
+            Serial8.println(str_buf1);
             break;
 
     } // switch (type)
@@ -2258,10 +2270,12 @@ void noteOffFun(void){
 
 void UITimeout(void)
 {
-        display.clearDisplay(); // erase display
-        display.display(); 
+//  display.clearDisplay(); // erase display
+//  display.display(); 
+    display.clearBuffer();
+    display.sendBuffer();
         // TODO: resetUISM();
-        ALREADY_TIMED_OUT = true;
+    ALREADY_TIMED_OUT = true;
 }
 
 void resetUITimeout(void)
@@ -2274,8 +2288,8 @@ void resetUITimeout(void)
 void EEPROM_update(int addr, int val){  
    int temp_var;
    EEPROM.get(addr, temp_var);
-   sprintf(str_buf, "addr: %d, temp_var: %d, val: %d", addr, temp_var, val);
-   Serial8.println(str_buf);
+   sprintf(str_buf1, "addr: %d, temp_var: %d, val: %d", addr, temp_var, val);
+   Serial8.println(str_buf1);
    if( temp_var != val ){
       EEPROM.put(addr, val);
     }

@@ -7,9 +7,12 @@
 #include <SD.h>
 #include "OledMenu.h"
 #include "patches.h"
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#include <Fonts/FreeMono9pt7b.h>
+
+//#include <Adafruit_GFX.h>
+//#include <Adafruit_SSD1306.h>
+//#include <Fonts/FreeMono9pt7b.h>
+#include <U8g2lib.h>
+
 
 #define CC_MODULATION_WHEEL               1
 #define CC_BREATH                         2
@@ -29,7 +32,9 @@
 #define OLED_RESET     33 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 //Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET); // in globals.cpp
-extern Adafruit_SSD1306 display;  // MenuItemsListFuncs.cpp
+//extern Adafruit_SSD1306 display;  // MenuItemsListFuncs.cpp
+//extern U8G2_SSD1306_128X64_NONAME_F_SW_I2C display;
+extern U8G2_SSD1306_128X64_NONAME_F_2ND_HW_I2C display;
 
 
 extern int currentPatch;

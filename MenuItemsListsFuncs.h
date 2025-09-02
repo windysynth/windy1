@@ -626,6 +626,7 @@ extern bool gotoBendStepMenu();
 
 
 // System Adj Menu functions
+extern void helpSysAdjGoto();
 extern bool gotoAuxInMenu();
 extern bool gotoOctaveMenu();
 extern bool gotoSemiMenu();

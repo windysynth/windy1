@@ -16,6 +16,9 @@
  *****************************/
 
 void OledMenu::doMenu(){
+  //int fontV = display.getAscent()-display.getDescent();
+  int fontV = display.getMaxCharHeight();
+  int fontH = display.getMaxCharWidth();
   if (escape()) {
     Serial8.println("escape()");
     //setCurrentMenu(&listEscapeMenu);
@@ -47,6 +50,12 @@ void OledMenu::doMenu(){
     //if(!runFunction()) { display.print("updateLeafValue ERROR!"); return;} 
     runningFunction = !runFunction();
     Serial8.println(str_oledbuf);
+    display.drawStr(0,2*fontV,"          ");
+    display.drawStr(0,3*fontV,"          ");
+    display.drawStr(0,4*fontV,"          ");
+    display.drawStr(2*fontH,2*fontV,str_oledbuf);
+    display.sendBuffer();
+    /*
     display.setCursor(0,18);
     display.println("          ");
     display.println("          ");
@@ -54,6 +63,7 @@ void OledMenu::doMenu(){
     display.setCursor(0,18);
     display.println(str_oledbuf);
     display.display();
+    */
     return; 
   } 
   knobButtonSelType = selectionMade();
@@ -205,15 +215,18 @@ selection_t OledMenu::selectionMade() {
 
 void OledMenu::displayMenu() {
     char outBuf[10];
-    display.setCursor(0,0);
-    int itemsPerScreen = 4;
+    //display.setCursor(0,0);
+    int fontV = display.getMaxCharHeight();
+    int fontH = display.getMaxCharWidth();
+    int itemsPerScreen = display.getDisplayHeight()/fontV;
     int menuSize = currentMenu->getSize();
     int topScreenIndex = (currentItemIndex/itemsPerScreen)*itemsPerScreen; //int div for truncate
     int botScreenIndex = topScreenIndex + itemsPerScreen; 
+    int currentScreenIndex = 0;
 
     if (menuSize == 1) {
-        //display.print("  ");
         getText(outBuf, 0);
+        /*
         display.println(outBuf);
         display.setCursor(0,18);
         display.println("          ");
@@ -222,6 +235,11 @@ void OledMenu::displayMenu() {
         display.setCursor(0,18);
         display.println(str_oledbuf);
         display.display(); 
+        */
+        display.drawStr(0,fontV,outBuf);
+        display.drawStr(0,fontV*2,"          ");
+        display.drawStr(0,fontV*3,"          ");
+        display.drawStr(0,fontV*4,"          ");
         Serial8.println(outBuf);
         Serial8.print(F("display Menu, menuSize = "));
         Serial8.println(menuSize);
@@ -230,22 +248,28 @@ void OledMenu::displayMenu() {
     for (int i = topScreenIndex; i < botScreenIndex; i++) {
       if (i == currentItemIndex) {
         Serial8.print("->");
-        display.print("->");
+        //display.print("->");
+        display.drawStr(0,fontV*(1+currentScreenIndex),"->");
       }
       else {
         Serial8.print("  ");
-        display.print("  ");
+        //display.print("  ");
+        display.drawStr(0,fontV*(1+currentScreenIndex),"  ");
       }
       // use getText method to pull text out into a buffer you can print
       if (i < menuSize){
           getText(outBuf, i);
-          display.println(outBuf);
+          //display.println(outBuf);
+          display.drawStr(2*fontH,fontV*(1+currentScreenIndex),outBuf);
       } else { 
-          display.println("        ");
+          //display.println("        ");
+          display.drawStr(2*fontH,fontV*(1+currentScreenIndex),"        ");
       }
+      currentScreenIndex++;
       Serial8.println(outBuf);
-      display.display(); 
+      //display.display(); 
     }
+      display.sendBuffer(); 
 
     Serial8.print(F("currentItemIndex =  "));
     Serial8.println(currentItemIndex);
@@ -254,5 +278,22 @@ void OledMenu::displayMenu() {
     }
 }
 
+void OledMenu::drawStrNl(int x, int y, const char* str){
+    int bufIdx = 0;
+    //str_buf using global so we allocate it statically
+    for (int i = 0; str[i] != '\0'; i++){
+        if ( str[i] == '\n') {
+            str_buf[bufIdx] = '\0'; 
+            display.drawStr(x, y, str_buf);
+            y += display.getMaxCharHeight(); // Move to next line
+            bufIdx = 0;         // reset buffer index
+        } else {
+            str_buf[bufIdx++] = str[i]; 
+        }
+    }
+    // Print any remaining text after the last \n or if no \n was present
+    str_buf[bufIdx] = '\0'; // Null-terminatet t
+    display.drawStr(x, y, str_buf);
+}
 
 
