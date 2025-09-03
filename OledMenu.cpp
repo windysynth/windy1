@@ -18,7 +18,7 @@
 void OledMenu::doMenu(){
   //int fontV = display.getAscent()-display.getDescent();
   int fontV = display.getMaxCharHeight();
-  int fontH = display.getMaxCharWidth();
+  //int fontH = display.getMaxCharWidth();
   if (escape()) {
     Serial8.println("escape()");
     //setCurrentMenu(&listEscapeMenu);
@@ -50,10 +50,11 @@ void OledMenu::doMenu(){
     //if(!runFunction()) { display.print("updateLeafValue ERROR!"); return;} 
     runningFunction = !runFunction();
     Serial8.println(str_oledbuf);
-    display.drawStr(0,2*fontV,"          ");
-    display.drawStr(0,3*fontV,"          ");
-    display.drawStr(0,4*fontV,"          ");
-    display.drawStr(2*fontH,2*fontV,str_oledbuf);
+    //display.drawStr(0,2*fontV,"             "); // TODO: draw black box instead
+    //display.drawStr(0,3*fontV,"             ");
+    //display.drawStr(0,4*fontV,"             ");
+    //display.drawStr(2*fontH,2*fontV,str_oledbuf);
+    drawStrNl(0,2*fontV,str_oledbuf);
     display.sendBuffer();
     /*
     display.setCursor(0,18);
@@ -225,7 +226,7 @@ void OledMenu::displayMenu() {
     int currentScreenIndex = 0;
 
     if (menuSize == 1) {
-        getText(outBuf, 0);
+        getText(outBuf, 0); // text from MenuItem (e.g., "Patch:")
         /*
         display.println(outBuf);
         display.setCursor(0,18);
@@ -237,9 +238,11 @@ void OledMenu::displayMenu() {
         display.display(); 
         */
         display.drawStr(0,fontV,outBuf);
-        display.drawStr(0,fontV*2,"          ");
-        display.drawStr(0,fontV*3,"          ");
-        display.drawStr(0,fontV*4,"          ");
+        //display.drawStr(0,fontV*2,"          ");
+        //display.drawStr(0,fontV*3,"          ");
+        //display.drawStr(0,fontV*4,"          ");
+        //display.drawStr(0,fontV*2,str_oledbuf);
+        display.sendBuffer();
         Serial8.println(outBuf);
         Serial8.print(F("display Menu, menuSize = "));
         Serial8.println(menuSize);
@@ -280,12 +283,21 @@ void OledMenu::displayMenu() {
 
 void OledMenu::drawStrNl(int x, int y, const char* str){
     int bufIdx = 0;
+    int fontV = display.getMaxCharHeight();
+    //int fontH = display.getMaxCharWidth();
+    int dispH = display.getDisplayWidth();
+    //int fontD = display.getDescent();
+    int fontA = display.getAscent();
+
     //str_buf using global so we allocate it statically
     for (int i = 0; str[i] != '\0'; i++){
         if ( str[i] == '\n') {
             str_buf[bufIdx] = '\0'; 
+            display.setDrawColor(0);
+            display.drawBox(0,y-fontA,dispH,fontV);
+            display.setDrawColor(1);
             display.drawStr(x, y, str_buf);
-            y += display.getMaxCharHeight(); // Move to next line
+            y += fontV; // Move to next line
             bufIdx = 0;         // reset buffer index
         } else {
             str_buf[bufIdx++] = str[i]; 
@@ -293,6 +305,9 @@ void OledMenu::drawStrNl(int x, int y, const char* str){
     }
     // Print any remaining text after the last \n or if no \n was present
     str_buf[bufIdx] = '\0'; // Null-terminatet t
+    display.setDrawColor(0);
+    display.drawBox(0,y-fontA,dispH,fontV);
+    display.setDrawColor(1);
     display.drawStr(x, y, str_buf);
 }
 

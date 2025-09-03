@@ -159,7 +159,7 @@ bool fxSourceFun() {
  return goUpOneMenu(); 
 }
 MenuItem PROGMEM patchSelectMenu[1] = {
-    { "Patch:\n " , patchSelectFun   }
+    { "Patch: " , patchSelectFun   }
 };
 // patchSelectMenu function
 bool patchSelectFun() {
@@ -182,8 +182,12 @@ bool patchSelectFun() {
         loadPatchSD(current_patchNumber);
     }
     String ps( current_patch.patch_string );
-    ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
-    sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
+    //ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+    //sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
+    char pn[3] ={0};
+    sprintf(pn, "%03d", current_patchNumber+1 );
+    display.drawStr(7*display.getMaxCharWidth(),display.getMaxCharHeight(),pn);
+    sprintf(myMenu.str_oledbuf, " %s", ps.c_str() );
     Serial8.println(current_patch.patch_string);
 
 //    if (updateEpromFlag)
@@ -208,10 +212,11 @@ MenuItem PROGMEM patchResetMenu[2] = {
 bool patchResetFun(){ return goUpOneMenu(); }
 
 MenuItem PROGMEM patchPasteMenu[1] = {
-   { "Paste   " , patchPasteFun   }
+   { "Paste  " , patchPasteFun   }
 };
 bool patchPasteFun(){ 
   if(myMenu.updateLeafValue){
+      char pn[3] ={0};
       paste_patchNumber += myMenu.updateLeafValue;
     if(paste_patchNumber > NUMBER_OF_PATCHES ){
         paste_patchNumber = 0; 
@@ -220,12 +225,18 @@ bool patchPasteFun(){
         paste_patchNumber = NUMBER_OF_PATCHES; 
     } 
     if (paste_patchNumber == NUMBER_OF_PATCHES){
-        sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+        sprintf(pn, "   ");
+        display.drawStr(7*display.getMaxCharWidth(),display.getMaxCharHeight(),pn);
+        sprintf(myMenu.str_oledbuf, "Exit w/o saving");
+        //sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
     }
     else { 
+        sprintf(pn, "%03d", paste_patchNumber+1 );
+        display.drawStr(7*display.getMaxCharWidth(),display.getMaxCharHeight(),pn);
         String ps( loadedPatches[paste_patchNumber].patch_string );
-        ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
-        sprintf(myMenu.str_oledbuf, "%03d\n%s", paste_patchNumber+1, ps.c_str() );
+        sprintf(myMenu.str_oledbuf, " %s", ps.c_str() );
+        //ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+        //sprintf(myMenu.str_oledbuf, "%03d\n%s", paste_patchNumber+1, ps.c_str() );
         Serial8.println(loadedPatches[paste_patchNumber].patch_string);
         // load the patch 
         if (!patchLoaded[paste_patchNumber])
@@ -2848,7 +2859,7 @@ bool gotoVolAdjMenu() {
   myMenu.setCurrentMenu(&listVolAdjustMenu);
   myMenu.knobAcceleration = 4;
   sprintf(myMenu.str_oledbuf,"  %ld   ", vol);
-  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
+  display.drawStr(0,2*display.getMaxCharHeight(),myMenu.str_oledbuf); //2nd line
   //display.println(myMenu.str_oledbuf);
   return true;
 }
@@ -2861,10 +2872,16 @@ bool gotoPatchSelectMenu() {
   myMenu.setCurrentMenu(&listPatchSelectMenu);
   myMenu.knobAcceleration = 1;
   String ps( current_patch.patch_string );
-  ps.setCharAt( ps.indexOf(' '), '\n'); 
-  sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
-  //display.println(myMenu.str_oledbuf);
-  display.drawStr(0,14,myMenu.str_oledbuf); //TODO: is 14 the correct place?
+  //ps.setCharAt( ps.indexOf(' '), '\n'); 
+  //sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
+  //sprintf(myMenu.str_oledbuf, "%03d %s", current_patchNumber+1, ps.c_str() );
+    //sprintf(myMenu.str_oledbuf, "%03d\n%s", current_patchNumber+1, ps.c_str() );
+  char pn[3] ={0};
+  sprintf(pn, "%03d", current_patchNumber+1 );
+  display.drawStr(7*display.getMaxCharWidth(),display.getMaxCharHeight(),pn);
+  //display.sendBuffer(); //draw number before "Patch: " 
+  sprintf(myMenu.str_oledbuf, " %s", ps.c_str() );
+  myMenu.drawStrNl(0,2*display.getMaxCharHeight(),myMenu.str_oledbuf); //2nd line
   Serial8.println(myMenu.str_oledbuf);
   return true;
 }
@@ -2904,13 +2921,23 @@ bool gotoPatchPasteMenu(){
   myMenu.previousItemIndexStack.push(myMenu.currentItemIndex);
   myMenu.setCurrentMenu(&listPatchPasteMenu);
   myMenu.knobAcceleration = 4;
+    char pn[3] ={0};
     if (paste_patchNumber == NUMBER_OF_PATCHES){
-        sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+        sprintf(pn, "   ");
+        display.drawStr(7*display.getMaxCharWidth(),display.getMaxCharHeight(),pn);
+        sprintf(myMenu.str_oledbuf, "Exit w/o saving");
+        //sprintf(myMenu.str_oledbuf, "Exit w/o\n saving");
+        myMenu.drawStrNl(0,2*display.getMaxCharHeight(),myMenu.str_oledbuf); //2nd line
     }
     else { 
+        sprintf(pn, "%03d", paste_patchNumber+1 );
+        display.drawStr(7*display.getMaxCharWidth(),display.getMaxCharHeight(),pn);
+
         String ps( loadedPatches[paste_patchNumber].patch_string );
-        ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
-        sprintf(myMenu.str_oledbuf, "%03d\n%s", paste_patchNumber+1, ps.c_str() );
+        sprintf(myMenu.str_oledbuf, " %s", ps.c_str() );
+        myMenu.drawStrNl(0,2*display.getMaxCharHeight(),myMenu.str_oledbuf); //2nd line
+        //ps.setCharAt( ps.indexOf(' '), '\n'); // TODO: spaces till end of line then \n
+        //sprintf(myMenu.str_oledbuf, "%03d\n%s", paste_patchNumber+1, ps.c_str() );
         Serial8.println(loadedPatches[paste_patchNumber].patch_string);
         // load the patch 
         if (!patchLoaded[paste_patchNumber])
