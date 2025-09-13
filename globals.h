@@ -63,9 +63,11 @@ extern int currentPatch;
 #endif
 extern const int topButtonPin;  
 extern const int botButtonPin;  
+extern const int pwrDownSensePin;  
 
 extern Bounce topButton;
 extern Bounce botButton;
+extern Bounce pwrDownSense;
 
 extern int32_t newKnob;
 
@@ -89,6 +91,7 @@ extern String verTxt_str;
 extern String splashTxt; 
 extern String version_str;
 extern String splashScreen_str;
+extern bool SPLASH_SCREEN_ON;
 extern bool PRINT_VALUES_FLAG;
 extern char str_buf[];
 extern char str_buf1[];

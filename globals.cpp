@@ -41,6 +41,8 @@ const int topButtonPin = 27;  // teensy4.1 pin
 const int botButtonPin = 26;  // teensy4.1 pin
 Bounce topButton(topButtonPin, debounceDelay);
 Bounce botButton(botButtonPin, debounceDelay);
+const int pwrDownSensePin = 25;  // teensy4.1 pin
+Bounce pwrDownSense(pwrDownSensePin, 1); //1ms
 
 int32_t newKnob = 0;
 
@@ -57,11 +59,12 @@ uint8_t usbMidiNrpnMsbNew = 0;
 uint8_t usbMidiNrpnData = 0;
 
 // globals for debugging
-String verNum_str = {"0.2.2"};
+String verNum_str = {"0.2.2x2"};
 String verTxt_str = {"version: "}; 
 String splashTxt = {"Windy 1\n  ver:\n   "}; 
 String version_str = verTxt_str + verNum_str;
 String splashScreen_str = {splashTxt + verNum_str};
+bool SPLASH_SCREEN_ON = true;
 char str_buf[64] = {0};
 char str_buf1[64] = {0};
 //char str_oledbuf[64] = {0}; // see OledMenu.h

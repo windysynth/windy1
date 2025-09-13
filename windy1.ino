@@ -521,7 +521,8 @@ void setup() {
     //sprintf(str_buf, version_str.c_str());
     sprintf(str_buf1, version_str.c_str());
     sprintf(myMenu.str_oledbuf, splashScreen_str.c_str());
-
+    
+    pinMode_INPUT_PULLUP_100K(pwrDownSensePin);
 #ifdef HW_VERSION_DUAL_ENCODER
     pinMode(knobTopButtonPin, INPUT_PULLUP);
     pinMode(knobBotButtonPin, INPUT_PULLUP);
@@ -1092,10 +1093,11 @@ void setup() {
         Serial8.println("u8g2 allocation failed");
     }
     //display.setFont(u8g2_font_5x7_mf); // lines start at {7,14,21,28,35,42,49,56,63};
-    display.setFont(u8g2_font_6x10_mf  ); // lines start at {8,16,24,32,40,48,56,64};
+    display.setFont(u8g2_font_10x20_mf  ); // lines start at {8,16,24,32,40,48,56,64};
     //display.drawStr(0,display.getMaxCharHeight(),myMenu.str_oledbuf);
     myMenu.drawStrNl(0,display.getMaxCharHeight(),myMenu.str_oledbuf);
     display.sendBuffer();
+    display.setFont(u8g2_font_6x10_mf  ); // lines start at {8,16,24,32,40,48,56,64};
 
     myMenu.setCurrentMenu(&listTopMenu);
     Serial8.println(myMenu.str_oledbuf);
@@ -1118,6 +1120,12 @@ void setup() {
     env_squelchR.release(squelchRelease);
     env_squelchR.releaseNoteOn(squelchRelease);
     env_squelchR.noteOn();
+
+    //------wait till powered up-------------
+    do{
+        pwrDownSense.update();  
+    } while( !pwrDownSense.read());  // false means powered down
+
 } // setup()
 
 void loop() 
@@ -1159,7 +1167,18 @@ void loop()
         }
     }
     */
-    
+
+    //------------ check for SGTL5000 pwr down-------------
+    pwrDownSense.update();  
+    if( !pwrDownSense.read()){
+        sgtl_power_down(); // shut down dac "vag" to avoid audio "pop".
+        //display.setFont(u8g2_font_10x20_mf  ); // lines start at {8,16,24,32,40,48,56,64};
+        //display.drawStr(20,20,"BYE!");
+        //display.sendBuffer();
+        while(true){ }
+    } 
+    //-------------check for SGTL5000 pwr down-------------
+
     if(!activeButtons) {
         activeButtons = myMenu.checkButtons();
     }
@@ -1170,6 +1189,7 @@ void loop()
         prevMilMenu = currentMillis;
         if(activeButtons) { myMenu.doMenu(); activeButtons = false; }
         if(activeButtonOrKnob | myMenu.reDoMenu) {
+            if(SPLASH_SCREEN_ON){ SPLASH_SCREEN_ON = false; gotoTopMenu(); }
             myMenu.doMenu();
             activeButtonOrKnob = false;
         } else if(programChangeFlag){
@@ -2294,3 +2314,52 @@ void EEPROM_update(int addr, int val){
       EEPROM.put(addr, val);
     }
 }
+
+void sgtl_power_down() {
+    // 1. Mute the headphone outputs
+    sgtl5000_1.muteHeadphone();
+    sgtl5000_1.muteLineout();
+    
+    //ws, added to control_sgtl5000.h
+    sgtl5000_1.vagrampdown(); //ws, added to control_sgtl5000.h
+    
+    display.setFont(u8g2_font_10x20_mf  ); // lines start at {8,16,24,32,40,48,56,64};
+    display.drawStr(20,20,"BYE!");
+    display.sendBuffer();
+    delay(390); // VAG_POWERUP to 0, 200-400ms before HEADPNONE_POWERUP and LINEOUT_POWERUP to 0
+    
+    //ws, added to control_sgtl5000.h
+    sgtl5000_1.powerdownDACHp(); // DAC_POWERUP, HEADPNONE_POWERUP and LINEOUT_POWERUP to 0
+
+    //ws, added to control_sgtl5000.h
+    // sgtl5000_1.powerdownDAP();
+}
+
+
+// to get pullup value other than default 22k
+// https://forum.pjrc.com/index.php?threads/teensy-4-option-for-100-kohm-or-47-kohm-pull-up-setting-instead-of-22-kohm-default.70515/
+//use IOMUXC_PAD_PUS(2) for 100k pull-up or IOMUXC_PAD_PUS(1) for 47k pull-up, like so:
+void pinMode_INPUT_PULLUP_100K(uint8_t pin)
+{
+  const struct digital_pin_bitband_and_config_table_struct *p;
+
+  if (pin >= CORE_NUM_DIGITAL) return;
+  p = digital_pin_to_info_PGM + pin;
+  *(p->reg + 1) &= ~(p->mask); // TODO: atomic
+  *(p->pad) = IOMUXC_PAD_DSE(7) | IOMUXC_PAD_PKE | IOMUXC_PAD_PUE | IOMUXC_PAD_PUS(2) | IOMUXC_PAD_HYS;
+  *(p->mux) = 5 | 0x10;
+}
+
+void pinMode_INPUT_PULLUP_47K(uint8_t pin)
+{
+  const struct digital_pin_bitband_and_config_table_struct *p;
+
+  if (pin >= CORE_NUM_DIGITAL) return;
+  p = digital_pin_to_info_PGM + pin;
+  *(p->reg + 1) &= ~(p->mask); // TODO: atomic
+  *(p->pad) = IOMUXC_PAD_DSE(7) | IOMUXC_PAD_PKE | IOMUXC_PAD_PUE | IOMUXC_PAD_PUS(1) | IOMUXC_PAD_HYS;
+  *(p->mux) = 5 | 0x10;
+}
+
+
+

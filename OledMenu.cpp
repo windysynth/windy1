@@ -75,8 +75,8 @@ void OledMenu::doMenu(){
       Serial8.println("runningFunction true");
       return; // skip displaying the menu if we're going to run item function again.
     }
-  Serial8.println("call displayMenu()");
-  displayMenu();
+    Serial8.println("call displayMenu()");
+    displayMenu();
   }
 }
 
@@ -248,6 +248,7 @@ void OledMenu::displayMenu() {
         Serial8.println(menuSize);
         return;
     }
+
     for (int i = topScreenIndex; i < botScreenIndex; i++) {
       if (i == currentItemIndex) {
         Serial8.print("->");

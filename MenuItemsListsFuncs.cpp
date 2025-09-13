@@ -134,7 +134,6 @@ bool volAdjustFun() {
     Serial8.println(F("volAdjustFun: updated vol "));
     return true;
  }
-  //display.clearBuffer(); // erase display
   //display.clearDisplay(); // erase display
   //display.display(); // refresh display
   Serial8.println(F("volAdjustFun: goto TopMenu"));
