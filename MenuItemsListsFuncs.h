@@ -343,7 +343,7 @@ extern MenuList listChorusDelay2Menu;
 extern MenuList listChorusMod2Menu;
 extern MenuList listChorusWet2Menu;
 
-extern MenuList listOscOsc1Menu;
+extern MenuList listOctOsc1Menu;
 extern MenuList listSemiOsc1Menu;
 extern MenuList listCentsOsc1Menu;
 extern MenuList listBeatOsc1Menu;
