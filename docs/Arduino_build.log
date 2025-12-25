@@ -1,0 +1,25 @@
+"C:\\Users\\Tim King\\AppData\\Local\\Arduino15\\packages\\teensy\\tools\\teensy-tools\\0.60.1/stdout_redirect" "C:\\Users\\Tim King\\AppData\\Local\\Temp\\arduino\\sketches\\CDD3CFE907678C638B827CC2BC3A9917/windy1m.ino.lst" "C:\\Users\\Tim King\\AppData\\Local\\Arduino15\\packages\\teensy\\tools\\teensy-compile\\11.3.1/arm/bin/arm-none-eabi-objdump" -d -S -C "C:\\Users\\Tim King\\AppData\\Local\\Temp\\arduino\\sketches\\CDD3CFE907678C638B827CC2BC3A9917/windy1m.ino.elf"
+Multiple libraries were found for "Bounce2.h"
+  Used: C:\work\repositories\libraries\Bounce2
+  Not used: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\Bounce2
+Multiple libraries were found for "MIDI.h"
+  Used: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\MIDI
+  Not used: C:\work\repositories\libraries\MIDI_Library
+Multiple libraries were found for "SD.h"
+  Used: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\SD
+  Not used: C:\Users\Tim King\AppData\Local\Arduino15\libraries\SD
+Using library U8g2 at version 2.35.30 in folder: C:\work\repositories\libraries\U8g2 
+Using library Encoder at version 1.4.4 in folder: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\Encoder 
+Using library Bounce2 at version 2.71 in folder: C:\work\repositories\libraries\Bounce2 
+Using library SD at version 2.0.0 in folder: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\SD 
+Using library SdFat at version 2.1.2 in folder: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\SdFat 
+Using library SPI at version 1.0 in folder: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\SPI 
+Using library Audio at version 1.3 in folder: C:\work\repositories\libraries\Audio 
+Using library SerialFlash at version 0.5 in folder: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\SerialFlash 
+Using library USBHost_t36 at version 0.2 in folder: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\USBHost_t36 
+Using library MIDI Library at version 5.0.2 in folder: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\MIDI 
+Using library EEPROM at version 2.0 in folder: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\EEPROM 
+Using library OpenAudio_ArduinoLibrary in folder: C:\work\repositories\libraries\OpenAudio_ArduinoLibrary (legacy)
+Using library hexefx_audiolib_F32 at version 1.3.0 in folder: C:\work\repositories\libraries\hexefx_audiolib_F32 
+Using library Wire at version 1.0 in folder: C:\Users\Tim King\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\Wire 
+

@@ -1,0 +1,70 @@
+//https://www.janbob.com/electron/OpenAudio_Design_Tool/index.html?info=AudioOutputI2S_F32#
+
+#include "OpenAudio_ArduinoLibrary.h"
+#include "AudioStream_F32.h"
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
+
+// GUItool: begin automatically generated code
+AudioInputI2S_F32        audioInI2S1;    //xy=182.1666717529297,24.16667938232422
+AudioConvert_I16toF32    Int2FloatL;     //xy=182.74998474121094,207.99996948242188
+AudioConvert_I16toF32    Int2FloatR;     //xy=183.99998474121094,256.2499694824219
+AudioOutputI2S_F32       audioOutI2S1;   //xy=349.16668701171875,26.166664123535156
+AudioEffectGain_F32      amp_extraGainR_F32; //xy=523,261.9999694824219
+AudioEffectGain_F32      amp_extraGainL_F32; //xy=527.25,216.74996948242188
+AudioMixer4_F32          mix_pongR_F32;  //xy=781.75,350.5
+AudioMixer4_F32          mix_pongL_F32;  //xy=786.75,184.25
+AudioConvert_F32toI16    Float2IntL;     //xy=964.75,226.24996948242188
+AudioConvert_F32toI16    Float2IntR;     //xy=967.5,298.7499694824219
+AudioConnection_F32          patchCord1(amp_extraGainR_F32, 0, mix_pongL_F32, 1);
+AudioConnection_F32          patchCord2(amp_extraGainR_F32, 0, mix_pongR_F32, 1);
+AudioConnection_F32          patchCord3(amp_extraGainL_F32, 0, mix_pongL_F32, 0);
+AudioConnection_F32          patchCord4(amp_extraGainL_F32, 0, mix_pongR_F32, 0);
+AudioConnection_F32          patchCord5(mix_pongR_F32, Float2IntR);
+AudioConnection_F32          patchCord6(mix_pongL_F32, Float2IntL);
+AudioControlSGTL5000     sgtl5000_1;     //xy=187.99998474121094,141.99996948242188
+// GUItool: end automatically generated code
+
+
+
+// https://hexeguitar.github.io/hexefx_audiolib_F32/gui/index.html?info=AudioOutputI2S2_F32#
+
+#include "OpenAudio_ArduinoLibrary.h"
+#include "hexefx_audiolib_F32.h"
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
+
+// GUItool: begin automatically generated code
+AudioConvert_I16toF32    Int2FloatR;     //xy=169.33326721191406,433
+AudioConvert_I16toF32    Int2FloatL;     //xy=172.33326721191406,471
+AudioInputI2S2_F32       i2s2In_f32_1;   //xy=214.3333282470703,238.3333282470703
+AudioEffectDelayStereo_F32 delay_F32; //xy=348.333251953125,447
+AudioOutputI2S2_F32      i2s2Out_f32_1;  //xy=377.33331298828125,239.33334350585938
+AudioEffectPlateReverb_F32 verb_F32;       //xy=511.3333282470703,448.0000305175781
+AudioEffectGain_F32      amp_extraGainR_F32; //xy=707.3333282470703,494.0000305175781
+AudioEffectGain_F32      amp_extraGainL_F32; //xy=722.3333282470703,413.0000305175781
+AudioMixer4_F32          mix_pongR_F32;  //xy=942.3333129882812,501.0000305175781
+AudioMixer4_F32          mix_pongL_F32;  //xy=956.3333129882812,431.0000305175781
+AudioConvert_F32toI16    Float2IntL;     //xy=1134.3333129882812,432.0000305175781
+AudioConvert_F32toI16    Float2IntR;     //xy=1135.3333129882812,494.0000305175781
+AudioConnection_F32          patchCord1(Int2FloatR, 0, delay_F32, 0);
+AudioConnection_F32          patchCord2(Int2FloatL, 0, delay_F32, 1);
+AudioConnection_F32          patchCord3(delay_F32, 0, verb_F32, 0);
+AudioConnection_F32          patchCord4(delay_F32, 1, verb_F32, 1);
+AudioConnection_F32          patchCord5(verb_F32, 0, amp_extraGainL_F32, 0);
+AudioConnection_F32          patchCord6(verb_F32, 1, amp_extraGainR_F32, 0);
+AudioConnection_F32          patchCord7(amp_extraGainR_F32, 0, mix_pongL_F32, 1);
+AudioConnection_F32          patchCord8(amp_extraGainR_F32, 0, mix_pongR_F32, 1);
+AudioConnection_F32          patchCord9(amp_extraGainL_F32, 0, mix_pongL_F32, 0);
+AudioConnection_F32          patchCord10(amp_extraGainL_F32, 0, mix_pongR_F32, 0);
+AudioConnection_F32          patchCord11(mix_pongR_F32, Float2IntR);
+AudioConnection_F32          patchCord12(mix_pongL_F32, Float2IntL);
+AudioControlSGTL5000     sgtl5000_1;     //xy=188.3333282470703,366.99999237060547
+// GUItool: end automatically generated code
+

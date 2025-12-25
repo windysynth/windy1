@@ -1,0 +1,82 @@
+		{"type":"AudioConvert_I16toF32","data":{"defaults":{"name":{"value":"new"}},"shortName":"convert2float","inputs":1,"outputs":1,"category":"control-function","color":"#E6E0F8","icon":"arrow-in.png"}},
+		{"type":"AudioConvert_F32toI16","data":{"defaults":{"name":{"value":"new"}},"shortName":"convert2int","inputs":1,"outputs":1,"category":"control-function","color":"#E6E0F8","icon":"arrow-in.png"}},
+
+<!--
+{"type":"AudioEffectGain_F32","data":{"defaults":{"name":{"value":"new"}},"shortName":"gain","inputs":"1","output":"0","category":"float-function","color":"#E6E0F8","icon":"arrow-in.png"}},
+        {"type":"AudioEffectGain_F32","data":{"defaults":{"name":{"value":"new"}},"shortName":"gain","inputs":"1","output":"0","category":"float-function","color":"#66E0F8","icon":"arrow-in.png","outputs":"1"}},
+-->
+        
+<script type="text/x-red" data-help-name="AudioConvert_I16toF32">
+<h3>Summary</h3>
+	<div class=tooltipinfo>
+	<p>TODO: describe</p>
+	</div>
+	<h3>Functions</h3>
+	<p TODO: list functions;</p>
+	<h3>Examples</h3>
+	<h3>Notes</h3>
+	<p> TODO: Notes</p>
+</script>
+<script type="text/x-red" data-template-name="AudioConvert_I16toF32">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="Name">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="AudioConvert_F32toI16">
+<h3>Summary</h3>
+	<div class=tooltipinfo>
+	<p>TODO: describe</p>
+	</div>
+	<h3>Functions</h3>
+	<p TODO: list functions;</p>
+	<h3>Examples</h3>
+	<h3>Notes</h3>
+	<p> TODO: Notes</p>
+</script>
+<script type="text/x-red" data-template-name="AudioConvert_F32toI16">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="Name">
+	</div>
+</script>
+
+
+<!--
+<script type="text/x-red" data-help-name="AudioEffectGain_F32">
+    <h3>Summary</h3>
+    <div class=tooltipinfo>
+    <p>Scale the signal by a fixed amount.  The gain is applied on a per-block
+    (as opposed to a per-sample) basis.
+    </p>
+    </div>
+    <h3>Audio Connections</h3>
+    <table class=doc align=center cellpadding=3>
+        <tr class=top><th>Port</th><th>Purpose</th></tr>
+        <tr class=odd><td align=center>In 0</td><td>Signal Input</td></tr>
+        <tr class=odd><td align=center>Out 0</td><td>Result of Input Times Gain</td></tr>
+    </table>
+    <h3>Functions</h3>
+    <p>There are two functions for setting the gain of this block:</p>
+    <p class=func><span class=keyword>setGain</span>(gain);</p>
+    <p class=desc>Set the gain as a linear value.  A value between 0.0 and 1.0
+    attenuates the signal while a value above 1.0 amplifies the signal.  Negative
+    values will invert the signal.</p>
+    <p class=func><span class=keyword>setGain_dB</span>(gain_dB);</p>
+    <p class=desc>Set the gain using a decibel value (gain_dB = 20*log10(gain)).
+    A value less than zero attenuates the signal and a value greater than zero
+    amplifies the signal.  Phase inversion is not available.</p>
+    <h3>Examples</h3>
+    <p> TODO
+    </p>
+</script>
+<script type="text/x-red" data-template-name="AudioEffectGain_F32">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+-->
+
+
