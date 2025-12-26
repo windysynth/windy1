@@ -467,8 +467,8 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDIs1);
 
 //-------------- USB HOST MIDI Class Compliant ------------
 USBHost myUSBHost;
-// MIDIDevice midi_ho(myUSBHost);
-MIDIDevice_BigBuffer midi_ho(myUSBHost);
+MIDIDevice midi_ho(myUSBHost);
+//MIDIDevice_BigBuffer midi_ho(myUSBHost);
 
 //-------------- usbMIDI for USB MIDI devices --------------
 // usbMIDI is included in the Teensy Core Library, so usbMIDI.begin() not needed
@@ -2123,17 +2123,35 @@ void processMIDI(bool midi_from_host_flag)
     Serial8.println(str_buf1);
     if (midi_from_host_flag)
       MIDIs1.sendProgramChange(data1, channel);
+    else 
+    {
+      midi_ho.sendProgramChange(data1, channel);
+    }
     break;
   case midi_ho.AfterTouchPoly: // 0xA0
     if (midi_from_host_flag)
       MIDIs1.sendAfterTouch(data1, data2, channel);
+    else 
+    {
+      midi_ho.sendAfterTouch(data1, data2, channel);
+    }
     // MIDIs1.sendPolyPressure(data1,data2,channel); // deprecated, so use the overloaded one
+    break;
   case midi_ho.AfterTouchChannel: // 0xD0
     if (midi_from_host_flag)
       MIDIs1.sendAfterTouch(data1, channel); // TODO: add AT as method of breath control
+    else
+    {
+      midi_ho.sendAfterTouch(data1, channel); // TODO: add AT as method of breath control
+    }
+    break;
   case midi_ho.ControlChange:                // 0xB0
     if (midi_from_host_flag)
       MIDIs1.sendControlChange(data1, data2, channel);
+    else
+    {
+      midi_ho.sendControlChange(data1, data2, channel);
+    }
     switch (data1)
     {
     case CC_MODULATION_WHEEL:
@@ -2254,6 +2272,10 @@ void processMIDI(bool midi_from_host_flag)
   case midi_ho.NoteOn: //(type==0x90)
     if (midi_from_host_flag)
       MIDIs1.sendNoteOn(data1, data2, channel);
+    else
+    {
+      midi_ho.sendNoteOn(data1, data2, channel);
+    }
     //  TODO: create amplitude transition between legato notes
     if (data2 == 0)
     {
@@ -2444,12 +2466,20 @@ void processMIDI(bool midi_from_host_flag)
   case midi_ho.NoteOff: //(type==0x80)
     if (midi_from_host_flag)
       MIDIs1.sendNoteOff(data1, data2, channel);
+    else
+    {
+      midi_ho.sendNoteOff(data1, data2, channel);
+    }
     noteOffFun();
     break;
 
   case midi_ho.PitchBend:
     if (midi_from_host_flag)
       MIDIs1.sendPitchBend(data1 + data2 * 128 - 8192, channel); // 0 = no bend, -2^13 ot +2^13-1
+    else
+    {
+      midi_ho.sendPitchBend(data1 + data2 * 128 - 8192, channel); // 0 = no bend, -2^13 ot +2^13-1
+    }
     dc_pitchbend.amplitude((data1 + data2 * 128.0 - 8192.0) * DIV8192, dc_pitchbend_ramp_rate);
     break;
   default:
