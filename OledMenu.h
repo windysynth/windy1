@@ -36,8 +36,8 @@ public:
   bool checkButtonsAndKnobs(); // 
   bool checkButtons(); // 
   void resetButtonsAndKnobs(); // 
-  float knobButtonSingleClickInterval= 150;  // milliiseconds
-  float knobButtonDoubleClickInterval= 150;  // milliiseconds
+  float knobButtonSingleClickInterval= 250;  // milliiseconds
+  float knobButtonDoubleClickInterval= 250;  // milliiseconds
   float knobButtonLongPressInterval = 500;  // milliiseconds
   uint32_t lastClickTime = 0;
   selection_t knobButtonSelType = NONE;

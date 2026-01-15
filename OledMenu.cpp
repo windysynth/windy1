@@ -240,8 +240,9 @@ void OledMenu::displayMenu() {
           display.println("        ");
       }
       Serial8.println(outBuf);
-      display.display(); 
+      //display.display(); 
     }
+      display.display(); 
 
     Serial8.print(F("currentItemIndex =  "));
     Serial8.println(currentItemIndex);
