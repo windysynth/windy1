@@ -83,6 +83,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "effect_compressor.h"
 
 #include "patches.h"
+#include "WSM_logo_oled.h"
 
 const int ledPin = 13;
 
@@ -1085,14 +1086,16 @@ void setup()
     // should never get here
     Serial8.println("u8g2 allocation failed");
   }
-  // u8g2.setFont(u8g2_font_5x7_mf); // lines start at {7,14,21,28,35,42,49,56,63};
   //  set font for splash screen
-  u8g2.setFont(u8g2_font_10x20_mf); // lines start at {8,16,24,32,40,48,56,64};
-  // u8g2.drawStr(0,u8g2.getMaxCharHeight(),str_oledbuf);
-  // myMenu.drawStrNl(0,u8g2.getMaxCharHeight(),str_oledbuf); //"Nl to handle new line
   u8g2.clearBuffer();
   u8g2.sendBuffer();
-  genSplashScreen(); // uses str_oledbuf
+  u8g2.setFont(u8g2_font_10x20_mf); // lines start at {8,16,24,32,40,48,56,64};
+  genSplashScreen(true); // true uses bitmap 
+  u8g2.sendBuffer();
+  delay(2000); // show splash screen for 2s
+  // u8g2.drawStr(0,u8g2.getMaxCharHeight(),str_oledbuf);
+  u8g2.clearBuffer();
+  genSplashScreen(false); // uses str_oledbuf
   u8g2.sendBuffer();
   // set font for menu screens
   u8g2.setFont(u8g2_font_6x10_mf); // lines start at {8,16,24,32,40,48,56,64};
@@ -1130,7 +1133,7 @@ void setup()
     pwrDownSense.update();
   } while (!pwrDownSense.read()); // false means powered down
 
-  delay(3000); // show splash screen for 3s
+  delay(2000); // show splash text screen for 2s
   // initial draw
   ms->draw();
 }
@@ -1741,9 +1744,14 @@ void namingAborted()
   // do nothing special
 }
 
-void genSplashScreen()
+void genSplashScreen(bool bitmap_flag)
 {
-  drawStrNl(0, u8g2.getMaxCharHeight(), str_oledbuf); //"Nl to handle new line
+  if (!bitmap_flag)
+  {
+      drawStrNl(0, u8g2.getMaxCharHeight(), str_oledbuf); //"Nl to handle new line
+      return;
+  }
+  u8g2.drawXBMP(0, 0, 128, 64, WSM_logo_oled_bitmap); // <-- Use the array name from generated code
 }
 void drawStrNl(int x, int y, const char *str)
 {
