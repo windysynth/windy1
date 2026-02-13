@@ -291,6 +291,7 @@ AudioConnection          patchCord44(dc_breathOscFilter1, 0, mix_fcModFilter1, 0
 AudioConnection          patchCord45(dc_pwOsc2, 0, mix_pwOsc2, 0);
 AudioConnection          patchCord46(sq_swpflt1, 0, mlt_DepthFilterSign1, 0);
 AudioConnection          patchCord47(onepole_PreNoise, rms_filterPreNoise);
+AudioConnection          patchCord47a(onepole_PreNoise, 0, multiply2, 0);
 AudioConnection          patchCord48(mix_pwOsc1, 0, wfmod_pulseOsc1, 1);
 AudioConnection          patchCord49(dc_breathLfoFilter4, 0, mult_lfoDepthFilter4, 1);
 AudioConnection          patchCord50(dc_breathSweepOsc1, 0, mix_pitchModOsc1, 1);
@@ -371,7 +372,7 @@ AudioConnection_F32      patchCord124(amp_extraGainL_F32, 0, mix_pongR_F32, 0);
 AudioConnection          patchCord125(mix_oscPreComp, 0, compress_oscLevels1, 1);
 AudioConnection          patchCord126(mix_oscPreComp, 0, compress_oscLevels1, 2);
 AudioConnection          patchCord127(mix_oscPreComp, 0, compress_oscLevels2, 1);
-AudioConnection          patchCord128(mix_oscPreComp, 0, compress_oscLevels2, 0);
+AudioConnection          patchCord128(mix_oscPreComp, 0, compress_oscLevels2, 2);
 AudioConnection          patchCord129(mult_thCurveOsc2, 0, mix_oscPreComp, 1);
 AudioConnection          patchCord130(mult_thCurveOsc2, 0, compress_oscLevels2, 0);
 AudioConnection          patchCord131(mult_thCurveOsc1, 0, mix_oscPreComp, 0);
