@@ -1388,8 +1388,8 @@ void loop()
   noteFreqOsc1 = noteFreqOsc1 + BeatOsc1;                                                                    // BeatOsc1 is additive
   noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2 - 69.0) / 12);                                               // 69 is note number for A4=440Hz
   noteFreqOsc2 = noteFreqOsc2 + BeatOsc2;                                                                    // BeatOsc2 is additive
-  noteFreqFilterOsc1 = 440.0 * pow(2, (noteNumberOsc1 - 69.0f + 9.0f) / 12.0f);                              // 69 is note number for A4=440Hz
-  noteFreqFilterOsc2 = 440.0 * pow(2, (noteNumberOsc2 - 69.0f + 9.0f) / 12.0f);                              // 69 is note number for A4=440Hz
+  //noteFreqFilterOsc1 = 440.0 * pow(2, (noteNumberOsc1 - 69.0f + 9.0f) / 12.0f);                              // 69 is note number for A4=440Hz
+  //noteFreqFilterOsc2 = 440.0 * pow(2, (noteNumberOsc2 - 69.0f + 9.0f) / 12.0f);                              // 69 is note number for A4=440Hz
   noteFreqFilter5 = 440.0 * pow(2, (min(noteNumberOsc1, noteNumberOsc2) - 69.0) / 12);                       // always at noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
   keyfollowFilter1 = pow(2, (noteNumberFilter1 - offsetNoteKeyfollow) * KeyFollowOscFilter1 / 144.0);        // 72 is C5
   keyfollowFilter2 = pow(2, (noteNumberFilter1 - offsetNoteKeyfollow) * KeyFollowOscFilter2 / 144.0);        // 72 is C5
