@@ -11,4 +11,3 @@ C:\Users\<user_name>\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1
 with my forked version of this library (or just replace the files that are different with mine).
 Currently, you want the "puleswidth_offset" branch here:  https://github.com/windysynth/Audio/tree/pulsewidth_offset
 
-
