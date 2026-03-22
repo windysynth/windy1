@@ -578,7 +578,8 @@ void setup()
   dc_beatOsc1.amplitude(0.0);                     // BeatOsc1 added directly to noteFreqOsc1 instead
   dc_beatOsc2.amplitude(0.0);                     // BeatOsc2 added directly to noteFreqOsc2 instead
 
-  wfmod_sawOsc1.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
+  //wfmod_sawOsc1.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
+  wfmod_sawOsc1.begin(WAVEFORM_SAWTOOTH);
   wfmod_sawOsc1.amplitude(SawOsc1);
   wfmod_sawOsc1.frequency(noteFreqOsc1);
   wfmod_sawOsc1.frequencyModulation(octaveControlOsc1); // max freq mod +/- 4.0 octaves
@@ -586,14 +587,14 @@ void setup()
   wfmod_triOsc1.amplitude(TriOsc1);
   wfmod_triOsc1.frequency(noteFreqOsc1);
   wfmod_triOsc1.frequencyModulation(octaveControlOsc1); // max freq mod +/- 4.0 octaves
-  wfmod_pulseOsc1.begin(WAVEFORM_BANDLIMIT_PULSE);
-  // wfmod_pulseOsc1.begin(WAVEFORM_PULSE);
+  //wfmod_pulseOsc1.begin(WAVEFORM_BANDLIMIT_PULSE);
+  wfmod_pulseOsc1.begin(WAVEFORM_PULSE);
   wfmod_pulseOsc1.amplitude(PulseOsc1);
   wfmod_pulseOsc1.frequency(noteFreqOsc1);
   wfmod_pulseOsc1.frequencyModulation(octaveControlOsc1); // max freq mod +/- 4.0 octaves
   wfmod_pulseOsc1.pulsewidth_offset(PwOsc1);              // ws added this to synth_waveform.cpp .h
-  wfmod_sawOsc2.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
-  // wfmod_sawOsc2.begin(WAVEFORM_SAWTOOTH);
+  //wfmod_sawOsc2.begin(WAVEFORM_BANDLIMIT_SAWTOOTH);
+  wfmod_sawOsc2.begin(WAVEFORM_SAWTOOTH);
   wfmod_sawOsc2.amplitude(SawOsc2);
   wfmod_sawOsc2.frequency(noteFreqOsc2);
   wfmod_sawOsc2.frequencyModulation(octaveControlOsc2); // max freq mod +/- 4.0 octaves
@@ -601,8 +602,8 @@ void setup()
   wfmod_triOsc2.amplitude(TriOsc2);
   wfmod_triOsc2.frequency(noteFreqOsc2);
   wfmod_triOsc2.frequencyModulation(octaveControlOsc2); // max freq mod +/- 4.0 octaves
-  wfmod_pulseOsc2.begin(WAVEFORM_BANDLIMIT_PULSE);
-  // wfmod_pulseOsc2.begin(WAVEFORM_PULSE);
+  //wfmod_pulseOsc2.begin(WAVEFORM_BANDLIMIT_PULSE);
+  wfmod_pulseOsc2.begin(WAVEFORM_PULSE);
   wfmod_pulseOsc2.amplitude(PulseOsc2);
   wfmod_pulseOsc2.frequency(noteFreqOsc2);
   wfmod_pulseOsc2.frequencyModulation(octaveControlOsc2); // max freq mod +/- 4.0 octaves
@@ -1390,7 +1391,7 @@ void loop()
   noteFreqOsc2 = noteFreqOsc2 + BeatOsc2;                                                                    // BeatOsc2 is additive
   //noteFreqFilterOsc1 = 440.0 * pow(2, (noteNumberOsc1 - 69.0f + 9.0f) / 12.0f);                              // 69 is note number for A4=440Hz
   //noteFreqFilterOsc2 = 440.0 * pow(2, (noteNumberOsc2 - 69.0f + 9.0f) / 12.0f);                              // 69 is note number for A4=440Hz
-  noteFreqFilter5 = 440.0 * pow(2, (min(noteNumberOsc1, noteNumberOsc2) - 69.0) / 12);                       // always at noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
+  //noteFreqFilter5 = 440.0 * pow(2, (min(noteNumberOsc1, noteNumberOsc2) - 69.0) / 12);                       // always at noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
   keyfollowFilter1 = pow(2, (noteNumberFilter1 - offsetNoteKeyfollow) * KeyFollowOscFilter1 / 144.0);        // 72 is C5
   keyfollowFilter2 = pow(2, (noteNumberFilter1 - offsetNoteKeyfollow) * KeyFollowOscFilter2 / 144.0);        // 72 is C5
   keyfollowFilter3 = pow(2, (noteNumberFilter1 - offsetNoteKeyfollowNoise) * KeyFollowNoiseFilter3 / 144.0); // 72 is C5
@@ -1455,12 +1456,13 @@ void loop()
   }
   filterPreNoise.frequency(clippedFreqFilterPreNoise);
   onepole_PreNoise.frequency(FreqPreNoiseFilter);
-  filter_osc1.frequency(noteFreqFilterOsc1); // Freq of osc1
+  filter_osc1.frequency(noteFreqFilterOsc1); // 68.0Hz
   filter_osc1b.frequency(noteFreqOsc1);      // Freq of osc1
-  filter_osc2.frequency(noteFreqFilterOsc2); // Freq of osc1
+  filter_osc2.frequency(noteFreqFilterOsc2); // 68.0Hz
   filter_osc2b.frequency(noteFreqOsc2);      // Freq of osc1
   // filter5.frequency(noteFreqFilter5); // HP filter post mix_Amp
-  filter5.frequency(noteNumberFilter1 + 24.0f); // HP filter post mix_Amp
+  //filter5.frequency(noteNumberFilter1 + 24.0f); // HP filter post mix_Amp
+  filter5.frequency(40.0); // HP filter post mix_Amp
   // filterPreMixHPL.frequency(noteFreqFilter5);
   // filterPreMixHPR.frequency(noteFreqFilter5);
   filterPreMixHPL.frequency(0.1f); //(62.5f);

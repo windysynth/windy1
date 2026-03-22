@@ -17,7 +17,7 @@ uint8_t usbMidiNrpnData = 0;
 bool monoModeFlag = false;
 
 // globals for debugging
-String verNum_str = {"0.2.8a"};
+String verNum_str = {"0.2.8c"};
 String verTxt_str = {"version: "};
 String splashTxt = {"Windy 1\n  ver:\n   "};
 String version_str = verTxt_str + verNum_str;
@@ -80,8 +80,8 @@ float noteNumberOsc1 = 69.0;
 float noteFreqOsc1 = 440.0;
 float noteNumberOsc2 = 69.0;
 float noteFreqOsc2 = 440.0;
-float noteFreqFilter5 = 220.0;
-float noteFreqFilterOsc1 = 68.0; // note for hp filter for each osc
+float noteFreqFilter5 = 68.0;
+float noteFreqFilterOsc1 = 68.0; // freq (Hz) fixed hp filter_osc1.frequency()
 float noteFreqFilterOsc2 = 68.0;
 float noteNumberFilter1 = 69.0;
 float noteNumberFilter2 = 69.0;
