@@ -653,10 +653,7 @@ void patchToNoiseBreathCurveLines()
 void patchToNoiseLevel()
 {
   NoiseLevel = (float)current_patch.nrpn_msb_noise[CCNOISELEVEL] * DIV127 * maxNoiseLevel;
-  //  if ((float)current_patch.nrpn_msb_common2[CCAMPLEVEL] * DIV127 > 0.005f)
-  //    NoiseLevel = NoiseLevel * (AmpLevel / ((float)current_patch.nrpn_msb_common2[CCAMPLEVEL] * DIV127));
-
-  updateSynthVariablesFlag = !preUpdateSynthVariablesFlag; // if not called from patchToSynthVariables()
+  //updateSynthVariablesFlag = !preUpdateSynthVariablesFlag; // if not called from patchToSynthVariables()
 } // 80,2,0,127,
 void patchToBendRange()
 {
@@ -711,10 +708,8 @@ void patchToVibratoAmp()
 } // 88,0,0,127, (bite tremelo amount)
 void patchToAmpLevel()
 {
-  // AmpLevel = amp_curve( (float)current_patch.nrpn_msb_common2[CCAMPLEVEL]*DIV127 );
   AmpLevel = (float)current_patch.nrpn_msb_common2[CCAMPLEVEL] * DIV127;
-  patchToNoiseLevel();
-  updateSynthVariablesFlag = !preUpdateSynthVariablesFlag; // if not called from patchToSynthVariables()
+  //updateSynthVariablesFlag = !preUpdateSynthVariablesFlag; // if not called from patchToSynthVariables()
 } // 88,1,0,127,
 // void patchToOctButtonLevel()
 //{

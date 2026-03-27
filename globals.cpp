@@ -17,7 +17,7 @@ uint8_t usbMidiNrpnData = 0;
 bool monoModeFlag = false;
 
 // globals for debugging
-String verNum_str = {"0.2.8c"};
+String verNum_str = {"0.2.9e"};
 String verTxt_str = {"version: "};
 String splashTxt = {"Windy 1\n  ver:\n   "};
 String version_str = verTxt_str + verNum_str;
@@ -197,8 +197,7 @@ CurveLines BreathOscCurveLines1 = {0.0f, 1.0f, 1.0f};
 float BreathThreshOsc1 = 0; // 64,16,0,127,
 float LevelOsc1 = 0;        // 64,17,0,127,
 float LimiterAmount = 0.0;  // 0 <= LimiterAmout <= 0.5, where 0 is linear
-// float LevelOscN_HeadRoom = 1.0f/2.75; //1.0f/2.2f;  //extraAmpFactor //64,17,0,127,
-float LevelOscN_HeadRoom = 1.0f / 1.7; // 1.0f/2.2f;  //extraAmpFactor //64,17,0,127,
+float LevelOscN_HeadRoom = 1.0f / 1.7; // 1.0f/1.7f;  //extraAmpFactor //64,17,0,127,
 float logPotYmidLevelOscN = 0.50f;     // 0.5 is linear, 0.8 means at 0.5 in you get 0.8 out
 float Amp_HeadRoom = 1.0f;             // 64,17,0,127,
 float OctOsc2 = 0;                     // 65,0,62,66,
@@ -302,29 +301,31 @@ float VibratoAmp = 0; // 88,0,0,127,
 float AmpLevel = 0.5; // 88,1,0,127,
 float mix_Amp_gain_0 = AmpLevel * Amp_HeadRoom;
 float mix_Amp_gain_1 = 1.0f;
-float OctButtonLevel = 0;             // 88,2,0,127,
-float EffectsChorusDelay1 = 0;        // 112,0,0,127,
-float EffectsChorusMod1 = 0;          // 112,1,0,127,
-float EffectsChorusWet1 = 0;          // 112,2,0,127,
-float EffectsChorusDelay2 = 0;        // 112,3,0,127,
-float EffectsChorusMod2 = 0;          // 112,4,0,127,
-float EffectsChorusWet2 = 0;          // 112,5,0,127,
-float EffectsChorusFeedback = 0;      // 112,6,0,127,
-float EffectsChorusLfoFreq = 0;       // 112,7,0,127,
-float EffectsChorusDryLevel = 0;      // 112,8,0,127,
-float EffectsDelayTimeL = 0;          // 113,0,0,127,
-float EffectsDelayTimeR = 0;          // 113,0,0,127,
-float EffectsDelayFeedback = 0;       // 113,1,0,127,
-float EffectsDelayDamp = 10000;       // 113,2,0,127,
-float EffectsDelayLevel = 0;          // 113,3,0,127,
-float EffectsDelayPong = 0.0;         // 113,3,0,127,
-float EffectsReverbSpare = 1.0;       // 114,1,0,127,
-float EffectsReverbLevel = 0;         // 114,1,0,127,
-float EffectsReverbDenseEarly = 0;    // 114,2,0,127,
-float EffectsReverbTime = 0;          // 114,3,10,50,//1.0 to 5.0 sec
-float EffectsReverbDamp = 0;          // 114,4,54,74,//-10 to +10
-float EffectsChorusFBHeadroom = 0.8;  // to reduce levels of chorus fb mixer to keep from clipping
-float EffectsChorusDryHeadroom = 0.1; // 0.8; // to reduce levels of chorus dry mixer to keep from clipping
+float OctButtonLevel = 0;                    // 88,2,0,127,
+float EffectsChorusDelay1 = 0;               // 112,0,0,127,
+float EffectsChorusMod1 = 0;                 // 112,1,0,127,
+float EffectsChorusWet1 = 0;                 // 112,2,0,127,
+float EffectsChorusDelay2 = 0;               // 112,3,0,127,
+float EffectsChorusMod2 = 0;                 // 112,4,0,127,
+float EffectsChorusWet2 = 0;                 // 112,5,0,127,
+float EffectsChorusFeedback = 0;             // 112,6,0,127,
+float EffectsChorusLfoFreq = 0;              // 112,7,0,127,
+float EffectsChorusDryLevel = 0;             // 112,8,0,127,
+float EffectsDelayTimeL = 0;                 // 113,0,0,127,
+float EffectsDelayTimeR = 0;                 // 113,0,0,127,
+float EffectsDelayFeedback = 0;              // 113,1,0,127,
+float EffectsDelayDamp = 10000;              // 113,2,0,127,
+float EffectsDelayLevel = 0;                 // 113,3,0,127,
+float EffectsDelayPong = 0.0;                // 113,3,0,127,
+float EffectsReverbSpare = 1.0;              // 114,1,0,127,
+float EffectsReverbLevel = 0;                // 114,1,0,127,
+float EffectsReverbDenseEarly = 0;           // 114,2,0,127,
+float EffectsReverbTime = 0;                 // 114,3,10,50,//1.0 to 5.0 sec
+float EffectsReverbDamp = 0;                 // 114,4,54,74,//-10 to +10
+//float EffectsChorusFBHeadroom = 0.8;         // to reduce levels of chorus fb mixer to keep from clipping
+float EffectsChorusFBHeadroom = 1.0/3.0f;         // to reduce levels of chorus fb mixer to keep from clipping
+//float EffectsChorusDryHeadroom = 1.0f / 1.7; // to reduce levels of chorus dry mixer to keep from clipping
+float EffectsChorusDryHeadroom = 1.0f / 3.0f; // to reduce levels of chorus dry mixer to keep from clipping
 
 // synth variable limits and references (calibration)
 float maxPwmLfoFreq = 5.6f;           // 4000s is 10 Hz at 100%
@@ -399,7 +400,7 @@ float limitBreathSweepOsc2 = 1.55 / (octaveControlOsc2 * 12); // 4000s is about 
 float maxMixNtcFilter = 1.0;                                  // 0.6;
 // float fPotValue = 0.0;
 // float iPotValue = 0;
-float extraAmpFactor = 2.0f / LevelOscN_HeadRoom; // 1/LevelOscN_HeadRoom*3.0f
+float extraAmpFactor = 1.0f / LevelOscN_HeadRoom; //  1.7 
 float extraLineInAmpFactor = 1.0;
 float mix_lineInLR_gain_0 = volf;
 float mix_lineInLR_gain_1 = extraLineInAmpFactor * mix_lineinf;
@@ -485,6 +486,3 @@ fx_t copy_buffer_fx = {
 }; // 61 bytes long
 
 const String alphaNumString(F("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()_+-`'|/ "));
-
-
-
