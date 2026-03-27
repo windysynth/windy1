@@ -81,6 +81,8 @@ float noteFreqOsc1 = 440.0;
 float noteNumberOsc2 = 69.0;
 float noteFreqOsc2 = 440.0;
 float noteFreqFilter5 = 68.0;
+float noteNumberFilterOsc1 = 69.0; // note number for osc1 hp filters
+float noteNumberFilterOsc2 = 69.0; // note number for osc2 hp filters
 float noteFreqFilterOsc1 = 68.0; // freq (Hz) fixed hp filter_osc1.frequency()
 float noteFreqFilterOsc2 = 68.0;
 float noteNumberFilter1 = 69.0;
@@ -322,10 +324,8 @@ float EffectsReverbLevel = 0;                // 114,1,0,127,
 float EffectsReverbDenseEarly = 0;           // 114,2,0,127,
 float EffectsReverbTime = 0;                 // 114,3,10,50,//1.0 to 5.0 sec
 float EffectsReverbDamp = 0;                 // 114,4,54,74,//-10 to +10
-//float EffectsChorusFBHeadroom = 0.8;         // to reduce levels of chorus fb mixer to keep from clipping
-float EffectsChorusFBHeadroom = 1.0/3.0f;         // to reduce levels of chorus fb mixer to keep from clipping
-//float EffectsChorusDryHeadroom = 1.0f / 1.7; // to reduce levels of chorus dry mixer to keep from clipping
-float EffectsChorusDryHeadroom = 1.0f / 3.0f; // to reduce levels of chorus dry mixer to keep from clipping
+float EffectsChorusFBHeadroom = 0.8;         // to reduce levels of chorus fb mixer to keep from clipping
+float EffectsChorusDryHeadroom = 1.0f / 1.7; // to reduce levels of chorus dry mixer to keep from clipping
 
 // synth variable limits and references (calibration)
 float maxPwmLfoFreq = 5.6f;           // 4000s is 10 Hz at 100%

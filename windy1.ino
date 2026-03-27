@@ -330,8 +330,8 @@ AudioConnection patchCord88(mix_levelNoise, 0, filter3, 0);
 AudioConnection patchCord89(mix_levelNoise, 0, mix_ntcFilter3, 0);
 AudioConnection patchCord90(mix_levelNoise, rms_mix_levelNoise);
 AudioConnection patchCord91(mix_fcModFilter1_sweep, 0, filter1, 1);
-AudioConnection patchCord92(Int2FloatR, 0, delay_F32, 1);
-AudioConnection patchCord93(Int2FloatL, 0, delay_F32, 0);
+AudioConnection_F32 patchCord92(Int2FloatR, 0, delay_F32, 1);
+AudioConnection_F32 patchCord93(Int2FloatL, 0, delay_F32, 0);
 AudioConnection patchCord94(mix_fcModFilter4, 0, mix_fcModFilter4_sweep, 1);
 AudioConnection patchCord95(wfmod_triOsc1, 0, mix_osc1, 1);
 AudioConnection patchCord96(wfmod_sawOsc1, 0, mix_osc1, 0);
@@ -344,8 +344,8 @@ AudioConnection patchCord102(filter3, 0, mix_ntcFilter3, 1);
 AudioConnection patchCord103(filter3, 1, mix_ntcFilter3, 2);
 AudioConnection patchCord104(filter3, 2, mix_ntcFilter3, 3);
 AudioConnection patchCord105(mlt_DepthFilterSign2, 0, mix_fcModFilter2_sweep, 0);
-AudioConnection patchCord106(delay_F32, 0, verb_F32, 0);
-AudioConnection patchCord107(delay_F32, 1, verb_F32, 1);
+AudioConnection_F32 patchCord106(delay_F32, 0, verb_F32, 0);
+AudioConnection_F32 patchCord107(delay_F32, 1, verb_F32, 1);
 AudioConnection patchCord108(mix_fcModFilter2, 0, mix_fcModFilter2_sweep, 1);
 AudioConnection patchCord109(dc_breathThreshOsc1, 0, mix_xfade, 0);
 AudioConnection patchCord110(dc_breathThreshOsc2, 0, mult_thCurveOsc2, 0);
@@ -355,22 +355,22 @@ AudioConnection patchCord113(mix_osc2, 0, mult_thCurveOsc2, 1);
 AudioConnection patchCord114(mix_ntcFilter3, 0, mix_ntcFilter4, 0);
 AudioConnection patchCord115(mix_ntcFilter3, 0, filter4, 0);
 AudioConnection patchCord116(mix_ntcFilter3, rms_mix_ntcFilter3);
-AudioConnection patchCord117(verb_F32, 0, amp_extraGainL_F32, 0);
-AudioConnection patchCord118(verb_F32, 1, amp_extraGainR_F32, 0);
+AudioConnection_F32 patchCord117(verb_F32, 0, amp_extraGainL_F32, 0);
+AudioConnection_F32 patchCord118(verb_F32, 1, amp_extraGainR_F32, 0);
 AudioConnection patchCord119(mix_fcModFilter4_sweep, 0, filter4, 1);
 AudioConnection patchCord120(mix_xfade, 0, mult_thCurveOsc1, 0);
 AudioConnection patchCord121(mix_fcModFilter2_sweep, 0, filter2, 1);
-AudioConnection patchCord122(amp_extraGainR_F32, 0, mix_pongL_F32, 1);
-AudioConnection patchCord123(amp_extraGainR_F32, 0, mix_pongR_F32, 1);
-AudioConnection patchCord124(amp_extraGainL_F32, 0, mix_pongL_F32, 0);
-AudioConnection patchCord125(amp_extraGainL_F32, 0, mix_pongR_F32, 0);
+AudioConnection_F32 patchCord122(amp_extraGainR_F32, 0, mix_pongL_F32, 1);
+AudioConnection_F32 patchCord123(amp_extraGainR_F32, 0, mix_pongR_F32, 1);
+AudioConnection_F32 patchCord124(amp_extraGainL_F32, 0, mix_pongL_F32, 0);
+AudioConnection_F32 patchCord125(amp_extraGainL_F32, 0, mix_pongR_F32, 0);
 AudioConnection patchCord126(mult_thCurveOsc2, 0, filter_osc2, 0);
 AudioConnection patchCord127(mult_thCurveOsc1, 0, filter_osc1, 0);
 AudioConnection patchCord128(flange1, 0, mix_chorus_wet, 0);
 AudioConnection patchCord129(flange2, 0, mix_chorus_wet, 1);
 AudioConnection patchCord130(flange3, 0, mix_chorus_wet, 2);
-AudioConnection patchCord131(mix_pongR_F32, Float2IntR);
-AudioConnection patchCord132(mix_pongL_F32, Float2IntL);
+AudioConnection_F32 patchCord131(mix_pongR_F32, Float2IntR);
+AudioConnection_F32 patchCord132(mix_pongL_F32, Float2IntL);
 AudioConnection patchCord133(filter_osc2, 2, filter_osc2b, 0);
 AudioConnection patchCord134(filter4, 0, mix_ntcFilter4, 1);
 AudioConnection patchCord135(filter4, 1, mix_ntcFilter4, 2);
@@ -1367,21 +1367,19 @@ void loop()
   noteNumberOsc1 = BendStep ? round(noteNumberOsc1 + BendRange * dc_pitchbend.read())
                             : noteNumberOsc1 + BendRange * dc_pitchbend.read();
   noteNumberOsc1 = noteNumberOsc1 + OctOsc1 * 12.0 + SemiOsc1 + FineOsc1 + FineTuneCentsf + Transposef + Octavef;
-  // noteNumberFilter1 = dc_portatimef.read()*128 + OctOsc1*12.0 + SemiOsc1+FineOsc1;
-  // noteNumberFilter1 = dc_portatimef.read()*128 + SemiOsc1+FineOsc1;
+  noteNumberFilterOsc1 = OctOsc1*12 + SemiOsc1 > 0.0f ? noteNumberOsc1 - (OctOsc1*12 + SemiOsc1) : noteNumberOsc1;
   noteNumberFilter1 = dc_portatimef.read() * 128.0f + FineTuneCentsf + Transposef + Octavef;
   noteNumberOsc2 = porta_step ? round(dc_portatime.read() * 128.0) : dc_portatime.read() * 128;
   noteNumberOsc2 = BendStep ? round(noteNumberOsc2 + BendRange * dc_pitchbend.read())
                             : noteNumberOsc2 + BendRange * dc_pitchbend.read();
   noteNumberOsc2 = noteNumberOsc2 + OctOsc2 * 12.0 + SemiOsc2 + FineOsc2 + FineTuneCentsf + Transposef + Octavef;
-  // noteNumberFilter2 = dc_portatimef.read()*128 + OctOsc2*12.0 + SemiOsc2+FineOsc2;
-  // noteNumberFilter2 = dc_portatimef.read()*128 + SemiOsc2+FineOsc2;
+  noteNumberFilterOsc2 = OctOsc2*12 + SemiOsc2 > 0.0f ? noteNumberOsc2 - (OctOsc2*12 + SemiOsc2) : noteNumberOsc2;
   noteFreqOsc1 = 440.0 * pow(2, (noteNumberOsc1 - 69.0) / 12); // 69 is note number for A4=440Hz
   noteFreqOsc1 = noteFreqOsc1 + BeatOsc1;                      // BeatOsc1 is additive
   noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2 - 69.0) / 12); // 69 is note number for A4=440Hz
   noteFreqOsc2 = noteFreqOsc2 + BeatOsc2;                      // BeatOsc2 is additive
-  // noteFreqFilterOsc1 = 440.0 * pow(2, (noteNumberOsc1 - 69.0f + 9.0f) / 12.0f);                              // 69 is note number for A4=440Hz
-  // noteFreqFilterOsc2 = 440.0 * pow(2, (noteNumberOsc2 - 69.0f + 9.0f) / 12.0f);                              // 69 is note number for A4=440Hz
+  noteFreqFilterOsc1 = 440.0 * pow(2, (noteNumberFilterOsc1 - 69.0f) / 12.0f); // 69 is note number for A4=440Hz
+  noteFreqFilterOsc2 = 440.0 * pow(2, (noteNumberFilterOsc2 - 69.0f) / 12.0f); // 69 is note number for A4=440Hz
   // noteFreqFilter5 = 440.0 * pow(2, (min(noteNumberOsc1, noteNumberOsc2) - 69.0) / 12);                       // always at noteNumberOsc1 or 2 whichever is lower;  TODO: match 4000s
   keyfollowFilter1 = pow(2, (noteNumberFilter1 - offsetNoteKeyfollow) * KeyFollowOscFilter1 / 144.0);        // 72 is C5
   keyfollowFilter2 = pow(2, (noteNumberFilter1 - offsetNoteKeyfollow) * KeyFollowOscFilter2 / 144.0);        // 72 is C5
@@ -1447,15 +1445,13 @@ void loop()
   }
   filterPreNoise.frequency(clippedFreqFilterPreNoise);
   onepole_PreNoise.frequency(FreqPreNoiseFilter);
-  // filter_osc1.frequency(noteFreqFilterOsc1); // 68.0Hz
-  filter_osc1.frequency(noteFreqOsc1);  // Freq of osc1
-  filter_osc1b.frequency(noteFreqOsc1); // Freq of osc1
-  // filter_osc2.frequency(noteFreqFilterOsc2); // 68.0Hz
-  filter_osc2.frequency(noteFreqOsc2);  // Freq of osc2
-  filter_osc2b.frequency(noteFreqOsc2); // Freq of osc2
+  filter_osc1.frequency(noteFreqFilterOsc1);  // Freq of osc1
+  filter_osc1b.frequency(noteFreqFilterOsc1); // Freq of osc1
+  filter_osc2.frequency(noteFreqFilterOsc2);  // Freq of osc2
+  filter_osc2b.frequency(noteFreqFilterOsc2); // Freq of osc2
   // filter5.frequency(noteFreqFilter5); // HP filter post mix_Amp
   // filter5.frequency(noteNumberFilter1 + 24.0f); // HP filter post mix_Amp
-  filter5.frequency(40.0); // HP filter post mix_Amp
+  filter5.frequency(10.0); // HP filter post mix_Amp
   // filterPreMixHPL.frequency(noteFreqFilter5);
   // filterPreMixHPR.frequency(noteFreqFilter5);
   // filterPreMixHPL.frequency(0.1f); //(62.5f);

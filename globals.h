@@ -95,6 +95,8 @@ extern float noteNumberOsc1;
 extern float noteFreqOsc1;
 extern float noteNumberOsc2;
 extern float noteFreqOsc2;
+extern float noteNumberFilterOsc1; // note for hp filter for each osc
+extern float noteNumberFilterOsc2;
 extern float noteFreqFilterOsc1; // note for hp filter for each osc
 extern float noteFreqFilterOsc2;
 extern float noteFreqFilter5;
