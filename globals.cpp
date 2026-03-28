@@ -17,7 +17,7 @@ uint8_t usbMidiNrpnData = 0;
 bool monoModeFlag = false;
 
 // globals for debugging
-String verNum_str = {"0.3.0"};
+String verNum_str = {"0.3.1"};
 String verTxt_str = {"version: "};
 String splashTxt = {"Windy 1\n  ver:\n   "};
 String version_str = verTxt_str + verNum_str;
@@ -386,7 +386,7 @@ float gammaDelayLevel = 3.0;              // Calibration: match 4000s
 float gammaDelayFeedback = 1.5;           // Calibration: match 4000s
 float maxTimeNoise = 1000;                // 1000 ms
 float TimeNoiseGamma = 4.0;
-float maxNoiseLevel = 0.23;
+float maxNoiseLevel = 0.115f; //0.23;
 float logPotYmidLevelNoise = 0.5f;
 float minGamma = 0.1;
 float maxGamma = 2.0;

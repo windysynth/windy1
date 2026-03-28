@@ -644,6 +644,7 @@ void patchToBreathNoiseFiltCurveLines4()
 void patchToNoiseTime()
 {
   NoiseTime = noiseTimeCurve((float)current_patch.nrpn_msb_noise[CCNOISETIME] * DIV127);
+  updateSynthVariablesFlag = !preUpdateSynthVariablesFlag; // if not called from patchToSynthVariables()
 } // 80,0,0,127,
 // NoiseBreathCurve = gen_noise_gamma(((float)(current_patch.nrpn_msb_noise[CCNOISEBREATHCURVE]))*DIV127);  	//80,1,0,127,
 void patchToNoiseBreathCurveLines()
@@ -653,7 +654,7 @@ void patchToNoiseBreathCurveLines()
 void patchToNoiseLevel()
 {
   NoiseLevel = (float)current_patch.nrpn_msb_noise[CCNOISELEVEL] * DIV127 * maxNoiseLevel;
-  //updateSynthVariablesFlag = !preUpdateSynthVariablesFlag; // if not called from patchToSynthVariables()
+  updateSynthVariablesFlag = !preUpdateSynthVariablesFlag; // if not called from patchToSynthVariables()
 } // 80,2,0,127,
 void patchToBendRange()
 {
