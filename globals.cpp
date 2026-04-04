@@ -17,7 +17,7 @@ uint8_t usbMidiNrpnData = 0;
 bool monoModeFlag = false;
 
 // globals for debugging
-String verNum_str = {"0.3.1"};
+String verNum_str = {"0.3.2e"};
 String verTxt_str = {"version: "};
 String splashTxt = {"Windy 1\n  ver:\n   "};
 String version_str = verTxt_str + verNum_str;
@@ -201,7 +201,6 @@ float LevelOsc1 = 0;        // 64,17,0,127,
 float LimiterAmount = 0.0;  // 0 <= LimiterAmout <= 0.5, where 0 is linear
 float LevelOscN_HeadRoom = 1.0f / 1.7; // 1.0f/1.7f;  //extraAmpFactor //64,17,0,127,
 float logPotYmidLevelOscN = 0.50f;     // 0.5 is linear, 0.8 means at 0.5 in you get 0.8 out
-float Amp_HeadRoom = 1.0f;             // 64,17,0,127,
 float OctOsc2 = 0;                     // 65,0,62,66,
 float SemiOsc2 = 0;                    // 65,1,52,76,
 float FineOsc2 = 0;                    // 65,2,14,114,
@@ -300,7 +299,8 @@ bool KeyTriggerSingle = 1;        // 81,7,0,1,//0=Multi 1=Single
 float s81_8 = 127;
 uint8_t ChorusOn = 1;
 float VibratoAmp = 0; // 88,0,0,127,
-float AmpLevel = 0.5; // 88,1,0,127,
+float AmpLevel = 1.0; // 88,1,0,127,
+float Amp_HeadRoom = 1.0f;             // 64,17,0,127,
 float mix_Amp_gain_0 = AmpLevel * Amp_HeadRoom;
 float mix_Amp_gain_1 = 1.0f;
 float OctButtonLevel = 0;                    // 88,2,0,127,
@@ -386,7 +386,7 @@ float gammaDelayLevel = 3.0;              // Calibration: match 4000s
 float gammaDelayFeedback = 1.5;           // Calibration: match 4000s
 float maxTimeNoise = 1000;                // 1000 ms
 float TimeNoiseGamma = 4.0;
-float maxNoiseLevel = 0.115f; //0.23;
+float maxNoiseLevel = 0.23*Amp_HeadRoom; //0.115f; 
 float logPotYmidLevelNoise = 0.5f;
 float minGamma = 0.1;
 float maxGamma = 2.0;

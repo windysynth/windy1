@@ -302,7 +302,7 @@ void patchToPulseOsc1()
 } // 64,7,0,127,
 void patchToPwOsc1()
 {
-  PwOsc1 = (float)current_patch.nrpn_msb_osc1[CCPWOSC1] * DIV127 + PwOffsetOsc1;
+  PwOsc1 = (float)current_patch.nrpn_msb_osc1[CCPWOSC1] * DIV127; // + PwOffsetOsc1;
   updateSynthVariablesFlag = !preUpdateSynthVariablesFlag; // if not called from patchToSynthVariables()
 } // 64,8,0,127,  GUI 0 = 50%
 void patchToPwmFreqOsc1()
@@ -710,7 +710,7 @@ void patchToVibratoAmp()
 void patchToAmpLevel()
 {
   AmpLevel = (float)current_patch.nrpn_msb_common2[CCAMPLEVEL] * DIV127;
-  //updateSynthVariablesFlag = !preUpdateSynthVariablesFlag; // if not called from patchToSynthVariables()
+  updateSynthVariablesFlag = !preUpdateSynthVariablesFlag; // if not called from patchToSynthVariables()
 } // 88,1,0,127,
 // void patchToOctButtonLevel()
 //{
@@ -954,7 +954,7 @@ void patchToSynthVariables()
   patchToEffectsReverbTime();       // 114,3,10,50,//1000 to 5000 ms
   patchToEffectsReverbDamp();       // 114,4,54,74,//-10 to +10
   // updateSynthVariablesFlag = true;
-}
+} // void patchToSynthVariables()
 
 #ifdef USEALL_PATCHFUNCS
 void printCurveMidiData()
