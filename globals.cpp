@@ -17,7 +17,7 @@ uint8_t usbMidiNrpnData = 0;
 bool monoModeFlag = false;
 
 // globals for debugging
-String verNum_str = {"0.3.2e"};
+String verNum_str = {"0.3.2g"};
 String verTxt_str = {"version: "};
 String splashTxt = {"Windy 1\n  ver:\n   "};
 String version_str = verTxt_str + verNum_str;
@@ -199,7 +199,7 @@ CurveLines BreathOscCurveLines1 = {0.0f, 1.0f, 1.0f};
 float BreathThreshOsc1 = 0; // 64,16,0,127,
 float LevelOsc1 = 0;        // 64,17,0,127,
 float LimiterAmount = 0.0;  // 0 <= LimiterAmout <= 0.5, where 0 is linear
-float LevelOscN_HeadRoom = 1.0f / 1.7; // 1.0f/1.7f;  //extraAmpFactor //64,17,0,127,
+float LevelOscN_HeadRoom = 1.0f / 1.0; // 1.0f/1.7f;  //extraAmpFactor //64,17,0,127,
 float logPotYmidLevelOscN = 0.50f;     // 0.5 is linear, 0.8 means at 0.5 in you get 0.8 out
 float OctOsc2 = 0;                     // 65,0,62,66,
 float SemiOsc2 = 0;                    // 65,1,52,76,
@@ -268,7 +268,7 @@ filterMode_t ModeNoiseFilter4_stored = LP; // 73,0,0,4,//LP HP BP NTC OFF
 float FreqNoiseFilter4 = 1046.5;           // C6  	//75,1,36,124,//Midi Note 36 to 124
 float FreqNoiseFilter4BModFactor = 1.0;    // Note number of Freq slider 36 to 124
 float QFactorNoiseFilter4 = 2.5;           // 75,2,5,127,"// 5=0.5, 127=12.7"
-float QFactorFilter5 = .707;               // 75,2,5,127,"// 5=0.5, 127=12.7"
+float QFactorFilter5 = 1.0;               // 75,2,5,127,"// 5=0.5, 127=12.7"
 float KeyFollowNoiseFilter4 = 12;          // 75,3,52,88,// -12 to +24 num semi tones
 float KeyFollowFilter5 = 1;                // 75,3,52,88,// -12 to +24 num semi tones
 float BreathModNoiseFilter4 = 0;           // 75,4,0,127,
@@ -300,9 +300,19 @@ float s81_8 = 127;
 uint8_t ChorusOn = 1;
 float VibratoAmp = 0; // 88,0,0,127,
 float AmpLevel = 1.0; // 88,1,0,127,
-float Amp_HeadRoom = 1.0f;             // 64,17,0,127,
+float Amp_HeadRoom = 1.0f;  // 64,17,0,127,
 float mix_Amp_gain_0 = AmpLevel * Amp_HeadRoom;
-float mix_Amp_gain_1 = 1.0f;
+float mix_Amp_gain_1 = 1.0f; 
+
+// Define the 17-point lookup table for hard clipping at +/- 0.83
+// Input Points: -1.0 to 1.0 in steps of 0.125
+//float ampClipTable[17] = {-0.75f -0.75f, -0.75f, -0.625f, -0.5f, -0.375f, -0.25f, -0.125f, 
+//                      0.0f, 0.125f, 0.25f, 0.375, 0.5f, 0.625f, 0.75f, 0.75f, 0.75f};
+float ampClipTable[17] = {-0.375f -0.375f, -0.375f, -0.375f, -0.375f, -0.375f, -0.25f, -0.125f, 
+                      0.0f, 0.125f, 0.25f, 0.375, 0.5f, 0.625f, 0.625f, 0.625f, 0.625f};
+  // Set the shaping table
+  //ws_ampClip.shape(ampClipTable, 17);
+
 float OctButtonLevel = 0;                    // 88,2,0,127,
 float EffectsChorusDelay1 = 0;               // 112,0,0,127,
 float EffectsChorusMod1 = 0;                 // 112,1,0,127,
@@ -324,8 +334,8 @@ float EffectsReverbLevel = 0;                // 114,1,0,127,
 float EffectsReverbDenseEarly = 0;           // 114,2,0,127,
 float EffectsReverbTime = 0;                 // 114,3,10,50,//1.0 to 5.0 sec
 float EffectsReverbDamp = 0;                 // 114,4,54,74,//-10 to +10
-float EffectsChorusFBHeadroom = 0.8;         // to reduce levels of chorus fb mixer to keep from clipping
-float EffectsChorusDryHeadroom = 1.0f / 1.7; // to reduce levels of chorus dry mixer to keep from clipping
+float EffectsChorusFBHeadroom = 1.0; //0.8;         // to reduce levels of chorus fb mixer to keep from clipping
+float EffectsChorusDryHeadroom = 0.8f; // to reduce levels of chorus dry mixer to keep from clipping
 
 // synth variable limits and references (calibration)
 float maxPwmLfoFreq = 5.6f;           // 4000s is 10 Hz at 100%

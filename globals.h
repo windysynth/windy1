@@ -283,6 +283,7 @@ extern float VibratoAmp; // 88,0,0,127,
 extern float AmpLevel;   // 88,1,0,127,
 extern float mix_Amp_gain_0;
 extern float mix_Amp_gain_1;
+extern float ampClipTable[17];
 extern float OctButtonLevel;           // 88,2,0,127,
 extern float EffectsChorusDelay1;      // 112,0,0,127,
 extern float EffectsChorusMod1;        // 112,1,0,127,
