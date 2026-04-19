@@ -56,7 +56,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 // Function prototypes
 void processNrpnMessage();
-void processUsbMIDI(void);
+
+#ifdef USE_PROCESSUSBMIDI
+    void processUsbMIDI(void);
+#endif 
 void printBytes(const byte *data, unsigned int size);
 void processSysex(const uint8_t *pSysexData, unsigned int size);
 #endif // process_midi_h_

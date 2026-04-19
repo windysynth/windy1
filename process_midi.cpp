@@ -64,6 +64,7 @@ void processNrpnMessage()
    patchToSynthVariables();
 }
 
+#ifdef USE_PROCESSUSBMIDI
 void processUsbMIDI(void)
 {
    byte type, channel, data1, data2; //, cable;
@@ -234,6 +235,7 @@ void processUsbMIDI(void)
       break;
    }
 }
+#endif // USE_PROCESSUSBMIDI
 
 void printBytes(const byte *data, unsigned int size)
 {

@@ -766,11 +766,11 @@ void setup()
     mix_chorus_wetR.gain(0, EffectsChorusWet1);
     mix_chorus_wetR.gain(1, EffectsChorusWet2);
     mix_chorus_fbL.gain(0, 1.0f * EffectsChorusFBHeadroom);
-    mix_chorus_fbL.gain(1, 0.5f*EffectsChorusFeedback * EffectsChorusFBHeadroom);
-    mix_chorus_fbL.gain(2, 0.5f*EffectsChorusFeedback * EffectsChorusFBHeadroom);
+    mix_chorus_fbL.gain(1, 0.7f*EffectsChorusFeedback * EffectsChorusFBHeadroom);
+    mix_chorus_fbL.gain(2, 0.7f*EffectsChorusFeedback * EffectsChorusFBHeadroom);
     mix_chorus_fbR.gain(0, 1.0f * EffectsChorusFBHeadroom);
-    mix_chorus_fbR.gain(1, 0.5f*EffectsChorusFeedback * EffectsChorusFBHeadroom);
-    mix_chorus_fbR.gain(2, 0.5f*EffectsChorusFeedback * EffectsChorusFBHeadroom);
+    mix_chorus_fbR.gain(1, 0.7f*EffectsChorusFeedback * EffectsChorusFBHeadroom);
+    mix_chorus_fbR.gain(2, 0.7f*EffectsChorusFeedback * EffectsChorusFBHeadroom);
   }
   else if (ChorusOn == 2) // stereo
   {
@@ -783,11 +783,11 @@ void setup()
     mix_chorus_wetR.gain(0, 0.0f*EffectsChorusWet1);
     mix_chorus_wetR.gain(1, EffectsChorusWet2);
     mix_chorus_fbL.gain(0, 1.0f * EffectsChorusFBHeadroom); // Dry
-    mix_chorus_fbL.gain(1, 0.5f*EffectsChorusFeedback * EffectsChorusFBHeadroom); // from WetL
+    mix_chorus_fbL.gain(1, 0.7f*EffectsChorusFeedback * EffectsChorusFBHeadroom); // from WetL
     mix_chorus_fbL.gain(2, 0.0f * EffectsChorusFBHeadroom);  // from WetR
     mix_chorus_fbR.gain(0, 1.0f * EffectsChorusFBHeadroom); // Dry
     mix_chorus_fbR.gain(1, 0.0f * EffectsChorusFBHeadroom); // from WetL
-    mix_chorus_fbR.gain(2, 0.5f*EffectsChorusFeedback * EffectsChorusFBHeadroom); // from WetR
+    mix_chorus_fbR.gain(2, 0.7f*EffectsChorusFeedback * EffectsChorusFBHeadroom); // from WetR
 
   }
   else // off
@@ -1343,12 +1343,13 @@ void loop()
     mix_chorus_wetL.gain(1, 0.5f*EffectsChorusWet2);
     mix_chorus_wetR.gain(0, 0.5f*EffectsChorusWet1);
     mix_chorus_wetR.gain(1, EffectsChorusWet2);
+
     mix_chorus_fbL.gain(0, 1.0f * EffectsChorusFBHeadroom); // Dry
-    mix_chorus_fbL.gain(1, 0.25f*EffectsChorusFeedback * EffectsChorusFBHeadroom); // from WetL
-    mix_chorus_fbL.gain(2, 0.75f*EffectsChorusFeedback * EffectsChorusFBHeadroom);  // from WetR
+    mix_chorus_fbL.gain(1, 0.5f*EffectsChorusFeedback * EffectsChorusFBHeadroom); // from WetL
+    mix_chorus_fbL.gain(2, 0.0f * EffectsChorusFBHeadroom);  // from WetR
     mix_chorus_fbR.gain(0, 1.0f * EffectsChorusFBHeadroom); // Dry
-    mix_chorus_fbR.gain(1, 0.75f*EffectsChorusFeedback * EffectsChorusFBHeadroom); // from WetL
-    mix_chorus_fbR.gain(2, 0.25f*EffectsChorusFeedback * EffectsChorusFBHeadroom); // from WetR
+    mix_chorus_fbR.gain(1, 0.0f * EffectsChorusFBHeadroom); // from WetL
+    mix_chorus_fbR.gain(2, 0.5f*EffectsChorusFeedback * EffectsChorusFBHeadroom); // from WetR
   }
   else // off
   {
@@ -1380,10 +1381,22 @@ void loop()
     delay_F32.treble_cut(EffectsDelayDamp);    // 0- 1.0
     delay_F32.set_ping_pong_on(EffectsDelayPong > 0.0f);
     delay_F32.treble_cut(EffectsDelayDamp); // 0- 1.0
-    mix_pongL_F32.gain(0, 0.5f * EffectsDelayPong + 0.5f);
-    mix_pongL_F32.gain(1, -0.5f * EffectsDelayPong + 0.5f);
-    mix_pongR_F32.gain(0, -0.5f * EffectsDelayPong + 0.5f);
-    mix_pongR_F32.gain(1, 0.5f * EffectsDelayPong + 0.5f);
+    if(ChorusOn==2)
+    {   
+        // let stereo chorus through
+        mix_pongL_F32.gain(0, 1.0f); // TODO: add spread for EffectDelayPong
+        mix_pongL_F32.gain(1, 0.0f);
+        mix_pongR_F32.gain(0, 0.0f);
+        mix_pongR_F32.gain(1, 1.0f);
+    }
+    else
+    {
+        mix_pongL_F32.gain(0, 0.5f * EffectsDelayPong + 0.5f);
+        mix_pongL_F32.gain(1, -0.5f * EffectsDelayPong + 0.5f);
+        mix_pongR_F32.gain(0, -0.5f * EffectsDelayPong + 0.5f);
+        mix_pongR_F32.gain(1, 0.5f * EffectsDelayPong + 0.5f);
+    }
+
     updateSynthVariablesFlag = false;
     // PRINT_VALUES_FLAG = true;
     PRINT_VALUES_FLAG = false;
@@ -1554,19 +1567,20 @@ void loop()
   //-------------------------------------------------------
   while (MIDIs1.read()) // MIDI DIN
   {
-    processMIDI(false); // process midi coming from the MIDIin 5pin DIN
+    processMIDI(DIN); // process midi coming from the MIDIin 5pin DIN
   }
   while (midi_ho.read()) // MIDI HOST
   {
     // process midi coming from the ewi on Host port and mirror to MIDIout 5pin Din
-    processMIDI(true);
+    processMIDI(HOST);
   }
   // usbMIDI.read() needs to be called rapidly from loop().  When
   // each MIDI messages arrives, it return true.  The message must
   // be fully processed before usbMIDI.read() is called again.
-  if (usbMIDI.read()) // MIDI DEVICE
+  while (usbMIDI.read()) // MIDI DEVICE
   {
-    processUsbMIDI(); // process midi coming from computer
+    //processUsbMIDI(); // process midi coming from usb device port (computer) 
+    processMIDI(DEVICE);
   }
 
   //------------------------------------------------------
@@ -2148,24 +2162,37 @@ void changeFilterMode(void)
 //  see https://www.pjrc.com/teensy/td_libs_MIDI.html for
 //            MIDI using
 //------------------------------------------------------
-void processMIDI(bool midi_from_host_flag)
+void processMIDI(MIDItype midi_port_type)
 {
+   unsigned int sysexSize = 0;
+   byte *pSysexData = NULL;
   // Note: callback method was too slow
   //      see https://www.pjrc.com/teensy/td_midi.html
-  if (midi_from_host_flag)
-  {
-    type = midi_ho.getType();
-    data1 = midi_ho.getData1();
-    data2 = midi_ho.getData2();
-    channel = midi_ho.getChannel();
-  }
-  else
-  {
-    type = MIDIs1.getType();
-    data1 = MIDIs1.getData1();
-    data2 = MIDIs1.getData2();
-    channel = MIDIs1.getChannel();
-  }
+    switch(midi_port_type)
+    {
+        case HOST:
+            type = midi_ho.getType();
+            channel = midi_ho.getChannel();
+            data1 = midi_ho.getData1();
+            data2 = midi_ho.getData2();
+            break;
+        case DIN:
+            type = MIDIs1.getType();
+            channel = MIDIs1.getChannel();
+            data1 = MIDIs1.getData1();
+            data2 = MIDIs1.getData2();
+            break;
+        case DEVICE:
+            // fetch the MIDI message, defined by these 5 numbers (except SysEX)
+            type = usbMIDI.getType();       // which MIDI message, 128-255
+            channel = usbMIDI.getChannel(); // which MIDI channel, 1-16
+            data1 = usbMIDI.getData1();     // first data byte of message, 0-127
+            data2 = usbMIDI.getData2();     // second data byte of message, 0-127
+            // cable = usbMIDI.getCable();     // which virtual cable with MIDIx8, 0-7
+            break;
+        default:
+            break; //should never get here 
+    }
   // const uint8_t *sys = midi_ho.getSysExArray();
   // sprintf(str_buf1, "type: %d, data1: %d, data2: %d, channel: %d", type,data1, data2, channel);
   // Serial8.println(str_buf1);
@@ -2177,39 +2204,97 @@ void processMIDI(bool midi_from_host_flag)
     programChangeFlag = true; // used in UISM
     sprintf(str_buf1, "type: %d, data1: %d, channel: %d", type, data1, channel);
     Serial8.println(str_buf1);
-    if (midi_from_host_flag)
-      MIDIs1.sendProgramChange(data1, channel);
-    else
+    switch(midi_port_type)
     {
-      midi_ho.sendProgramChange(data1, channel);
+        case HOST:
+          MIDIs1.sendProgramChange(data1, channel); // send to DIN
+          usbMIDI.sendProgramChange(data1, channel); // send to DEVICE
+          break;
+        case DIN:
+          midi_ho.sendProgramChange(data1, channel); // send to HOST
+          usbMIDI.sendProgramChange(data1, channel); // send to DEVICE
+          break;
+        case DEVICE:
+          midi_ho.sendProgramChange(data1, channel); // send to HOST
+          MIDIs1.sendProgramChange(data1, channel);  // sendo to DIN
+          break;
     }
     break;
   case midi_ho.AfterTouchPoly: // 0xA0
-    if (midi_from_host_flag)
-      MIDIs1.sendAfterTouch(data1, data2, channel);
-    else
+    switch(midi_port_type)
     {
-      midi_ho.sendAfterTouch(data1, data2, channel);
+        case HOST:
+          MIDIs1.sendAfterTouch(data1, data2, channel);
+          usbMIDI.sendAfterTouch(data1, data2, channel);
+          break;
+        case DIN:
+          midi_ho.sendAfterTouch(data1, data2, channel);
+          usbMIDI.sendAfterTouch(data1, data2, channel);
+          break;
+        case DEVICE:
+          midi_ho.sendAfterTouch(data1, data2, channel);
+          MIDIs1.sendAfterTouch(data1, data2, channel);
+          break;
     }
     // MIDIs1.sendPolyPressure(data1,data2,channel); // deprecated, so use the overloaded one
     break;
   case midi_ho.AfterTouchChannel: // 0xD0
-    if (midi_from_host_flag)
-      MIDIs1.sendAfterTouch(data1, channel); // TODO: add AT as method of breath control
-    else
+    switch(midi_port_type)
     {
-      midi_ho.sendAfterTouch(data1, channel); // TODO: add AT as method of breath control
+        case HOST:
+          MIDIs1.sendAfterTouch(data1, channel); // TODO: add AT as method of breath control
+          usbMIDI.sendAfterTouch(data1, channel);
+          break;
+        case DIN:
+          midi_ho.sendAfterTouch(data1, channel);
+          usbMIDI.sendAfterTouch(data1, channel);
+          break;
+        case DEVICE:
+          midi_ho.sendAfterTouch(data1, channel);
+          MIDIs1.sendAfterTouch(data1, channel);
+          break;
     }
     break;
   case midi_ho.ControlChange: // 0xB0
-    if (midi_from_host_flag)
-      MIDIs1.sendControlChange(data1, data2, channel);
-    else
+    switch(midi_port_type)
     {
-      midi_ho.sendControlChange(data1, data2, channel);
+        case HOST:
+          MIDIs1.sendControlChange(data1, data2, channel);
+          usbMIDI.sendControlChange(data1, data2, channel);
+          break;
+        case DIN:
+          midi_ho.sendControlChange(data1, data2, channel);
+          usbMIDI.sendControlChange(data1, data2, channel);
+          break;
+        case DEVICE:
+          midi_ho.sendControlChange(data1, data2, channel);
+          MIDIs1.sendControlChange(data1, data2, channel);
+          break;
     }
     switch (data1)
     {
+    case CC_NRPN_DATA_ENTRY:
+       usbMidiNrpnData = data2;
+       processNrpnMessage();
+       sprintf(str_buf1, "M:%d, L:%d, D:%d", usbMidiNrpnMsbOld, usbMidiNrpnLsbOld, usbMidiNrpnData);
+       Serial8.println(str_buf1);
+       break;
+    case CC_NRPN_LSB:
+       // usbMidiNrpnLsbOld = usbMidiNrpnLsbNew;
+       // usbMidiNrpnLsbNew = data2;
+       usbMidiNrpnLsbOld = data2;
+       break;
+    case CC_NRPN_MSB:
+       // usbMidiNrpnMsbOld = usbMidiNrpnMsbNew;
+       // usbMidiNrpnMsbNew = data2;
+       usbMidiNrpnMsbOld = data2;
+       //  if (usbMidiNrpnMsbNew == 127 && usbMidiNrpnLsbNew == 127)
+       //  {
+       //      processNrpnMessage();
+       //      sprintf(str_buf1, "NRPN(M) %d, NRPN(L) %d, Data: %d", usbMidiNrpnMsbOld, usbMidiNrpnLsbOld, usbMidiNrpnData );
+       //      Serial8.println(str_buf1);
+       //  }
+       break;
     case CC_MODULATION_WHEEL:
     case CC_BREATH:
     case 3:
@@ -2326,11 +2411,20 @@ void processMIDI(bool midi_from_host_flag)
     break;
 
   case midi_ho.NoteOn: //(type==0x90)
-    if (midi_from_host_flag)
-      MIDIs1.sendNoteOn(data1, data2, channel);
-    else
+    switch(midi_port_type)
     {
-      midi_ho.sendNoteOn(data1, data2, channel);
+        case HOST:
+          MIDIs1.sendNoteOn(data1, data2, channel);
+          usbMIDI.sendNoteOn(data1, data2, channel);
+          break;
+        case DIN:
+          midi_ho.sendNoteOn(data1, data2, channel);
+          usbMIDI.sendNoteOn(data1, data2, channel);
+          break;
+        case DEVICE:
+          midi_ho.sendNoteOn(data1, data2, channel);
+          MIDIs1.sendNoteOn(data1, data2, channel);
+          break;
     }
     //  TODO: create amplitude transition between legato notes
     if (data2 == 0)
@@ -2520,29 +2614,66 @@ void processMIDI(bool midi_from_host_flag)
     break;
 
   case midi_ho.NoteOff: //(type==0x80)
-    if (midi_from_host_flag)
-      MIDIs1.sendNoteOff(data1, data2, channel);
-    else
+    switch(midi_port_type)
     {
-      midi_ho.sendNoteOff(data1, data2, channel);
+        case HOST:
+          MIDIs1.sendNoteOff(data1, data2, channel);
+          usbMIDI.sendNoteOff(data1, data2, channel);
+          break;
+        case DIN:
+          midi_ho.sendNoteOff(data1, data2, channel);
+          usbMIDI.sendNoteOff(data1, data2, channel);
+          break;
+        case DEVICE:
+          midi_ho.sendNoteOff(data1, data2, channel);
+          MIDIs1.sendNoteOff(data1, data2, channel);
+          break;
     }
     noteOffFun();
     break;
 
   case midi_ho.PitchBend:
-    if (midi_from_host_flag)
-      MIDIs1.sendPitchBend(data1 + data2 * 128 - 8192, channel); // 0 = no bend, -2^13 ot +2^13-1
-    else
+    switch(midi_port_type)
     {
-      midi_ho.sendPitchBend(data1 + data2 * 128 - 8192, channel); // 0 = no bend, -2^13 ot +2^13-1
+        case HOST:
+          MIDIs1.sendPitchBend(data1 + data2 * 128 - 8192, channel); // 0 = no bend, -2^13 ot +2^13-1
+          usbMIDI.sendPitchBend(data1 + data2 * 128 - 8192, channel); // 0 = no bend, -2^13 ot +2^13-1
+          break;
+        case DIN:
+          midi_ho.sendPitchBend(data1 + data2 * 128 - 8192, channel); // 0 = no bend, -2^13 ot +2^13-1
+          usbMIDI.sendPitchBend(data1 + data2 * 128 - 8192, channel); // 0 = no bend, -2^13 ot +2^13-1
+          break;
+        case DEVICE:
+          midi_ho.sendPitchBend(data1 + data2 * 128 - 8192, channel); // 0 = no bend, -2^13 ot +2^13-1
+          MIDIs1.sendPitchBend(data1 + data2 * 128 - 8192, channel); // 0 = no bend, -2^13 ot +2^13-1
+          break;
     }
     dc_pitchbend.amplitude((data1 + data2 * 128.0 - 8192.0) * DIV8192, dc_pitchbend_ramp_rate);
     break;
+  case usbMIDI.SystemExclusive: // 0xF0
+    // Messages larger than usbMIDI's internal buffer are truncated.
+    // To receive large messages, you *must* use the 3-input function
+    // handler.  See InputFunctionsComplete for details.
+    sysexSize = (unsigned int)data1 + (unsigned int)data2 * 256;
+    switch(midi_port_type)
+    {
+        case HOST:
+         pSysexData = midi_ho.getSysExArray();
+         break; 
+        case DIN:
+         pSysexData = MIDIs1.getSysExArray();
+         break; 
+        case DEVICE:
+         pSysexData = usbMIDI.getSysExArray();
+         break;
+        default:
+         break; //should never get here: bad midi_port_type
+    } // switch (midi_port_type)
+    processSysex(pSysexData, sysexSize);
   default:
     sprintf(str_buf1, "Default! type: %d, data1: %d, channel: %d", type, data1, channel);
     Serial8.println(str_buf1);
     break;
-
   } // switch (type)
 } // processMIDI()
 

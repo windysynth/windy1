@@ -20,6 +20,7 @@
 #define CC_NRPN_LSB 98
 #define CC_NRPN_MSB 99
 
+enum MIDItype {DIN, HOST, DEVICE};
 extern uint8_t type;
 extern uint8_t data1;
 extern uint8_t data2;
