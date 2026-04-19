@@ -40,27 +40,27 @@ NamingDescriptor MenuSystem::makeNaming(char *buf, uint8_t maxlen, NamingFinishF
   return n;
 }
 
-void MenuSystem::pollEncoders(int16_t botDelta, int16_t topDelta, bool botButtonPressed, bool topButtonPressed)
+void MenuSystem::pollEncoders(int16_t navDelta, int16_t valDelta, bool enterButtonPressed, bool backButtonPressed)
 {
   if (_inNaming)
   {
     // move highlighted char
-    if (botDelta > 0)
+    if (navDelta > 0)
     {
       _nameEditIndex = (_nameEditIndex + 1) % _namingDesc.maxlen;
     }
-    else if (botDelta < 0)
+    else if (navDelta < 0)
     {
       if (_nameEditIndex == 0)
         _nameEditIndex = _namingDesc.maxlen - 1;
       else
         _nameEditIndex = (_nameEditIndex - 1);
     }
-    if (topDelta != 0)
+    if (valDelta != 0)
     {
-      adjustNamingChar(topDelta > 0 ? 1 : -1);
+      adjustNamingChar(valDelta > 0 ? 1 : -1);
     }
-    if (botButtonPressed)
+    if (enterButtonPressed)
     {
       // finish naming: trim spaces
       // ensure buffer is null terminated (assume caller allocated at least maxlen+1)
@@ -87,7 +87,7 @@ void MenuSystem::pollEncoders(int16_t botDelta, int16_t topDelta, bool botButton
       }
       _inNaming = false;
     }
-    if (topButtonPressed)
+    if (backButtonPressed)
     {
       if (_namingDesc.abort)
         _namingDesc.abort();
@@ -96,19 +96,19 @@ void MenuSystem::pollEncoders(int16_t botDelta, int16_t topDelta, bool botButton
     return;
   } // if (_inNaming)
 
-  if (botDelta != 0)
+  if (navDelta != 0)
   {
-    moveSelection(botDelta > 0 ? 1 : -1);
+    moveSelection(navDelta > 0 ? 1 : -1);
     _skipPatchToSynth = true;
   }
-  if (topDelta != 0)
-    adjustValueAtSelection(topDelta > 0 ? 1 : -1);
+  if (valDelta != 0)
+    adjustValueAtSelection(valDelta > 0 ? 1 : -1);
 
-  if (botButtonPressed)
+  if (enterButtonPressed)
   {
     enterItem();
   }
-  if (topButtonPressed)
+  if (backButtonPressed)
   {
     exitToParent(); // checks for root inside
   }

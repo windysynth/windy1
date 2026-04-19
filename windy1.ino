@@ -1747,7 +1747,7 @@ void updateUI()
 
   if (botDelta || topDelta || botBtn || topBtn)
   {
-    ms->pollEncoders(botDelta, topDelta, botBtn, topBtn);
+    ms->pollEncoders(topDelta, botDelta, topBtn, botBtn);
     ms->draw();
   }
 }

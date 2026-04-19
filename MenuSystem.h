@@ -85,7 +85,7 @@ class MenuSystem
 public:
   MenuSystem(U8G2 &u8g2, Menu *rootMenu);
   void begin();
-  void pollEncoders(int16_t botDelta, int16_t topDelta, bool botButtonPressed, bool topButtonPressed);
+  void pollEncoders(int16_t navDelta, int16_t valDelta, bool enterButtonPressed, bool backButtonPressed);
   void draw();
 
   // allow external callers (actions) to exit to parent menu
