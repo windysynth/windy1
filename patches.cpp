@@ -220,45 +220,6 @@ void patchToDummyFunc()
 {
   // dummy function for menu items that don't have a patchToSynth function
 }
-/*
-    compress_oscLevels.setAttack( 0.10f);
-    compress_oscLevels.setRelease( 20.0f);
-    compress_oscLevels.setRatio( 12.0f);
-    compress_oscLevels.setThreshold( -16.0f);
-    compress_oscLevels.setKnee( 8.0f);
-    compress_oscLevels.setMakeupGain(14.0f);
-    compress_oscLevels.setSideChain(0);
-*/
-void compAttackAdjustFun()
-{
-  comp_paramsf[CCCOMPATTACK] = ((float)comp_params[CCCOMPATTACK]) / 10.0f; // 0.1ms to 12.7ms
-  updateCalibrationFlag = true;
-}
-void compReleaseAdjustFun()
-{
-  comp_paramsf[CCCOMPRELEASE] = (float)(comp_params[CCCOMPRELEASE]); // 1ms to 127ms
-  updateCalibrationFlag = true;
-}
-void compRatioAdjustFun()
-{
-  comp_paramsf[CCCOMPRATIO] = ((float)comp_params[CCCOMPRATIO]) / 10.0f; // 0.1 to 12.7
-  updateCalibrationFlag = true;
-}
-void compThreshAdjustFun()
-{
-  comp_paramsf[CCCOMPTHRESHOLD] = (float)(comp_params[CCCOMPTHRESHOLD] - 64); // -40 to 0 dB
-  updateCalibrationFlag = true;
-}
-void compKneeAdjustFun()
-{
-  comp_paramsf[CCCOMPKNEE] = (float)(comp_params[CCCOMPKNEE]); // 0 to 40 dB
-  updateCalibrationFlag = true;
-}
-void compMUGainAdjustFun()
-{
-  comp_paramsf[CCCOMPMAKEUPGAIN] = (float)(comp_params[CCCOMPMAKEUPGAIN]); // 0 to 40 db
-  updateCalibrationFlag = true;
-}
 void nnBmodAdjustFun()
 {
   // call functions that use NNBModCal
@@ -266,6 +227,36 @@ void nnBmodAdjustFun()
   patchToFreqOscFilter2();
   patchToFreqNoiseFilter3();
   patchToFreqNoiseFilter4();
+}
+void hp1fAdjustFun()
+{
+  // don't need function here
+  //float Freqhp1_NN = (float)hp1f; // 0,124,note# 0(c-1) to 124(e9)
+  //noteFreqFilterOsc1 = 440.0f * pow(2, (Freqhp1_NN - 69.0f) / 12.0f);
+}
+void hp1qAdjustFun()
+{
+   QFactorFilterOsc1 = (float)hp1q/10.0f;
+}
+void hp1bfAdjustFun()
+{
+  // don't need function here
+  //float Freqhp1b_NN = (float)hp1bf; // 0,124,note# 0(c-1) to 124(e9)
+  //noteFreqFilterOsc1b = 440.0f * pow(2, (Freqhp1b_NN - 69.0f) / 12.0f);
+}
+void hp1bqAdjustFun()
+{
+   QFactorFilterOsc1b = (float)hp1bq/10.0f;
+}
+void clipAdjustFun()
+{
+  for(int idx = 0; idx<17; idx++)
+  {
+      ampClipTable[idx] = (idx + 56) < ampClipLowIdx ? ampClipTableFull[ampClipLowIdx-56] :
+                          (idx + 56) > ampClipHighIdx ? ampClipTableFull[ampClipHighIdx-56] :
+                          ampClipTableFull[idx];
+  }
+  updateCalibrationFlag = true;
 }
 
 //--------patchTo<SynthParam> functions--------

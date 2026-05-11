@@ -282,12 +282,11 @@ void centsAdjustFun();
 void breathccAdjustFun();
 void patchToDummyFunc();
 void fxSourcToSynth();
-void compAttackAdjustFun();
-void compReleaseAdjustFun();
-void compRatioAdjustFun();
-void compThreshAdjustFun();
-void compKneeAdjustFun();
-void compMUGainAdjustFun();
+void hp1fAdjustFun();
+void hp1qAdjustFun();
+void hp1bfAdjustFun();
+void hp1bqAdjustFun();
+void clipAdjustFun();
 void nnBmodAdjustFun();
 void patchToOctOsc1();              // 64,0,62,66,
 void patchToSemiOsc1();             // 64,1,52,76,

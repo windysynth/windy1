@@ -17,7 +17,7 @@ uint8_t usbMidiNrpnData = 0;
 bool monoModeFlag = false;
 
 // globals for debugging
-String verNum_str = {"0.3.3b"};
+String verNum_str = {"0.3.3d"};
 String verTxt_str = {"version: "};
 String splashTxt = {"Windy 1\n  ver:\n   "};
 String version_str = verTxt_str + verNum_str;
@@ -84,7 +84,9 @@ float noteFreqFilter5 = 68.0;
 float noteNumberFilterOsc1 = 69.0; // note number for osc1 hp filters
 float noteNumberFilterOsc2 = 69.0; // note number for osc2 hp filters
 float noteFreqFilterOsc1 = 68.0; // freq (Hz) fixed hp filter_osc1.frequency()
-float noteFreqFilterOsc2 = 68.0;
+float noteFreqFilterOsc1b = 68.0;
+float QFactorFilterOsc1 = 0.837f;
+float QFactorFilterOsc1b = 0.837f;
 float noteNumberFilter1 = 69.0;
 float noteNumberFilter2 = 69.0;
 float portatimef_t = 6;
@@ -118,30 +120,14 @@ float Octavef = 0.0;
 uint8_t breath_cc = 2;      // can be 1, 2, 7 or 11 for cc01, cc02, etc. (default cc02)
 uint8_t breath_cc_last = 2; // can be 1, 2, 7 or 11 for cc01, cc02, etc. (default cc02)
 int eeprom_breath_cc = 2;
-/*
-#define CCCOMPATTACK 0
-#define CCCOMPRELEASE 1
-#define CCCOMPRATIO 2
-#define CCCOMPTHRESHOLD 3
-#define CCCOMPKNEE 4
-#define CCCOMPMAKEUPGAIN 5
-#define CCCOMPSIDECHAIN 6
-*/
-/*
-    It offers the following controls:
-    Attack rates 0.1 - 2000 mS, float; but using 0.1-12.7ms (1-127), stepsize 0.1
-    Release rates 0.1 - 2000mS, float; but using 1-127ms, stepsize 1
-    Ratio between 1 to 32767, float; but using 0.1-12.7 (1-127), stepsize 0.1
-    Threshold between 0 to -40dB, float, using 0 to -40 (24-64) stepsize 1
-    Knee width between 0 to 40dB (soft to hard knee control), float; using 0-40, stepsize 1
-    Makeup Gain between 0 to 40dB, float, using 0 to 40, stepsize 1
-    Multiple side chain inputs that can be selected at run time, uint8_t, 0 or 1
-*/
-int eeprom_comp_params[EEPROM_COMP_PARAMS_SIZE] = {1, 20, 23, 64 - 16, 16, 9};
-uint8_t comp_params[EEPROM_COMP_PARAMS_SIZE] = {1, 20, 23, 64 - 16, 16, 9};
-float comp_paramsf[EEPROM_COMP_PARAMS_SIZE] = {0.1f, 20.0f, 23.0f / 10.0f, -16.0f, 16.0, 9.0f};
-uint8_t comp_sideChain = 0;
+
 int eeprom_NNBModCal = 87;
+int eeprom_ampClipHighIdx = 64+5;
+int eeprom_ampClipLowIdx = 64-3;
+int eeprom_hp1f = 16;
+int eeprom_hp1q = 8; // 8 = 0.8
+int eeprom_hp1bf = 16;
+int eeprom_hp1bq = 8; // 8 = 0.8
 
 const uint32_t eepromUpdateInterval = 60000; // milliseconds (120,000 = 2min)
 uint32_t eepromPreviousMillis = 0;
@@ -310,6 +296,8 @@ float mix_Amp_gain_1 = 1.0f;
 //                      0.0f, 0.125f, 0.25f, 0.375, 0.5f, 0.625f, 0.75f, 0.75f, 0.75f};
 float ampClipTable[17] = {-0.375f -0.375f, -0.375f, -0.375f, -0.375f, -0.375f, -0.25f, -0.125f, 
                       0.0f, 0.125f, 0.25f, 0.375, 0.5f, 0.625f, 0.625f, 0.625f, 0.625f};
+float ampClipTableFull[17] = {-1.0f -0.875f, -0.75f, -0.625f, -0.5f, -0.375f, -0.25f, -0.125f, 
+                      0.0f, 0.125f, 0.25f, 0.375, 0.5f, 0.625f, 0.75f, 0.875f, 1.0f};
   // Set the shaping table
   //ws_ampClip.shape(ampClipTable, 17);
 
@@ -360,6 +348,12 @@ float modOffsetFilter2 = 1;
 float modOffsetFilter3 = 1;
 float modOffsetFilter4 = 1;
 // float NN_BModF_one = 87.0f; // 96.0f
+uint8_t hp1f = 16; // note number 1 = 8.66Hz
+uint8_t hp1q = 8; // 0.8
+uint8_t hp1bf = 16; // note number 1 = 8.66Hz
+uint8_t hp1bq = 8; // 0.8
+uint8_t ampClipHighIdx = 64+5;
+uint8_t ampClipLowIdx = 64-3;
 uint8_t NNBModCal = 87;
 float clippedFreqFilter1 = 1046.5;     // C6
 float clippedFreqFilter2 = 1046.5;     // C6

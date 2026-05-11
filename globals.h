@@ -99,7 +99,9 @@ extern float noteFreqOsc2;
 extern float noteNumberFilterOsc1; // note for hp filter for each osc
 extern float noteNumberFilterOsc2;
 extern float noteFreqFilterOsc1; // note for hp filter for each osc
-extern float noteFreqFilterOsc2;
+extern float noteFreqFilterOsc1b;
+extern float QFactorFilterOsc1;
+extern float QFactorFilterOsc1b;
 extern float noteFreqFilter5;
 extern float noteNumberFilter1;
 extern float noteNumberFilter2;
@@ -134,22 +136,14 @@ extern uint8_t breath_cc_last; // can be 1 to 11 (except 06) for cc01, cc02, etc
 extern int eeprom_breath_cc;
 extern std::vector<int32_t> breath_cc_choices[];
 
-/*
-    It offers the following controls:
-    Attack rates 0.1 - 2000 mS, float; but using 0.1-12.7ms (1-127), stepsize 0.1
-    Release rates 0.1 - 2000mS, float; but using 1-127ms, stepsize 1
-    Ratio between 1 to 32767, float; but using 0.1-12.7 (1-127), stepsize 0.1
-    Knee width between 0 to 40dB (soft to hard knee control), float; using 0-40, stepsize 1
-    Threshold between 0 to -40dB, float, using 0 to -40 (24-64) stepsize 1
-    Makeup Gain between 0 to 40dB, float, using 0 to 40, stepsize 1
-    Multiple side chain inputs that can be selected at run time, uint8_t, 0 or 1
-*/
-#define EEPROM_COMP_PARAMS_SIZE 6
-extern int eeprom_comp_params[EEPROM_COMP_PARAMS_SIZE];
-extern uint8_t comp_params[EEPROM_COMP_PARAMS_SIZE];
-extern float comp_paramsf[EEPROM_COMP_PARAMS_SIZE];
-extern uint8_t comp_sideChain;
 extern int eeprom_NNBModCal;
+extern int eeprom_ampClipHighIdx;
+extern int eeprom_ampClipLowIdx;
+extern int eeprom_hp1f;
+extern int eeprom_hp1q; // 8 = 0.8
+extern int eeprom_hp1bf;
+extern int eeprom_hp1bq; // 8 = 0.8
+
 
 // patch synth variables
 extern float OctOsc1;  // 64,0,62,66,
@@ -285,6 +279,9 @@ extern float AmpLevel;   // 88,1,0,127,
 extern float mix_Amp_gain_0;
 extern float mix_Amp_gain_1;
 extern float ampClipTable[17];
+extern float ampClipTableFull[17];
+extern uint8_t ampClipHighIdx;
+extern uint8_t ampClipLowIdx;
 extern float OctButtonLevel;           // 88,2,0,127,
 extern float EffectsChorusDelay1;      // 112,0,0,127,
 extern float EffectsChorusMod1;        // 112,1,0,127,
@@ -333,6 +330,10 @@ extern float modOffsetFilter3;
 extern float modOffsetFilter4;
 // extern float NN_BModF_one;
 extern uint8_t NNBModCal;
+extern uint8_t hp1f; 
+extern uint8_t hp1q; 
+extern uint8_t hp1bf; 
+extern uint8_t hp1bq; 
 extern float clippedFreqFilter1;        // C6
 extern float clippedFreqFilter2;        // C6
 extern float clippedFreqFilter3;        // C6

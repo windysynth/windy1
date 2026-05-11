@@ -277,12 +277,12 @@ MenuItem systemMenuItems[]{
 };
 MenuItem calibrationMenuItems[]{
     makeActionItem("Back", goUpOne),
-    makeValueItem("CompAttack:", compAttackAdjustFun, &comp_params[CCCOMPATTACK], 1, 127, 1, nprnToDisplay2p1fHzDiv10), // 0.1ms to 12.7ms
-    makeValueItem("CompRelease:", compReleaseAdjustFun, &comp_params[CCCOMPRELEASE], 1, 127, 1, nprnToDisplay03d),      // 1ms to 127ms
-    makeValueItem("CompRatio:", compRatioAdjustFun, &comp_params[CCCOMPRATIO], 1, 127, 1, nprnToDisplay2p1fHzDiv10),    // 0.1 to 12.7
-    makeValueItem("CompThresh:", compThreshAdjustFun, &comp_params[CCCOMPTHRESHOLD], 24, 64, 1, nprnToDisplay03dm),     // -40 to 0 dB
-    makeValueItem("CompKnee:", compKneeAdjustFun, &comp_params[CCCOMPKNEE], 0, 40, 1, nprnToDisplay03d),                // 0 to 40 dB
-    makeValueItem("CompMUGain:", compMUGainAdjustFun, &comp_params[CCCOMPMAKEUPGAIN], 0, 40, 1, nprnToDisplay03d),      // 0 to 40 db
+    makeValueItem("hp1_freq:", hp1fAdjustFun, &hp1f, 0, 124, 1, nprnToDisplayFilterFreqHz), // 
+    makeValueItem("hp1_q:", hp1qAdjustFun, &hp1q, 5, 127, 1, nprnToDisplay2p1fHzDiv10),      // 0.5 to 12.7 
+    makeValueItem("hp1b_freq:", hp1bfAdjustFun, &hp1bf, 0, 124, 1, nprnToDisplayFilterFreqHz),    // 
+    makeValueItem("hp1b_q:", hp1bqAdjustFun, &hp1bq, 5, 127, 1, nprnToDisplay2p1fHzDiv10),     // 0.5 to 12.7
+    makeValueItem("clip_high:", clipAdjustFun, &ampClipHighIdx, 64, 72, 1, nprnToDisplay03dm),                // 0 to +8 steps where +8 is full + 
+    makeValueItem("clip_low:", clipAdjustFun, &ampClipLowIdx, 56, 64, 1, nprnToDisplay03dm),      // -8 to 0 steps where -8 is full - 
     makeValueItem("NNBModCal:", nnBmodAdjustFun, &NNBModCal, 60, 100, 1, nprnToDisplay03d),                             // NN filter uses full OctaveControlFilter<N>
 };
 

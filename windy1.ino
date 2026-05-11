@@ -62,8 +62,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define OCTAVE_EEPROM_ADDR ((int)20)
 #define BREATH_CC_EEPROM_ADDR ((int)24)
 #define FXSOURCE_EEPROM_ADDR ((int)28)
-#define COMP_PRAMS_ADDR ((int)32)
+//#define COMP_PRAMS_ADDR ((int)32)
+#define NNHP1F_ADDR ((int)32)
+#define HP1Q_ADDR  ((int)36)
+#define NNHP1BF_ADDR ((int)40)
+#define HP1BQ_ADDR  ((int)44)
+// gap from 48-54
 #define NNBMODCALPROM_ADDR ((int)56)
+#define AMPCLIPHIGHIDX_ADDR ((int)60)
+#define AMPCLIPLOWIDX_ADDR ((int)64)
 
 // #include <Arduino.h>
 #include <U8g2lib.h>
@@ -80,7 +87,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include <OpenAudio_ArduinoLibrary.h> //for AudioConvert_I16toF32, AudioConvert_F32toI16, and AudioEffectGain_F32
 #include <hexefx_audiolib_F32.h>      // for AudioEffectPlateReverb_F32 and AudioEffectDelayStereo_F32
-#include "effect_compressor.h"
 
 #include "patches.h"
 #include "WSM_logo_oled.h"
@@ -613,17 +619,11 @@ void setup()
   //filter5.resonance(QFactorFilter5);           // Q factor
   //filter5.octaveControl(octaveControlFilter5); // sets range of control from mix_fcModFilter4
   filter_osc1.frequency(noteFreqFilterOsc1);   // Freq of osc1
-  filter_osc1.resonance(0.837f);                // Q factor
+  filter_osc1.resonance(QFactorFilterOsc1);                // Q factor
   filter_osc1.octaveControl(1.0f);            // not using this control
-  filter_osc1b.frequency(noteFreqFilterOsc1); // Freq of osc1
-  filter_osc1b.resonance(0.837f);               // Q factor
+  filter_osc1b.frequency(noteFreqFilterOsc1b); // Freq of osc1
+  filter_osc1b.resonance(QFactorFilterOsc1b);               // Q factor
   filter_osc1b.octaveControl(1.0f);           // not using this control
-  //filter_osc2.frequency(noteFreqFilterOsc2);  // Freq of osc1
-  //filter_osc2.resonance(0.837f);                         // Q factor
-  //filter_osc2.octaveControl(1.0f);                     // not using this control
-  //filter_osc2b.frequency(noteFreqFilterOsc2);          // Freq of osc1
-  //filter_osc2b.resonance(0.837f);                        // Q factor
-  //filter_osc2b.octaveControl(1.0f);                    // not using this control
   filterPreNoise.frequency(clippedFreqFilterPreNoise); // highpass pre-filter for noise signal
   filterPreNoise.resonance(0.707);
   filterPreNoise.octaveControl(octaveControlPreNoiseFilter); // sets range of control from mix_fcModFilter4
@@ -679,10 +679,6 @@ void setup()
   // cacluateHeadRoom();
   mix_oscLevels.gain(0, LevelOsc1 * LevelOscN_HeadRoom);
   mix_oscLevels.gain(1, LevelOsc2 * LevelOscN_HeadRoom);
-#ifdef USE_COMPRESSOR
-  mix_oscPreComp.gain(0, LevelOsc1 * LevelOscN_HeadRoom);
-  mix_oscPreComp.gain(1, LevelOsc2 * LevelOscN_HeadRoom);
-#endif // USE_COMPRESSOR
 
   mix_levelNoise.gain(0, 1.0); // pass thru for now
   // mix_levelNoise.gain(1, 1.0); // Debug path.
@@ -750,10 +746,12 @@ void setup()
   ws_ampClip.shape(ampClipTable, 17);
 
   flange1.begin(delayline_flange1, FLANGE_DELAY_LENGTH,
-                (int)EffectsChorusDelay1 % (int)(93.0f * 88.2f), (int)EffectsChorusMod1, EffectsChorusLfoFreq);
+                (int)EffectsChorusDelay1, (int)EffectsChorusMod1, EffectsChorusLfoFreq);
+                //(int)EffectsChorusDelay1 % (int)(93.0f * 88.2f), (int)EffectsChorusMod1, EffectsChorusLfoFreq);
   flange1.setDryOn(false);  // just need delay signal
   flange2.begin(delayline_flange2, FLANGE_DELAY_LENGTH,
-                (int)EffectsChorusDelay2 % (int)(93.0f * 88.2f), (int)EffectsChorusMod2, EffectsChorusLfoFreq);
+                (int)EffectsChorusDelay2, (int)EffectsChorusMod2, EffectsChorusLfoFreq);
+               // (int)EffectsChorusDelay2 % (int)(93.0f * 88.2f), (int)EffectsChorusMod2, EffectsChorusLfoFreq);
   flange2.setDryOn(false);  // just need delay signal
   if (ChorusOn == 1) // mono 4k
   {
@@ -952,66 +950,45 @@ void setup()
   }
   fxSourcePatch = eeprom_fxSourcePatch;
 
-  int size = sizeof(eeprom_comp_params) / sizeof(eeprom_comp_params[0]);
-  for (int i = 0; i < size; i++)
+  EEPROM.get(NNHP1F_ADDR, eeprom_hp1f);
+  sprintf(str_buf1, "read eeprom_hp1f (%03d)", eeprom_hp1f);
+  Serial8.println(str_buf1);
+  if (eeprom_hp1f < 1 || eeprom_hp1f > 16)
   {
-
-    EEPROM.get(COMP_PRAMS_ADDR + i * sizeof(eeprom_comp_params[0]), eeprom_comp_params[i]);
-    switch (i)
-    {
-    case CCCOMPATTACK:
-      if (eeprom_comp_params[i] < 1 || eeprom_comp_params[i] > 127)
-      {
-        eeprom_comp_params[i] = 1; // 0.1-12.7ms (1-127) default 1 = 0.1ms
-        EEPROM.put(COMP_PRAMS_ADDR + i * sizeof(eeprom_comp_params[0]), eeprom_comp_params[i]);
-      }
-      comp_paramsf[i] = (float)eeprom_comp_params[i] / 10.0f;
-      break;
-    case CCCOMPRELEASE:
-      if (eeprom_comp_params[i] < 1 || eeprom_comp_params[i] > 127)
-      {
-        eeprom_comp_params[i] = 20; // 1-127ms default 20 = 20ms
-        EEPROM.put(COMP_PRAMS_ADDR + i * sizeof(eeprom_comp_params[0]), eeprom_comp_params[i]);
-      }
-      comp_paramsf[i] = (float)eeprom_comp_params[i];
-      break;
-    case CCCOMPRATIO:
-      if (eeprom_comp_params[i] < 1 || eeprom_comp_params[i] > 127)
-      {
-        eeprom_comp_params[i] = 23; // 0.1-12.7 (1-127), default 23 = 2.3
-        EEPROM.put(COMP_PRAMS_ADDR + i * sizeof(eeprom_comp_params[0]), eeprom_comp_params[i]);
-      }
-      comp_paramsf[i] = (float)eeprom_comp_params[i] / 10.0f;
-      break;
-    case CCCOMPTHRESHOLD:
-      if (eeprom_comp_params[i] < 24 || eeprom_comp_params[i] > 64)
-      {
-        eeprom_comp_params[i] = 48; // -40 to 0 = 24 to 64, default = 48 = -16
-        EEPROM.put(COMP_PRAMS_ADDR + i * sizeof(eeprom_comp_params[0]), eeprom_comp_params[i]);
-      }
-      comp_paramsf[i] = (float)eeprom_comp_params[i] - 64.0f;
-      break;
-    case CCCOMPKNEE:
-      if (eeprom_comp_params[i] < 0 || eeprom_comp_params[i] > 40)
-      {
-        eeprom_comp_params[i] = 16; // 0 to 40dB, default = 16db
-        EEPROM.put(COMP_PRAMS_ADDR + i * sizeof(eeprom_comp_params[0]), eeprom_comp_params[i]);
-      }
-      comp_paramsf[i] = (float)eeprom_comp_params[i];
-      break;
-    case CCCOMPMAKEUPGAIN:
-      if (eeprom_comp_params[i] < 0 || eeprom_comp_params[i] > 40)
-      {
-        eeprom_comp_params[i] = 9; // 0 to 40dB, default = 9dB
-        EEPROM.put(COMP_PRAMS_ADDR + i * sizeof(eeprom_comp_params[0]), eeprom_comp_params[i]);
-      }
-      comp_paramsf[i] = (float)eeprom_comp_params[i];
-      break;
-    default:
-      break;
-    }
-    comp_params[i] = (uint8_t)eeprom_comp_params[i];
+    eeprom_hp1f = 16; // default 16
+    EEPROM.put(NNHP1F_ADDR, eeprom_hp1f);
   }
+  hp1f = eeprom_hp1f;
+
+  EEPROM.get(HP1Q_ADDR, eeprom_hp1q);
+  sprintf(str_buf1, "read eeprom_hp1q (%03d)", eeprom_hp1q);
+  Serial8.println(str_buf1);
+  if (eeprom_hp1q < 5 || eeprom_hp1q > 127)
+  {
+    eeprom_hp1q = 8; // default 0.8
+    EEPROM.put(HP1Q_ADDR, eeprom_hp1q);
+  }
+  hp1q = eeprom_hp1q;
+
+  EEPROM.get(NNHP1BF_ADDR, eeprom_hp1bf);
+  sprintf(str_buf1, "read eeprom_hp1bf (%03d)", eeprom_hp1bf);
+  Serial8.println(str_buf1);
+  if (eeprom_hp1bf < 1 || eeprom_hp1bf > 16)
+  {
+    eeprom_hp1bf = 16; // default 16
+    EEPROM.put(NNHP1BF_ADDR, eeprom_hp1bf);
+  }
+  hp1bf = eeprom_hp1bf;
+
+  EEPROM.get(HP1BQ_ADDR, eeprom_hp1bq);
+  sprintf(str_buf1, "read eeprom_hp1bq (%03d)", eeprom_hp1bq);
+  Serial8.println(str_buf1);
+  if (eeprom_hp1bq < 5 || eeprom_hp1bq > 127)
+  {
+    eeprom_hp1bq = 8; // default 0.8
+    EEPROM.put(HP1BQ_ADDR, eeprom_hp1bq);
+  }
+  hp1bq = eeprom_hp1bq;
 
   EEPROM.get(NNBMODCALPROM_ADDR, eeprom_NNBModCal);
   sprintf(str_buf1, "read eeprom_NNBModCal (%03d)", eeprom_NNBModCal);
@@ -1023,37 +1000,25 @@ void setup()
   }
   NNBModCal = eeprom_NNBModCal;
 
-#ifdef USE_COMPRESSOR
-  Serial8.println("Compressor enabled");
-  /*
-      It offers the following controls:
-      Attack rates 0.1 - 2000 mS, float
-      Release rates 0.1 - 2000mS, float
-      Ratio between 1 to 32767, float
-      Knee width between 0 to 40dB (soft to hard knee control), float
-      Threshold between 0 to -40dB, float
-      Makeup Gain between 0 to 40dB, float
-      Multiple side chain inputs that can be selected at run time, uint8_t
-  */
-  compress_oscLevels1.enable();
-  compress_oscLevels1.setAttack(comp_paramsf[CCCOMPATTACK]);
-  compress_oscLevels1.setRelease(comp_paramsf[CCCOMPRELEASE]);
-  compress_oscLevels1.setRatio(comp_paramsf[CCCOMPRATIO]);
-  compress_oscLevels1.setThreshold(comp_paramsf[CCCOMPTHRESHOLD]);
-  compress_oscLevels1.setKnee(comp_paramsf[CCCOMPKNEE]);
-  compress_oscLevels1.setMakeupGain(comp_paramsf[CCCOMPMAKEUPGAIN]);
-  compress_oscLevels1.setSideChain(comp_sideChain);
-  // compress_oscLevels1.disable();
-  compress_oscLevels2.enable();
-  compress_oscLevels2.setAttack(comp_paramsf[CCCOMPATTACK]);
-  compress_oscLevels2.setRelease(comp_paramsf[CCCOMPRELEASE]);
-  compress_oscLevels2.setRatio(comp_paramsf[CCCOMPRATIO]);
-  compress_oscLevels2.setThreshold(comp_paramsf[CCCOMPTHRESHOLD]);
-  compress_oscLevels2.setKnee(comp_paramsf[CCCOMPKNEE]);
-  compress_oscLevels2.setMakeupGain(comp_paramsf[CCCOMPMAKEUPGAIN]);
-  compress_oscLevels2.setSideChain(comp_sideChain);
-  // compress_oscLevels2.disable();
-#endif // USE_COMPRESSOR
+  EEPROM.get(AMPCLIPHIGHIDX_ADDR, eeprom_ampClipHighIdx);
+  sprintf(str_buf1, "read eeprom_ampClipHighIdx (%03d)", eeprom_ampClipHighIdx);
+  Serial8.println(str_buf1);
+  if (eeprom_ampClipHighIdx < 64-8 || eeprom_ampClipHighIdx > 64+8)
+  {
+    eeprom_ampClipHighIdx = ampClipHighIdx; // if out of range start at default
+    EEPROM.put(AMPCLIPHIGHIDX_ADDR, eeprom_ampClipHighIdx);
+  }
+  ampClipHighIdx = eeprom_ampClipHighIdx;
+
+  EEPROM.get(AMPCLIPLOWIDX_ADDR, eeprom_ampClipLowIdx);
+  sprintf(str_buf1, "read eeprom_ampClipLowIdx (%03d)", eeprom_ampClipLowIdx);
+  Serial8.println(str_buf1);
+  if (eeprom_ampClipLowIdx < 64-8 || eeprom_ampClipLowIdx > 64+8)
+  {
+    eeprom_ampClipLowIdx = ampClipLowIdx; // if out of range start at default 
+    EEPROM.put(AMPCLIPLOWIDX_ADDR, eeprom_ampClipLowIdx);
+  }
+  ampClipLowIdx = eeprom_ampClipLowIdx;
 
   amp_extraGainR_F32.setGain(extraAmpFactor);
   amp_extraGainL_F32.setGain(extraAmpFactor);
@@ -1234,20 +1199,7 @@ void loop()
   {
 
 // cacluateHeadRoom();
-#ifdef USE_COMPRESSOR
-    compress_oscLevels1.setAttack(comp_paramsf[CCCOMPATTACK]);
-    compress_oscLevels1.setRelease(comp_paramsf[CCCOMPRELEASE]);
-    compress_oscLevels1.setRatio(comp_paramsf[CCCOMPRATIO]);
-    compress_oscLevels1.setThreshold(comp_paramsf[CCCOMPTHRESHOLD]);
-    compress_oscLevels1.setKnee(comp_paramsf[CCCOMPKNEE]);
-    compress_oscLevels1.setMakeupGain(comp_paramsf[CCCOMPMAKEUPGAIN]);
-    compress_oscLevels2.setAttack(comp_paramsf[CCCOMPATTACK]);
-    compress_oscLevels2.setRelease(comp_paramsf[CCCOMPRELEASE]);
-    compress_oscLevels2.setRatio(comp_paramsf[CCCOMPRATIO]);
-    compress_oscLevels2.setThreshold(comp_paramsf[CCCOMPTHRESHOLD]);
-    compress_oscLevels2.setKnee(comp_paramsf[CCCOMPKNEE]);
-    compress_oscLevels2.setMakeupGain(comp_paramsf[CCCOMPMAKEUPGAIN]);
-#endif // USE_COMPRESSOR
+    ws_ampClip.shape(ampClipTable, 17);
     updateCalibrationFlag = false;
   }
 
@@ -1270,12 +1222,6 @@ void loop()
 
     mix_oscLevels.gain(0, LevelOsc1 * LevelOscN_HeadRoom);
     mix_oscLevels.gain(1, LevelOsc2 * LevelOscN_HeadRoom);
-#ifdef USE_COMPRESSOR
-    compress_oscLevels1.setGain(mix_oscLevels.gain(0));
-    compress_oscLevels2.setGain(mix_oscLevels.gain(1));
-    mix_oscPreComp.gain(0, LevelOsc1 * LevelOscN_HeadRoom);
-    mix_oscPreComp.gain(1, LevelOsc2 * LevelOscN_HeadRoom);
-#endif // USE_COMPRESSOR
     sine_lfoOsc1.amplitude(PwmDepthOsc1);
     sine_lfoOsc1.frequency(PwmFreqOsc1);
     sine_lfoOsc2.amplitude(PwmDepthOsc2);
@@ -1314,8 +1260,10 @@ void loop()
     mix_Amp.gain(1, mix_Amp_gain_1); // 4000s AmpLevel doesn't control Noise Level
 
     // wrap EffectsChorusDelay1 & 2 at 93ms (44.1*93 = 4101.3) (ewi 4k wraps like this)
-    flange1.voices((int)EffectsChorusDelay1 % (int)(93.0f * 88.2f), (int)EffectsChorusMod1, EffectsChorusLfoFreq);
-    flange2.voices((int)EffectsChorusDelay2 % (int)(93.0f * 88.2f), (int)EffectsChorusMod2, EffectsChorusLfoFreq);
+    //flange1.voices((int)EffectsChorusDelay1 % (int)(93.0f * 88.2f), (int)EffectsChorusMod1, EffectsChorusLfoFreq);
+    //flange2.voices((int)EffectsChorusDelay2 % (int)(93.0f * 88.2f), (int)EffectsChorusMod2, EffectsChorusLfoFreq);
+    flange1.voices((int)EffectsChorusDelay1, (int)EffectsChorusMod1, EffectsChorusLfoFreq);
+    flange2.voices((int)EffectsChorusDelay2, (int)EffectsChorusMod2, EffectsChorusLfoFreq);
   if (ChorusOn == 1) // mono 4k
   {
     mix_chorus_dryL.gain(0, EffectsChorusDryLevel * EffectsChorusDryHeadroom);
@@ -1450,8 +1398,13 @@ void loop()
   noteFreqOsc1 = noteFreqOsc1 + BeatOsc1;                      // BeatOsc1 is additive
   noteFreqOsc2 = 440.0 * pow(2, (noteNumberOsc2 - 69.0) / 12); // 69 is note number for A4=440Hz
   noteFreqOsc2 = noteFreqOsc2 + BeatOsc2;                      // BeatOsc2 is additive
-  noteFreqFilterOsc1 = 440.0 * pow(2, (min(noteNumberFilterOsc1, noteNumberOsc2) - 69.0f) / 12.0f); // = 4k 
-  noteFreqFilterOsc2 = noteFreqFilterOsc1; //both are the same (could use one filter after mixing)
+  //noteFreqFilterOsc1 = 440.0 * pow(2, (min(noteNumberOsc1, noteNumberOsc2) - 69.0f) / 12.0f); // = 4k 
+  noteFreqFilterOsc1 = hp1f > 15 ? 
+                440.0 * pow(2, (min(noteNumberFilterOsc1, noteNumberFilterOsc2) - 69.0f) / 12.0f) // = 4k 
+                : 440.0 * pow(2, ((float) hp1f - 69.0f) / 12.0f) ; 
+  noteFreqFilterOsc1b = hp1bf > 15 ? 
+                440.0 * pow(2, (min(noteNumberFilterOsc1, noteNumberFilterOsc2) - 69.0f) / 12.0f) // = 4k 
+                : 440.0 * pow(2, ((float) hp1bf - 69.0f) / 12.0f) ; 
   keyfollowFilter1 = pow(2, (noteNumberFilter1 - offsetNoteKeyfollow) * KeyFollowOscFilter1 / 144.0);        // 72 is C5
   keyfollowFilter2 = pow(2, (noteNumberFilter1 - offsetNoteKeyfollow) * KeyFollowOscFilter2 / 144.0);        // 72 is C5
   keyfollowFilter3 = pow(2, (noteNumberFilter1 - offsetNoteKeyfollowNoise) * KeyFollowNoiseFilter3 / 144.0); // 72 is C5
@@ -1517,9 +1470,9 @@ void loop()
   filterPreNoise.frequency(clippedFreqFilterPreNoise);
   onepole_PreNoise.frequency(FreqPreNoiseFilter);
   filter_osc1.frequency(noteFreqFilterOsc1);  // Freq of osc1
-  filter_osc1b.frequency(noteFreqFilterOsc1); // Freq of osc1
-  //filter_osc2.frequency(noteFreqFilterOsc2);  // Freq of osc2
-  //filter_osc2b.frequency(noteFreqFilterOsc2); // Freq of osc2
+  filter_osc1.resonance(QFactorFilterOsc1);                // Q factor
+  filter_osc1b.frequency(noteFreqFilterOsc1b); // Freq of osc1
+  filter_osc1b.resonance(QFactorFilterOsc1b);               // Q factor
   //filter5.frequency(5.0); // HP filter post mix_Amp
   // filterPreMixHPL.frequency(noteFreqFilter5);
   // filterPreMixHPR.frequency(noteFreqFilter5);
@@ -1586,7 +1539,12 @@ void loop()
   //------------------------------------------------------
   // update eeprom if any values stored there have changed
   //------------------------------------------------------
-  if (!updateEpromFlag && ((current_patchNumber != eeprom_patchNumber) || (eeprom_mix_linein != mix_linein) || (eeprom_FineTuneCents != FineTuneCents) || (eeprom_vol != vol) || (eeprom_Transpose != Transpose) || (eeprom_Octave != Octave) || (eeprom_breath_cc != breath_cc) || (eeprom_fxSourcePatch != fxSourcePatch) || (comp_params[CCCOMPATTACK] != eeprom_comp_params[CCCOMPATTACK]) || (comp_params[CCCOMPRELEASE] != eeprom_comp_params[CCCOMPRELEASE]) || (comp_params[CCCOMPRATIO] != eeprom_comp_params[CCCOMPRATIO]) || (comp_params[CCCOMPTHRESHOLD] != eeprom_comp_params[CCCOMPTHRESHOLD]) || (comp_params[CCCOMPKNEE] != eeprom_comp_params[CCCOMPKNEE]) || (comp_params[CCCOMPMAKEUPGAIN] != eeprom_comp_params[CCCOMPMAKEUPGAIN]) || (NNBModCal != eeprom_NNBModCal)))
+  if (!updateEpromFlag && ((current_patchNumber != eeprom_patchNumber) || (eeprom_mix_linein != mix_linein) 
+    || (eeprom_FineTuneCents != FineTuneCents) || (eeprom_vol != vol) || (eeprom_Transpose != Transpose) 
+    || (eeprom_Octave != Octave) || (eeprom_breath_cc != breath_cc) || (eeprom_fxSourcePatch != fxSourcePatch) 
+    || (eeprom_hp1f != hp1f)||(eeprom_hp1bf != hp1bf)||(eeprom_hp1q != hp1q)||(eeprom_hp1bq != hp1bq)
+    || (NNBModCal != eeprom_NNBModCal) || (ampClipHighIdx != eeprom_ampClipHighIdx)
+    || (ampClipLowIdx != eeprom_ampClipLowIdx)))
   {
     updateEpromFlag = true;
     eepromCurrentMillis = millis();
@@ -1630,18 +1588,38 @@ void loop()
       eeprom_breath_cc = breath_cc;
       Serial8.println(str_buf1);
       EEPROM_update(BREATH_CC_EEPROM_ADDR, eeprom_breath_cc);
-      int size = sizeof(eeprom_comp_params) / sizeof(eeprom_comp_params[0]);
-      for (int ii = 0; ii < size; ii++)
-      {
-        sprintf(str_buf1, "Writing comp_params[%d] (%03d) to EEPROM", ii, eeprom_comp_params[ii]);
-        Serial8.println(str_buf1);
-        eeprom_comp_params[ii] = (int)comp_params[ii];
-        EEPROM_update(COMP_PRAMS_ADDR + ii * sizeof(eeprom_comp_params[0]), eeprom_comp_params[ii]);
-      }
+
+      sprintf(str_buf1, "Writing hp1f (%03d) to EEPROM", eeprom_hp1f);
+      Serial8.println(str_buf1);
+      eeprom_hp1f = hp1f;
+      EEPROM_update(NNHP1F_ADDR, eeprom_hp1f);
+      sprintf(str_buf1, "Writing hp1q (%03d) to EEPROM", eeprom_hp1q);
+      Serial8.println(str_buf1);
+      eeprom_hp1q = hp1q;
+      EEPROM_update(HP1Q_ADDR, eeprom_hp1q);
+      sprintf(str_buf1, "Writing hp1bf (%03d) to EEPROM", eeprom_hp1bf);
+      Serial8.println(str_buf1);
+      eeprom_hp1bf = hp1bf;
+      EEPROM_update(NNHP1BF_ADDR, eeprom_hp1bf);
+      sprintf(str_buf1, "Writing hp1bq (%03d) to EEPROM", eeprom_hp1bq);
+      Serial8.println(str_buf1);
+      eeprom_hp1bq = hp1bq;
+      EEPROM_update(HP1BQ_ADDR, eeprom_hp1bq);
+
       sprintf(str_buf1, "Writing NNBModCal (%03d) to EEPROM", eeprom_NNBModCal);
       Serial8.println(str_buf1);
       eeprom_NNBModCal = NNBModCal;
       EEPROM_update(NNBMODCALPROM_ADDR, eeprom_NNBModCal);
+
+      sprintf(str_buf1, "Writing ampClipHighIdx (%03d) to EEPROM", eeprom_ampClipHighIdx);
+      Serial8.println(str_buf1);
+      eeprom_ampClipHighIdx = ampClipHighIdx;
+      EEPROM_update(AMPCLIPHIGHIDX_ADDR, eeprom_ampClipHighIdx);
+
+      sprintf(str_buf1, "Writing ampClipLowIdx (%03d) to EEPROM", eeprom_ampClipLowIdx);
+      Serial8.println(str_buf1);
+      eeprom_ampClipLowIdx = ampClipLowIdx;
+      EEPROM_update(AMPCLIPLOWIDX_ADDR, eeprom_ampClipLowIdx);
       updateEpromFlag = false;
     }
   } // if (updateEpromFlag )
@@ -2165,7 +2143,7 @@ void changeFilterMode(void)
 void processMIDI(MIDItype midi_port_type)
 {
    unsigned int sysexSize = 0;
-   byte *pSysexData = NULL;
+   const byte *pSysexData = NULL;
   // Note: callback method was too slow
   //      see https://www.pjrc.com/teensy/td_midi.html
     switch(midi_port_type)
