@@ -17,7 +17,7 @@ uint8_t usbMidiNrpnData = 0;
 bool monoModeFlag = false;
 
 // globals for debugging
-String verNum_str = {"0.3.3d"};
+String verNum_str = {"0.3.3e"};
 String verTxt_str = {"version: "};
 String splashTxt = {"Windy 1\n  ver:\n   "};
 String version_str = verTxt_str + verNum_str;
@@ -353,7 +353,7 @@ uint8_t hp1q = 8; // 0.8
 uint8_t hp1bf = 16; // note number 1 = 8.66Hz
 uint8_t hp1bq = 8; // 0.8
 uint8_t ampClipHighIdx = 64+5;
-uint8_t ampClipLowIdx = 64-3;
+uint8_t ampClipLowIdx = 64-5;
 uint8_t NNBModCal = 87;
 float clippedFreqFilter1 = 1046.5;     // C6
 float clippedFreqFilter2 = 1046.5;     // C6

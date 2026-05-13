@@ -93,6 +93,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 const int ledPin = 13;
 
+
 //-------- paste below the Auto generated code from Audio System Design Tool  --------
 #include <Audio.h>
 #include <Wire.h>
@@ -218,28 +219,28 @@ AudioFilterStateVariable filter2;        //xy=1812.5000381469727,1166.2247791290
 AudioMixer4              mix_ntcFilter1; //xy=1814.5000381469727,1013.224781036377
 AudioEffectFlange        flange2;        //xy=1895.5000381469727,1672.2245903015137
 AudioEffectFlange        flange1;        //xy=1899.5000381469727,1594.2245922088623
-AudioConvert_F32toI16    Float2IntL;     //xy=1917.5,1839.224775314331
-AudioConvert_F32toI16    Float2IntR;     //xy=1922.5,1904.224775314331
+AudioConvert_F32toI16    Float2IntL;     //xy=1932.5,1841.2247314453125
+AudioConvert_F32toI16    Float2IntR;     //xy=1933.5,1905.2247314453125
 AudioMixer4              mix_ntcFilter4; //xy=1958.5,1363.224775314331
 AudioMixer4              mix_ntcFilter2; //xy=1966.5000381469727,1156.2247791290283
-AudioFilterStateVariable filter_osc1;    //xy=1992.4999771118164,477.22474479675293
+AudioEffectWaveshaper    ws_ampClip;     //xy=1975,472
 AudioAnalyzeRMS          rms_mix_ntcFilter4; //xy=2083.5,1272.224775314331
 AudioMixer4              mix_chorus_wetR; //xy=2103.405921936035,1699.4249076843262
 AudioEffectEnvelope      env_squelchL;   //xy=2109.5,1799.224775314331
 AudioMixer4              mix_chorus_wetL; //xy=2112.49991607666,1590.2241020202637
 AudioEffectEnvelope      env_squelchR;   //xy=2121.5,1900.224775314331
+AudioFilterStateVariable filter_osc1;    //xy=2129.5,480.2247314453125
 AudioFilterFIR           fir_formant;    //xy=2129.5000343322754,1158.224778175354
-AudioFilterStateVariable filter_osc1b;   //xy=2154.499973297119,496.2247142791748
 AudioMixer4              mix_Amp;        //xy=2188.5,1371.224775314331
 AudioEffectEnvelope      env_squelch;    //xy=2255.4997901916504,1444.2245922088623
 AudioFilterStateVariable filterPreMixHPR; //xy=2281.5,1967.224775314331
 AudioFilterStateVariable filterPreMixHPL; //xy=2284.5,1831.224775314331
+AudioFilterStateVariable filter_osc1b;   //xy=2291.4999961853027,499.2247009277344
 AudioInputI2S            i2s2;           //xy=2287.5,1895.224775314331
-AudioEffectWaveshaper    ws_ampClip;     //xy=2368.806198120117,1361.4249801635742
 AudioMixer4              mix_chorus_dryL; //xy=2369.5001220703125,1626.2245922088623
 AudioMixer4              mix_chorus_dryR; //xy=2370.5001220703125,1716.2245922088623
-AudioMixer4              mix_lineInL;    //xy=2477.5,1872.224775314331
-AudioMixer4              mix_lineInR;    //xy=2482.5,1969.224775314331
+AudioMixer4              mix_lineInL;    //xy=2485.49991607666,1872.2248802185059
+AudioMixer4              mix_lineInR;    //xy=2501.49991607666,1959.2248840332031
 AudioOutputI2S           i2s1;           //xy=2646.5,1913.224775314331
 
 AudioConnection          patchCord1(dc_sweepDepthFilter3, 0, sq_swpflt3, 0);
@@ -379,7 +380,7 @@ AudioConnection_F32      patchCord134(mix_pongL_F32, Float2IntL);
 AudioConnection          patchCord135(filter4, 0, mix_ntcFilter4, 1);
 AudioConnection          patchCord136(filter4, 1, mix_ntcFilter4, 2);
 AudioConnection          patchCord137(filter4, 2, mix_ntcFilter4, 3);
-AudioConnection          patchCord138(mix_oscLevels, 0, filter_osc1, 0);
+AudioConnection          patchCord138(mix_oscLevels, ws_ampClip);
 AudioConnection          patchCord139(filter2, 0, mix_ntcFilter2, 1);
 AudioConnection          patchCord140(filter2, 1, mix_ntcFilter2, 2);
 AudioConnection          patchCord141(filter2, 2, mix_ntcFilter2, 3);
@@ -394,7 +395,7 @@ AudioConnection          patchCord149(Float2IntR, env_squelchR);
 AudioConnection          patchCord150(mix_ntcFilter4, 0, mix_Amp, 1);
 AudioConnection          patchCord151(mix_ntcFilter4, rms_mix_ntcFilter4);
 AudioConnection          patchCord152(mix_ntcFilter2, fir_formant);
-AudioConnection          patchCord153(filter_osc1, 2, filter_osc1b, 0);
+AudioConnection          patchCord153(ws_ampClip, 0, filter_osc1, 0);
 AudioConnection          patchCord154(mix_chorus_wetR, 0, mix_chorus_fbL, 2);
 AudioConnection          patchCord155(mix_chorus_wetR, 0, mix_chorus_fbR, 2);
 AudioConnection          patchCord156(mix_chorus_wetR, 0, mix_chorus_dryR, 1);
@@ -403,23 +404,23 @@ AudioConnection          patchCord158(mix_chorus_wetL, 0, mix_chorus_dryL, 1);
 AudioConnection          patchCord159(mix_chorus_wetL, 0, mix_chorus_fbL, 1);
 AudioConnection          patchCord160(mix_chorus_wetL, 0, mix_chorus_fbR, 1);
 AudioConnection          patchCord161(env_squelchR, 0, filterPreMixHPR, 0);
-AudioConnection          patchCord162(fir_formant, 0, mix_Amp, 0);
-AudioConnection          patchCord163(filter_osc1b, 2, mix_ntcFilter1, 0);
-AudioConnection          patchCord164(filter_osc1b, 2, filter1, 0);
-AudioConnection          patchCord165(mix_Amp, ws_ampClip);
-AudioConnection          patchCord166(env_squelch, 0, mix_chorus_dryL, 0);
-AudioConnection          patchCord167(env_squelch, 0, mix_chorus_fbL, 0);
-AudioConnection          patchCord168(env_squelch, 0, mix_chorus_dryR, 0);
-AudioConnection          patchCord169(env_squelch, 0, mix_chorus_fbR, 0);
-AudioConnection          patchCord170(filterPreMixHPR, 2, mix_lineInR, 0);
-AudioConnection          patchCord171(filterPreMixHPR, 2, mix_lineInL, 3);
-AudioConnection          patchCord172(filterPreMixHPL, 2, mix_lineInL, 0);
-AudioConnection          patchCord173(filterPreMixHPL, 2, mix_lineInR, 3);
-AudioConnection          patchCord174(i2s2, 0, mix_lineInL, 1);
-AudioConnection          patchCord175(i2s2, 0, mix_lineInR, 2);
-AudioConnection          patchCord176(i2s2, 1, mix_lineInR, 1);
-AudioConnection          patchCord177(i2s2, 1, mix_lineInL, 2);
-AudioConnection          patchCord178(ws_ampClip, env_squelch);
+AudioConnection          patchCord162(filter_osc1, 2, filter_osc1b, 0);
+AudioConnection          patchCord163(fir_formant, 0, mix_Amp, 0);
+AudioConnection          patchCord164(mix_Amp, env_squelch);
+AudioConnection          patchCord165(env_squelch, 0, mix_chorus_dryL, 0);
+AudioConnection          patchCord166(env_squelch, 0, mix_chorus_fbL, 0);
+AudioConnection          patchCord167(env_squelch, 0, mix_chorus_dryR, 0);
+AudioConnection          patchCord168(env_squelch, 0, mix_chorus_fbR, 0);
+AudioConnection          patchCord169(filterPreMixHPR, 2, mix_lineInR, 0);
+AudioConnection          patchCord170(filterPreMixHPR, 2, mix_lineInL, 3);
+AudioConnection          patchCord171(filterPreMixHPL, 2, mix_lineInL, 0);
+AudioConnection          patchCord172(filterPreMixHPL, 2, mix_lineInR, 3);
+AudioConnection          patchCord173(filter_osc1b, 2, mix_ntcFilter1, 0);
+AudioConnection          patchCord174(filter_osc1b, 2, filter1, 0);
+AudioConnection          patchCord175(i2s2, 0, mix_lineInL, 1);
+AudioConnection          patchCord176(i2s2, 0, mix_lineInR, 2);
+AudioConnection          patchCord177(i2s2, 1, mix_lineInR, 1);
+AudioConnection          patchCord178(i2s2, 1, mix_lineInL, 2);
 AudioConnection          patchCord179(mix_chorus_dryL, Int2FloatL);
 AudioConnection          patchCord180(mix_chorus_dryR, Int2FloatR);
 AudioConnection          patchCord181(mix_lineInL, 0, i2s1, 0);
@@ -427,7 +428,6 @@ AudioConnection          patchCord182(mix_lineInR, 0, i2s1, 1);
 
 AudioControlSGTL5000     sgtl5000_1;     //xy=193.5,62.224775314331055
 // GUItool: end automatically generated code
-
 
 //-------- paste above the Auto generated code from Audio System Design Tool  --------
 
@@ -742,8 +742,6 @@ void setup()
 
   mix_Amp.gain(0, AmpLevel * Amp_HeadRoom);
   mix_Amp.gain(1, 1.0f); // 4000s AmpLevel doesn't control Noise Level
-  // Set the shaping table
-  ws_ampClip.shape(ampClipTable, 17);
 
   flange1.begin(delayline_flange1, FLANGE_DELAY_LENGTH,
                 (int)EffectsChorusDelay1, (int)EffectsChorusMod1, EffectsChorusLfoFreq);
@@ -1019,6 +1017,10 @@ void setup()
     EEPROM.put(AMPCLIPLOWIDX_ADDR, eeprom_ampClipLowIdx);
   }
   ampClipLowIdx = eeprom_ampClipLowIdx;
+  
+  // Set the shaping table
+  clipAdjustFun();
+  ws_ampClip.shape(ampClipTable, 17);
 
   amp_extraGainR_F32.setGain(extraAmpFactor);
   amp_extraGainL_F32.setGain(extraAmpFactor);
