@@ -1,0 +1,12 @@
+[submodule "3rdparty/Audio"]
+	path = 3rdparty/Audio
+	url = https://github.com/ivaylomil/Audio.git
+	branch = pulsewidth_offset
+[submodule "3rdparty/hexefx_audiolib_F32"]
+	path = 3rdparty/hexefx_audiolib_F32
+	url = https://github.com/ivaylomil/hexefx_audiolib_F32.git
+	branch = ws_mods
+[submodule "3rdparty/OpenAudio_ArduinoLibrary"]
+	path = 3rdparty/OpenAudio_ArduinoLibrary
+	url = https://github.com/ivaylomil/OpenAudio_ArduinoLibrary.git
+	branch = windy1-platformio
