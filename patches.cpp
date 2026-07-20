@@ -190,8 +190,13 @@ void volAdjustFun()
 };
 void auxInAdjustFun()
 {
+#if ENABLE_LINE_IN
   mix_lineinf = ((float)mix_linein) / 100.0f;
   mix_lineinf = (mix_lineinf * mix_lineinf) * 2.0f;
+#else
+  mix_linein = 0;
+  mix_lineinf = 0.0f;
+#endif
 };
 void octaveAdjustFun()
 {
@@ -211,6 +216,72 @@ void breathccAdjustFun()
   breath_cc = breath_cc == 6 && breath_cc_last == 7 ? 5 : breath_cc; // skip 6 if last was 7
   breath_cc_last = breath_cc;
 } // 64,2,14,114,-50 to +50 cents
+void velModeAdjustFun()
+{
+  // no-op: note_vel_mode is read directly in NoteOn handler
+}
+void nprnToDisplayVelMode(char *dispValBuf, uint8_t *val)
+{
+  if (val == NULL) return;
+  switch (*val)
+  {
+  case 0: sprintf(dispValBuf, " Default  "); break;
+  case 1: sprintf(dispValBuf, "  BrOnly  "); break;
+  case 2: sprintf(dispValBuf, "  Hybrid  "); break;
+  default: sprintf(dispValBuf, "   ???    "); break;
+  }
+}
+void legatoAssistAdjustFun()
+{
+  if (legato_assist_mode == 0)
+  {
+    clearDeferredLegatoNote();
+  }
+}
+void legatoHoldMsAdjustFun()
+{
+  evaluateDeferredLegatoRelease();
+}
+void legatoBreathThAdjustFun()
+{
+  updateLegatoThresholdCache();
+  evaluateDeferredLegatoRelease();
+}
+void legatoReleasePolicyAdjustFun()
+{
+  evaluateDeferredLegatoRelease();
+}
+void nprnToDisplayLegatoAssist(char *dispValBuf, uint8_t *val)
+{
+  if (val == NULL) return;
+  switch (*val)
+  {
+  case 0: sprintf(dispValBuf, "    Off   "); break;
+  case 1: sprintf(dispValBuf, "    On    "); break;
+  default: sprintf(dispValBuf, "   ???    "); break;
+  }
+}
+void nprnToDisplayLegatoHoldMs(char *dispValBuf, uint8_t *val)
+{
+  if (val == NULL) return;
+  sprintf(dispValBuf, "  %03d mS ", *val);
+}
+void nprnToDisplayLegatoBreathTh(char *dispValBuf, uint8_t *val)
+{
+  if (val == NULL) return;
+  sprintf(dispValBuf, "   %03d    ", *val);
+}
+void nprnToDisplayLegatoReleasePolicy(char *dispValBuf, uint8_t *val)
+{
+  if (val == NULL) return;
+  switch (*val)
+  {
+  case 0: sprintf(dispValBuf, " BreathOnl"); break;
+  case 1: sprintf(dispValBuf, " BrOrTime "); break;
+  case 2: sprintf(dispValBuf, " TimeOnly "); break;
+  default: sprintf(dispValBuf, "   ???    "); break;
+  }
+}
 void fxSourcToSynth()
 {
   // updateSynthVariablesFlag = true; //updating patch and effects (TODO: only effects?)

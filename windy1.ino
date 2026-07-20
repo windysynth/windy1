@@ -71,6 +71,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define NNBMODCALPROM_ADDR ((int)56)
 #define AMPCLIPHIGHIDX_ADDR ((int)60)
 #define AMPCLIPLOWIDX_ADDR ((int)64)
+#define NOTE_VEL_MODE_EEPROM_ADDR ((int)68)
+#define LEGATO_ASSIST_MODE_EEPROM_ADDR ((int)72)
+#define LEGATO_ASSIST_HOLD_MS_EEPROM_ADDR ((int)76)
+#define LEGATO_ASSIST_BREATH_TH_EEPROM_ADDR ((int)80)
+#define LEGATO_RELEASE_POLICY_EEPROM_ADDR ((int)84)
 
 // #include <Arduino.h>
 #include <U8g2lib.h>
@@ -425,8 +430,6 @@ AudioConnection          patchCord179(mix_chorus_dryL, Int2FloatL);
 AudioConnection          patchCord180(mix_chorus_dryR, Int2FloatR);
 AudioConnection          patchCord181(mix_lineInL, 0, i2s1, 0);
 AudioConnection          patchCord182(mix_lineInR, 0, i2s1, 1);
-
-AudioControlSGTL5000     sgtl5000_1;     //xy=193.5,62.224775314331055
 // GUItool: end automatically generated code
 
 //-------- paste above the Auto generated code from Audio System Design Tool  --------
@@ -447,8 +450,6 @@ Bounce knobBotButton(BOT_BTN, debounceDelay);
 Bounce knobTopButton(TOP_BTN, debounceDelay);
 
 //-------------- Msc Pins----------------------------
-const int pwrDownSensePin = 25;              // teensy4.1 pin
-Bounce pwrDownSense(pwrDownSensePin, 1);     // 1ms
 const int LO_RIGHT_PLUG = 33;                // line out plug sense, high is plugged in
 const int LO_LEFT_PLUG = 5;                  // line out plug sense, high is plugged in
 Bounce loRightPluggedIn(LO_RIGHT_PLUG, 100); // 10ms
@@ -477,6 +478,178 @@ const float squelchDelay = 60.0f;                     // ms
 const float squelchAttack = 30.0f;                    // ms
 const uint32_t readRMSInterval = 1000;                // ms
 
+#ifdef DEBUG_MIDI_INPUT
+enum MidiDebugEvent : uint8_t
+{
+  MIDI_DBG_NOTE_ON = 0,
+  MIDI_DBG_NOTE_OFF,
+  MIDI_DBG_CC,
+  MIDI_DBG_PC,
+  MIDI_DBG_PB,
+  MIDI_DBG_NRPN,
+  MIDI_DBG_MISMATCH,
+  MIDI_DBG_EVENT_COUNT
+};
+
+static uint32_t midi_debug_counts[3][MIDI_DBG_EVENT_COUNT] = {0};
+static uint32_t midi_debug_last_warn_ms[3] = {0};
+static uint32_t midi_debug_last_summary_ms = 0;
+
+static inline uint8_t midiDebugPortIndex(MIDItype src)
+{
+  switch (src)
+  {
+  case DIN: return 0;
+  case HOST: return 1;
+  case DEVICE: return 2;
+  default: return 0;
+  }
+}
+
+static inline bool midiDebugPortEnabled(MIDItype src)
+{
+  return ((MIDI_DEBUG_PORT_MASK & (1u << midiDebugPortIndex(src))) != 0u);
+}
+
+static inline const char *midiDebugSourceName(MIDItype src)
+{
+  switch (src)
+  {
+  case DIN: return "DIN";
+  case HOST: return "HOST";
+  case DEVICE: return "DEV";
+  default: return "UNK";
+  }
+}
+
+static inline void midiDebugCount(MIDItype src, MidiDebugEvent evt)
+{
+  const uint8_t src_idx = midiDebugPortIndex(src);
+  if (src_idx < 3 && evt < MIDI_DBG_EVENT_COUNT)
+  {
+    midi_debug_counts[src_idx][evt]++;
+  }
+}
+
+static void midiDebugPrintSummary()
+{
+#if MIDI_DEBUG_LEVEL >= 1
+  const uint32_t now_ms = millis();
+  if ((now_ms - midi_debug_last_summary_ms) < MIDI_DEBUG_RATE_MS)
+  {
+    return;
+  }
+  midi_debug_last_summary_ms = now_ms;
+
+  for (uint8_t src_idx = 0; src_idx < 3; ++src_idx)
+  {
+    const MIDItype src = (src_idx == 0) ? DIN : ((src_idx == 1) ? HOST : DEVICE);
+    if (!midiDebugPortEnabled(src))
+    {
+      continue;
+    }
+
+    const uint32_t n_on = midi_debug_counts[src_idx][MIDI_DBG_NOTE_ON];
+    const uint32_t n_off = midi_debug_counts[src_idx][MIDI_DBG_NOTE_OFF];
+    const uint32_t cc = midi_debug_counts[src_idx][MIDI_DBG_CC];
+    const uint32_t pc = midi_debug_counts[src_idx][MIDI_DBG_PC];
+    const uint32_t pb = midi_debug_counts[src_idx][MIDI_DBG_PB];
+    const uint32_t nrpn = midi_debug_counts[src_idx][MIDI_DBG_NRPN];
+    const uint32_t mm = midi_debug_counts[src_idx][MIDI_DBG_MISMATCH];
+
+    if ((n_on + n_off + cc + pc + pb + nrpn + mm) == 0u)
+    {
+      continue;
+    }
+
+    snprintf(str_buf1, 64,
+             "[MIDI %s] on:%lu off:%lu cc:%lu pc:%lu pb:%lu nrpn:%lu mm:%lu bcc:%u",
+             midiDebugSourceName(src),
+             (unsigned long)n_on,
+             (unsigned long)n_off,
+             (unsigned long)cc,
+             (unsigned long)pc,
+             (unsigned long)pb,
+             (unsigned long)nrpn,
+             (unsigned long)mm,
+             (unsigned int)breath_cc);
+    Serial8.println(str_buf1);
+
+    for (uint8_t e = 0; e < MIDI_DBG_EVENT_COUNT; ++e)
+    {
+      midi_debug_counts[src_idx][e] = 0;
+    }
+  }
+#endif
+}
+
+static void midiDebugLogEvent(MIDItype src, uint8_t msg_type, uint8_t ch, uint8_t d1, uint8_t d2)
+{
+#if MIDI_DEBUG_LEVEL >= 2
+  if (!midiDebugPortEnabled(src))
+  {
+    return;
+  }
+
+  switch (msg_type)
+  {
+  case 0x90:
+    snprintf(str_buf1, 64, "[MIDI %s] ON ch:%u n:%u v:%u", midiDebugSourceName(src), ch, d1, d2);
+    Serial8.println(str_buf1);
+    break;
+  case 0x80:
+    snprintf(str_buf1, 64, "[MIDI %s] OFF ch:%u n:%u v:%u", midiDebugSourceName(src), ch, d1, d2);
+    Serial8.println(str_buf1);
+    break;
+  case 0xB0:
+    snprintf(str_buf1, 64, "[MIDI %s] CC ch:%u cc:%u v:%u", midiDebugSourceName(src), ch, d1, d2);
+    Serial8.println(str_buf1);
+    break;
+  case 0xC0:
+    snprintf(str_buf1, 64, "[MIDI %s] PC ch:%u p:%u", midiDebugSourceName(src), ch, d1);
+    Serial8.println(str_buf1);
+    break;
+  case 0xE0:
+    snprintf(str_buf1, 64, "[MIDI %s] PB ch:%u v:%d", midiDebugSourceName(src), ch, ((int)d1 + ((int)d2 << 7) - 8192));
+    Serial8.println(str_buf1);
+    break;
+  default:
+    break;
+  }
+#else
+  (void)src;
+  (void)msg_type;
+  (void)ch;
+  (void)d1;
+  (void)d2;
+#endif
+}
+
+static void midiDebugWarnBreathMismatch(MIDItype src, uint8_t cc_num, uint8_t cc_val)
+{
+  if (!midiDebugPortEnabled(src))
+  {
+    return;
+  }
+
+  const uint8_t src_idx = midiDebugPortIndex(src);
+  const uint32_t now_ms = millis();
+  if ((now_ms - midi_debug_last_warn_ms[src_idx]) < MIDI_DEBUG_WARN_RATE_MS)
+  {
+    return;
+  }
+  midi_debug_last_warn_ms[src_idx] = now_ms;
+
+  snprintf(str_buf1, 64,
+           "[MIDI %s] CC mismatch got:%u expected:%u val:%u",
+           midiDebugSourceName(src),
+           (unsigned int)cc_num,
+           (unsigned int)breath_cc,
+           (unsigned int)cc_val);
+  Serial8.println(str_buf1);
+}
+#endif
+
 void setup()
 {
   pinMode(ledPin, OUTPUT);
@@ -486,10 +659,9 @@ void setup()
   sprintf(str_oledbuf, splashScreen_str.c_str());
 
   Serial8.begin(1000000);
-  // Serial.begin(1000000); // for debugging over usb serial
+  Serial.begin(1000000); // for debugging over usb serial
   pinMode(BOT_BTN, INPUT_PULLUP);
   pinMode(TOP_BTN, INPUT_PULLUP);
-  pinMode_INPUT_PULLUP_100K(pwrDownSensePin);
 
   uint32_t boatLoaderCatchTime = millis();
   do
@@ -512,33 +684,6 @@ void setup()
   knobTopButton.update();
   knobBotButton.rose();
   knobTopButton.rose();
-
-#ifdef SGTL5000_CHECK_PWRON_DEFAULT // defined in control_sgtl5000.h
-// ws added read_b4_enable() to avoid loud click due to calling enable() when already enabled
-// when coming out of bootloader
-#define SGTL5000_0030_PWRON_DEFAULT 0x7060
-  unsigned int sgtl_val = sgtl5000_1.read_b4_enable((unsigned int)0x0030);
-  if (SGTL5000_0030_PWRON_DEFAULT == sgtl_val)
-  {
-    sgtl5000_1.enable();
-  }
-  else
-  {
-    String test_str = verNum_str + "\n sgtl:\n 0x%04X";
-    sprintf(str_oledbuf, test_str.c_str(), sgtl_val);
-  }
-#else
-  sgtl5000_1.enable();
-#endif
-  sgtl5000_1.muteHeadphone();
-  sgtl5000_1.muteLineout();
-  sgtl5000_1.inputSelect(AUDIO_INPUT_LINEIN);
-  sgtl5000_1.dacVolumeRamp();
-  sgtl5000_1.lineOutLevel(13); // 3.16V p-p
-  sgtl5000_1.lineInLevel(0);   // 3.12V p-p
-  sgtl5000_1.unmuteLineout();
-  sgtl5000_1.unmuteHeadphone();
-  sgtl5000_1.volume(0.80);
 
   //------------ configure AudioMemory (for 16bit int) ----------------
   AudioMemory(100); // TODO: how much AudioMemory do I need? (delay 2.9ms per block for 1270/2.9 = 438
@@ -914,6 +1059,68 @@ void setup()
 
   breath_cc = eeprom_breath_cc;
 
+  EEPROM.get(NOTE_VEL_MODE_EEPROM_ADDR, eeprom_note_vel_mode);
+  sprintf(str_buf1, "read eeprom_note_vel_mode (%03d)", eeprom_note_vel_mode);
+  Serial8.println(str_buf1);
+  if (eeprom_note_vel_mode < 0 || eeprom_note_vel_mode > 2)
+  {
+    sprintf(str_buf1, "eeprom_note_vel_mode (%03d) out of range.", eeprom_note_vel_mode);
+    Serial8.println(str_buf1);
+    eeprom_note_vel_mode = 0; // default: Legacy
+    EEPROM.put(NOTE_VEL_MODE_EEPROM_ADDR, eeprom_note_vel_mode);
+  }
+  note_vel_mode = (uint8_t)eeprom_note_vel_mode;
+
+  EEPROM.get(LEGATO_ASSIST_MODE_EEPROM_ADDR, eeprom_legato_assist_mode);
+  sprintf(str_buf1, "read eeprom_legato_assist_mode (%03d)", eeprom_legato_assist_mode);
+  Serial8.println(str_buf1);
+  if (eeprom_legato_assist_mode < 0 || eeprom_legato_assist_mode > 1)
+  {
+    sprintf(str_buf1, "eeprom_legato_assist_mode (%03d) out of range.", eeprom_legato_assist_mode);
+    Serial8.println(str_buf1);
+    eeprom_legato_assist_mode = 0;
+    EEPROM.put(LEGATO_ASSIST_MODE_EEPROM_ADDR, eeprom_legato_assist_mode);
+  }
+  legato_assist_mode = (uint8_t)eeprom_legato_assist_mode;
+
+  EEPROM.get(LEGATO_ASSIST_HOLD_MS_EEPROM_ADDR, eeprom_legato_assist_hold_ms);
+  sprintf(str_buf1, "read eeprom_legato_assist_hold_ms (%03d)", eeprom_legato_assist_hold_ms);
+  Serial8.println(str_buf1);
+  if (eeprom_legato_assist_hold_ms < 0 || eeprom_legato_assist_hold_ms > 255)
+  {
+    sprintf(str_buf1, "eeprom_legato_assist_hold_ms (%03d) out of range.", eeprom_legato_assist_hold_ms);
+    Serial8.println(str_buf1);
+    eeprom_legato_assist_hold_ms = 40;
+    EEPROM.put(LEGATO_ASSIST_HOLD_MS_EEPROM_ADDR, eeprom_legato_assist_hold_ms);
+  }
+  legato_assist_hold_ms = (uint8_t)eeprom_legato_assist_hold_ms;
+
+  EEPROM.get(LEGATO_ASSIST_BREATH_TH_EEPROM_ADDR, eeprom_legato_assist_breath_th);
+  sprintf(str_buf1, "read eeprom_legato_assist_breath_th (%03d)", eeprom_legato_assist_breath_th);
+  Serial8.println(str_buf1);
+  if (eeprom_legato_assist_breath_th < 0 || eeprom_legato_assist_breath_th > 127)
+  {
+    sprintf(str_buf1, "eeprom_legato_assist_breath_th (%03d) out of range.", eeprom_legato_assist_breath_th);
+    Serial8.println(str_buf1);
+    eeprom_legato_assist_breath_th = 10;
+    EEPROM.put(LEGATO_ASSIST_BREATH_TH_EEPROM_ADDR, eeprom_legato_assist_breath_th);
+  }
+  legato_assist_breath_th = (uint8_t)eeprom_legato_assist_breath_th;
+
+  EEPROM.get(LEGATO_RELEASE_POLICY_EEPROM_ADDR, eeprom_legato_release_policy);
+  sprintf(str_buf1, "read eeprom_legato_release_policy (%03d)", eeprom_legato_release_policy);
+  Serial8.println(str_buf1);
+  if (eeprom_legato_release_policy < 0 || eeprom_legato_release_policy > 2)
+  {
+    sprintf(str_buf1, "eeprom_legato_release_policy (%03d) out of range.", eeprom_legato_release_policy);
+    Serial8.println(str_buf1);
+    eeprom_legato_release_policy = 0;
+    EEPROM.put(LEGATO_RELEASE_POLICY_EEPROM_ADDR, eeprom_legato_release_policy);
+  }
+  legato_release_policy = (uint8_t)eeprom_legato_release_policy;
+  updateLegatoThresholdCache();
+
+#if ENABLE_LINE_IN
   EEPROM.get(MIX_LINEIN_EEPROM_ADDR, eeprom_mix_linein);
   sprintf(str_buf1, "read eeprom_mix_linein (%03d)", eeprom_mix_linein);
   Serial8.println(str_buf1);
@@ -924,6 +1131,11 @@ void setup()
   }
   mix_linein = eeprom_mix_linein;
   mix_lineinf = ((float)mix_linein) / 100.0f;
+#else
+  eeprom_mix_linein = 0;
+  mix_linein = 0;
+  mix_lineinf = 0.0f;
+#endif
 
   EEPROM.get(VOL_EEPROM_ADDR, eeprom_vol);
   sprintf(str_buf1, "read eeprom_vol (%03d)", eeprom_vol);
@@ -1029,14 +1241,20 @@ void setup()
   mix_pongR_F32.gain(0, -0.5f * EffectsDelayPong + 0.5f);
   mix_pongR_F32.gain(1, 0.5f * EffectsDelayPong + 0.5f);
 
-  // mix_lineInL.gain(0, volf(1.0-mix_lineinf));
   mix_lineInL.gain(0, volf);
+#if ENABLE_LINE_IN
   mix_lineInL.gain(1, mix_lineinf * extraLineInAmpFactor);
+#else
+  mix_lineInL.gain(1, 0.0f);
+#endif
   mix_lineInL.gain(2, 0.0);
   mix_lineInL.gain(3, 0.0);
-  // mix_lineInR.gain(0, volf(1.0-mix_lineinf));
   mix_lineInR.gain(0, volf);
+#if ENABLE_LINE_IN
   mix_lineInR.gain(1, mix_lineinf * extraLineInAmpFactor);
+#else
+  mix_lineInR.gain(1, 0.0f);
+#endif
   mix_lineInR.gain(2, 0.0);
   mix_lineInR.gain(3, 0.0);
   sprintf(str_buf1, "loadPatchNumberEEPROM (%03d) ", eeprom_patchNumber);
@@ -1114,12 +1332,6 @@ void setup()
 
   // set to top menu after delay
 
-  //------wait till powered up-------------
-  do
-  {
-    pwrDownSense.update();
-  } while (!pwrDownSense.read()); // false means powered down
-
   delay(2000); // show splash text screen for 2s
   // initial draw
   ms->draw();
@@ -1130,20 +1342,6 @@ void loop()
   static unsigned long prevMilMenu = millis();
   static unsigned long prevMilUpdateSynth = millis();
   //  static unsigned long prevMilRMS = millis();
-
-  //------------ check for SGTL5000 pwr down-------------
-  pwrDownSense.update();
-  if (!pwrDownSense.read())
-  {
-    sgtl_power_down(); // shut down dac "vag" to avoid audio "pop".
-    // u8g2.setFont(u8g2_font_10x20_mf  ); // lines start at {8,16,24,32,40,48,56,64};
-    // u8g2.drawStr(20,20,"BYE!");
-    // u8g2.sendBuffer();
-    while (true)
-    {
-    }
-  }
-  //-------------check for SGTL5000 pwr down-------------
 
   currentMillis = millis();
   //----------check knobs, buttons and updateUI----------
@@ -1354,7 +1552,11 @@ void loop()
 
   // no reason to wait for these
   mix_lineInLR_gain_0 = volf;
+#if ENABLE_LINE_IN
   mix_lineInLR_gain_1 = mix_lineinf * extraLineInAmpFactor;
+#else
+  mix_lineInLR_gain_1 = 0.0f;
+#endif
 
   //-------------------------------------------------------
   //  Update Realtime Audio System
@@ -1538,15 +1740,25 @@ void loop()
     processMIDI(DEVICE);
   }
 
+#ifdef DEBUG_MIDI_INPUT
+  midiDebugPrintSummary();
+#endif
+
   //------------------------------------------------------
   // update eeprom if any values stored there have changed
   //------------------------------------------------------
-  if (!updateEpromFlag && ((current_patchNumber != eeprom_patchNumber) || (eeprom_mix_linein != mix_linein) 
+  if (!updateEpromFlag && ((current_patchNumber != eeprom_patchNumber)
+#if ENABLE_LINE_IN
+    || (eeprom_mix_linein != mix_linein)
+#endif
     || (eeprom_FineTuneCents != FineTuneCents) || (eeprom_vol != vol) || (eeprom_Transpose != Transpose) 
     || (eeprom_Octave != Octave) || (eeprom_breath_cc != breath_cc) || (eeprom_fxSourcePatch != fxSourcePatch) 
+    || (eeprom_legato_assist_mode != (int)legato_assist_mode) || (eeprom_legato_assist_hold_ms != (int)legato_assist_hold_ms)
+    || (eeprom_legato_assist_breath_th != (int)legato_assist_breath_th) || (eeprom_legato_release_policy != (int)legato_release_policy)
     || (eeprom_hp1f != hp1f)||(eeprom_hp1bf != hp1bf)||(eeprom_hp1q != hp1q)||(eeprom_hp1bq != hp1bq)
     || (NNBModCal != eeprom_NNBModCal) || (ampClipHighIdx != eeprom_ampClipHighIdx)
-    || (ampClipLowIdx != eeprom_ampClipLowIdx)))
+    || (ampClipLowIdx != eeprom_ampClipLowIdx)
+    || (eeprom_note_vel_mode != (int)note_vel_mode)))
   {
     updateEpromFlag = true;
     eepromCurrentMillis = millis();
@@ -1566,10 +1778,12 @@ void loop()
       sprintf(str_buf1, "Writing vol (%03d) to EEPROM", eeprom_vol);
       Serial8.println(str_buf1);
       EEPROM_update(VOL_EEPROM_ADDR, eeprom_vol);
+    #if ENABLE_LINE_IN
       eeprom_mix_linein = mix_linein;
       sprintf(str_buf1, "Writing mix_linein (%03d) to EEPROM", eeprom_mix_linein);
       Serial8.println(str_buf1);
       EEPROM_update(MIX_LINEIN_EEPROM_ADDR, eeprom_mix_linein);
+    #endif
       eeprom_fxSourcePatch = fxSourcePatch; // one if Patch, zero if global
       sprintf(str_buf1, "Writing fxSourcePatch (%03d) to EEPROM", eeprom_fxSourcePatch);
       Serial8.println(str_buf1);
@@ -1590,6 +1804,26 @@ void loop()
       eeprom_breath_cc = breath_cc;
       Serial8.println(str_buf1);
       EEPROM_update(BREATH_CC_EEPROM_ADDR, eeprom_breath_cc);
+
+      eeprom_legato_assist_mode = (int)legato_assist_mode;
+      sprintf(str_buf1, "Writing legato_assist_mode (%03d) to EEPROM", eeprom_legato_assist_mode);
+      Serial8.println(str_buf1);
+      EEPROM_update(LEGATO_ASSIST_MODE_EEPROM_ADDR, eeprom_legato_assist_mode);
+
+      eeprom_legato_assist_hold_ms = (int)legato_assist_hold_ms;
+      sprintf(str_buf1, "Writing legato_assist_hold_ms (%03d) to EEPROM", eeprom_legato_assist_hold_ms);
+      Serial8.println(str_buf1);
+      EEPROM_update(LEGATO_ASSIST_HOLD_MS_EEPROM_ADDR, eeprom_legato_assist_hold_ms);
+
+      eeprom_legato_assist_breath_th = (int)legato_assist_breath_th;
+      sprintf(str_buf1, "Writing legato_assist_breath_th (%03d) to EEPROM", eeprom_legato_assist_breath_th);
+      Serial8.println(str_buf1);
+      EEPROM_update(LEGATO_ASSIST_BREATH_TH_EEPROM_ADDR, eeprom_legato_assist_breath_th);
+
+      eeprom_legato_release_policy = (int)legato_release_policy;
+      sprintf(str_buf1, "Writing legato_release_policy (%03d) to EEPROM", eeprom_legato_release_policy);
+      Serial8.println(str_buf1);
+      EEPROM_update(LEGATO_RELEASE_POLICY_EEPROM_ADDR, eeprom_legato_release_policy);
 
       sprintf(str_buf1, "Writing hp1f (%03d) to EEPROM", eeprom_hp1f);
       Serial8.println(str_buf1);
@@ -1622,6 +1856,10 @@ void loop()
       Serial8.println(str_buf1);
       eeprom_ampClipLowIdx = ampClipLowIdx;
       EEPROM_update(AMPCLIPLOWIDX_ADDR, eeprom_ampClipLowIdx);
+      sprintf(str_buf1, "Writing note_vel_mode (%03d) to EEPROM", eeprom_note_vel_mode);
+      Serial8.println(str_buf1);
+      eeprom_note_vel_mode = (int)note_vel_mode;
+      EEPROM_update(NOTE_VEL_MODE_EEPROM_ADDR, eeprom_note_vel_mode);
       updateEpromFlag = false;
     }
   } // if (updateEpromFlag )
@@ -1679,29 +1917,6 @@ void resetUITimeout(void)
 {
   previousUITimeoutTime = currentUITimeoutTime;
   ALREADY_TIMED_OUT = false;
-}
-
-void sgtl_power_down()
-{
-  // 1. Mute the headphone outputs
-  sgtl5000_1.muteHeadphone();
-  sgtl5000_1.muteLineout();
-
-  // ws, added to control_sgtl5000.h
-  sgtl5000_1.vagrampdown(); // ws, added to control_sgtl5000.h
-
-  u8g2.setFont(u8g2_font_10x20_mf); // lines start at {8,16,24,32,40,48,56,64};
-  u8g2.clearBuffer();
-  u8g2.sendBuffer();
-  u8g2.drawStr(20, 20, "BYE!");
-  u8g2.sendBuffer();
-  delay(390); // VAG_POWERUP to 0, 200-400ms before HEADPNONE_POWERUP and LINEOUT_POWERUP to 0
-
-  // ws, added to control_sgtl5000.h
-  sgtl5000_1.powerdownDACHp(); // DAC_POWERUP, HEADPNONE_POWERUP and LINEOUT_POWERUP to 0
-
-  // ws, added to control_sgtl5000.h
-  //  sgtl5000_1.powerdownDAP();
 }
 
 void updateUI()
@@ -2138,6 +2353,79 @@ void changeFilterMode(void)
   }
 } // changeFilterMode()
 
+void clearDeferredLegatoNote()
+{
+  deferred_noteoff_pending = false;
+  deferred_noteoff_note = 0;
+  deferred_noteoff_started_ms = 0;
+}
+
+void updateLegatoThresholdCache()
+{
+  legato_breath_th_engage = ((float)legato_assist_breath_th) * DIV127;
+  int release_th = (int)legato_assist_breath_th - 4;
+  if (release_th < 0)
+    release_th = 0;
+  legato_breath_th_release = ((float)release_th) * DIV127;
+}
+
+void evaluateDeferredLegatoRelease()
+{
+  if (!deferred_noteoff_pending)
+    return;
+  if (deferred_noteoff_note != currentMidiNote)
+  {
+    clearDeferredLegatoNote();
+    return;
+  }
+
+  uint32_t elapsedMs = millis() - deferred_noteoff_started_ms;
+  bool releaseNow = false;
+  switch (legato_release_policy)
+  {
+  case 0:
+    releaseNow = lastBreathf <= legato_breath_th_release;
+    break;
+  case 1:
+    releaseNow = (lastBreathf <= legato_breath_th_release) || (elapsedMs >= (uint32_t)legato_assist_hold_ms);
+    break;
+  case 2:
+    releaseNow = elapsedMs >= (uint32_t)legato_assist_hold_ms;
+    break;
+  default:
+    releaseNow = lastBreathf <= legato_breath_th_release;
+    break;
+  }
+
+  if (releaseNow)
+  {
+    clearDeferredLegatoNote();
+    noteOffFun();
+  }
+}
+
+static void handleLegatoReleaseEntry()
+{
+  if (data1 != currentMidiNote || legato_assist_mode == 0)
+  {
+    clearDeferredLegatoNote();
+    noteOffFun();
+    return;
+  }
+
+  if (lastBreathf < legato_breath_th_engage)
+  {
+    clearDeferredLegatoNote();
+    noteOffFun();
+    return;
+  }
+
+  deferred_noteoff_pending = true;
+  deferred_noteoff_note = currentMidiNote;
+  deferred_noteoff_started_ms = millis();
+  evaluateDeferredLegatoRelease();
+}
+
 //------------------------------------------------------
 //  see https://www.pjrc.com/teensy/td_libs_MIDI.html for
 //            MIDI using
@@ -2177,9 +2465,16 @@ void processMIDI(MIDItype midi_port_type)
   // sprintf(str_buf1, "type: %d, data1: %d, data2: %d, channel: %d", type,data1, data2, channel);
   // Serial8.println(str_buf1);
 
+#ifdef DEBUG_MIDI_INPUT
+  midiDebugLogEvent(midi_port_type, type, channel, data1, data2);
+#endif
+
   switch (type)
   {
   case midi_ho.ProgramChange: // 0xC0
+#ifdef DEBUG_MIDI_INPUT
+    midiDebugCount(midi_port_type, MIDI_DBG_PC);
+#endif
     programChangeData = data1;
     programChangeFlag = true; // used in UISM
     sprintf(str_buf1, "type: %d, data1: %d, channel: %d", type, data1, channel);
@@ -2236,6 +2531,9 @@ void processMIDI(MIDItype midi_port_type)
     }
     break;
   case midi_ho.ControlChange: // 0xB0
+#ifdef DEBUG_MIDI_INPUT
+    midiDebugCount(midi_port_type, MIDI_DBG_CC);
+#endif
     switch(midi_port_type)
     {
         case HOST:
@@ -2256,8 +2554,9 @@ void processMIDI(MIDItype midi_port_type)
     case CC_NRPN_DATA_ENTRY:
        usbMidiNrpnData = data2;
        processNrpnMessage();
-       sprintf(str_buf1, "M:%d, L:%d, D:%d", usbMidiNrpnMsbOld, usbMidiNrpnLsbOld, usbMidiNrpnData);
-       Serial8.println(str_buf1);
+    #ifdef DEBUG_MIDI_INPUT
+      midiDebugCount(midi_port_type, MIDI_DBG_NRPN);
+    #endif
        break;
     case CC_NRPN_LSB:
        // usbMidiNrpnLsbOld = usbMidiNrpnLsbNew;
@@ -2286,6 +2585,10 @@ void processMIDI(MIDItype midi_port_type)
     case CC_EXPRESSION:
       if (data1 != (uint8_t)breath_cc)
       {
+#ifdef DEBUG_MIDI_INPUT
+        midiDebugCount(midi_port_type, MIDI_DBG_MISMATCH);
+        midiDebugWarnBreathMismatch(midi_port_type, data1, data2);
+#endif
         break;
       }
       else
@@ -2373,6 +2676,7 @@ void processMIDI(MIDItype midi_port_type)
           // dc_breathNoise.amplitude(0,rampTimeDynNoiseOn);
           dc_breathNoise.amplitude(0, dc_breathOff_rampTime);
         }
+        evaluateDeferredLegatoRelease();
         break;
       }
     case CC_PORTA_TIME:
@@ -2391,6 +2695,9 @@ void processMIDI(MIDItype midi_port_type)
     break;
 
   case midi_ho.NoteOn: //(type==0x90)
+#ifdef DEBUG_MIDI_INPUT
+    midiDebugCount(midi_port_type, MIDI_DBG_NOTE_ON);
+#endif
     switch(midi_port_type)
     {
         case HOST:
@@ -2409,15 +2716,30 @@ void processMIDI(MIDItype midi_port_type)
     //  TODO: create amplitude transition between legato notes
     if (data2 == 0)
     {
-      noteOffFun();
+      handleLegatoReleaseEntry();
       break;
     }
-    data2f = ((float)data2) * DIV127;
-    if (lastBreathf <= 0.0f)
+
+    if (deferred_noteoff_pending)
     {
+      clearDeferredLegatoNote();
+    }
+
+    data2f = ((float)data2) * DIV127;
+    // Note velocity response: 0=Legacy 1=BrOnly 2=Hybrid
+    if (note_vel_mode == 0 && lastBreathf <= 0.0f)
+    {
+      // Legacy: seed breath from velocity when breath is zero
       previousBreathf = 0.0f;
       lastBreathf = data2f;
     }
+    else if (note_vel_mode == 2 && data2f > lastBreathf)
+    {
+      // Hybrid: use whichever is larger (velocity or current breath)
+      previousBreathf = lastBreathf;
+      lastBreathf = data2f;
+    }
+    // BrOnly (mode 1): leave lastBreathf unchanged; silence until breath CC arrives
     //  Only treat Note on Velocity as a Breath value if lastBreathf was zero
     dc_breathThreshOsc1_amp = piecewise_curve_func(thresh(lastBreathf, BreathThreshOsc1), BreathOscCurveLines1);
     dc_breathThreshOsc2_amp = piecewise_curve_func(thresh(lastBreathf, BreathThreshOsc2), BreathOscCurveLines2);
@@ -2594,6 +2916,9 @@ void processMIDI(MIDItype midi_port_type)
     break;
 
   case midi_ho.NoteOff: //(type==0x80)
+#ifdef DEBUG_MIDI_INPUT
+    midiDebugCount(midi_port_type, MIDI_DBG_NOTE_OFF);
+#endif
     switch(midi_port_type)
     {
         case HOST:
@@ -2609,10 +2934,13 @@ void processMIDI(MIDItype midi_port_type)
           MIDIs1.sendNoteOff(data1, data2, channel);
           break;
     }
-    noteOffFun();
+    handleLegatoReleaseEntry();
     break;
 
   case midi_ho.PitchBend:
+#ifdef DEBUG_MIDI_INPUT
+    midiDebugCount(midi_port_type, MIDI_DBG_PB);
+#endif
     switch(midi_port_type)
     {
         case HOST:
@@ -2661,6 +2989,7 @@ void noteOffFun(void)
 {
   if (data1 == currentMidiNote)
   {
+    clearDeferredLegatoNote();
     note_is_on = false;
     fMidiNoteNorm = ((float)data1) / 128.0;
     dc_portatime.amplitude(fMidiNoteNorm);                //

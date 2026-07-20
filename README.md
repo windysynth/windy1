@@ -2,25 +2,81 @@
 Windy1 is a teensy 4.1 based MIDI host synthesizer designed to work with usb class complaint Wind controllers (e.g., EWI5000, EWIUSB,NuEVI, NuRAD, WARBL2, etc.)
 The patches are editable with the Vyzex EWI4000S editor software or internally through the UI.
 
+## Credits
+This original project is [windysynth/windy1](https://github.com/windysynth/windy1).
+
 ## Building the Windy1
-Windy1 is easiest to build using the Arduino IDE. You will also need to download and install Teensyduino to build for and upload to the Teensy.
+This repo is configured to build with PlatformIO.
 
-### libraries
-You must replace the audio folder...
-C:\Users\<user_name>\AppData\Local\Arduino15\packages\teensy\hardware\avr\0.60.1\libraries\Audio
-...with my forked version of this library (or just replace the files that are different with mine).
-Currently, you want the "puleswidth_offset" branch here:  https://github.com/windysynth/Audio/tree/pulsewidth_offset
+### cloning and dependencies
+Required library variants are included as Git submodules under `3rdparty/`:
 
-Also, use my forked version of hexefx_audiolib_F32, here...
-https://github.com/windysynth/hexefx_audiolib_F32
-clone the "ws_mods" branch to your libraries directory.
-I have my "Preferenences>Sketchbook location" here...
-c:\work\repositories
-So my libraries are here...
-C:\work\repositories\libraries
+- `3rdparty/Audio` (Audio fork, pulsewidth_offset branch behavior)
+- `3rdparty/hexefx_audiolib_F32` (ws_mods behavior)
+- `3rdparty/OpenAudio_ArduinoLibrary` (windy1-platformio branch)
+
+To clone the repo with all required submodules:
+
+```bash
+git clone --recurse-submodules https://github.com/ivaylomil/windy1.git
+```
+
+If you already cloned without submodules, initialize them with:
+
+```bash
+git submodule update --init --recursive
+```
+
+PlatformIO is configured to use these copies via `lib_extra_dirs`.
+
+Build command:
+
+```bash
+pio run
+```
+
+Default build environment:
+
+- `windy1_teensy41` : I2S DAC output-only build (`ENABLE_LINE_IN=0`)
+
+Line-in enabled build environment:
+
+- `windy1_teensy41_linein` : I2S DAC + optional I2S ADC line-in build (`ENABLE_LINE_IN=1`)
+
+Examples:
+
+```bash
+pio run -e windy1_teensy41
+pio run -e windy1_teensy41_linein
+```
+
+Upload command:
+
+```bash
+pio run -t upload
+```
+
+### optional line-in feature switch
+Line-in is optional in both hardware and software.
+
+The repo already provides two PlatformIO environments instead of requiring manual flag edits:
+
+- `windy1_teensy41` : output-only build (no ADC line-in hardware required)
+- `windy1_teensy41_linein` : line-in enabled build (I2S ADC hardware required, e.g. PCM1808)
 
 ### hardware
-I've created my own teensy 4.1 based board, but it mimics the 4.1 + audio shield.
-The power supply section is a bit different, so I added pwrDownSense() (pin 25) to shut down the sgtl5000 chip before the power is removed fromt the audio circuits to minimize a loud pop as it is turned off. 
+Current baseline hardware is:
 
-The Delay effect requires that the extra serial RAM chip is installed on the back of the teensy 4.1, which is why PSRAM_INSTALLED is defined
+- Teensy 4.1
+- I2S DAC for output (PCM5102, UDA1334A, or compatible standard I2S DAC)
+- PSRAM chip on Teensy 4.1 (required for current delay settings)
+- microSD card for patch/FX files
+- OLED and encoders for local UI
+
+Optional line-in hardware:
+
+- I2S ADC (for example PCM1808), enabled only when `ENABLE_LINE_IN=1`
+
+Current firmware no longer depends on SGTL5000 runtime support.
+
+For full wiring and bring-up details, see `docs/WINDY1_HARDWARE_BUILD_GUIDE.md`.

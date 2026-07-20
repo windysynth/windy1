@@ -269,11 +269,18 @@ MenuItem patchCommonMenuItems[]{
 };
 MenuItem systemMenuItems[]{
     makeActionItem("Back", goUpOne),
+#if ENABLE_LINE_IN
     makeValueItem("Aux In:", auxInAdjustFun, &mix_linein, 0, 100, 1, nprnToDisplay03d),
+#endif
     makeValueItem("Octave:", octaveAdjustFun, &Octave, 62, 66, 1, nprnToDisplay03dm),
     makeValueItem("Semi:", semiAdjustFun, &Transpose, 52, 76, 1, nprnToDisplay03dm),
     makeValueItem("Cents:", centsAdjustFun, &FineTuneCents, 14, 114, 1, nprnToDisplay03dm),
     makeValueItem("BreathCC:", breathccAdjustFun, &breath_cc, 1, 11, 1, nprnToDisplay03d),
+    makeValueItem("LegatoA:", legatoAssistAdjustFun, &legato_assist_mode, 0, 1, 1, nprnToDisplayLegatoAssist),
+    makeValueItem("LegHold:", legatoHoldMsAdjustFun, &legato_assist_hold_ms, 0, 255, 1, nprnToDisplayLegatoHoldMs),
+    makeValueItem("BreathTh:", legatoBreathThAdjustFun, &legato_assist_breath_th, 0, 127, 1, nprnToDisplayLegatoBreathTh),
+    makeValueItem("LegPol:", legatoReleasePolicyAdjustFun, &legato_release_policy, 0, 2, 1, nprnToDisplayLegatoReleasePolicy),
+    makeValueItem("VelMode:", velModeAdjustFun, &note_vel_mode, 0, 2, 1, nprnToDisplayVelMode),
 };
 MenuItem calibrationMenuItems[]{
     makeActionItem("Back", goUpOne),

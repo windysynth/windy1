@@ -14,6 +14,7 @@
 
 #include "MenuSystem.h"
 #include <Audio.h>
+#include "globals.h"
 
 // forward declarations for actions
 void updateUI();
@@ -23,7 +24,7 @@ void swapPatchWithDestination();
 void saveGlobalFxSD_wrap();
 void namingFinished(const char *s);
 void namingAborted();
-void genSplashScreen();
+void genSplashScreen(bool bitmap_flag);
 void UITimeout(void);
 void resetUITimeout(void);
 void sgtl_power_down();
@@ -32,7 +33,7 @@ void pinMode_INPUT_PULLUP_100K(uint8_t pin);
 void pinMode_INPUT_PULLUP_47K(uint8_t pin);
 void drawStrNl(int x, int y, const char *str);
 void changeFilterMode(void);
-void processMIDI(bool midi_from_host_flag);
+void processMIDI(MIDItype midi_port_type);
 void noteOffFun(void);
 
 // Audio System externs

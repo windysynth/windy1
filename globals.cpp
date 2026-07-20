@@ -120,6 +120,21 @@ float Octavef = 0.0;
 uint8_t breath_cc = 2;      // can be 1, 2, 7 or 11 for cc01, cc02, etc. (default cc02)
 uint8_t breath_cc_last = 2; // can be 1, 2, 7 or 11 for cc01, cc02, etc. (default cc02)
 int eeprom_breath_cc = 2;
+uint8_t note_vel_mode = 0;  // 0=Legacy 1=BrOnly 2=Hybrid (default 0)
+int eeprom_note_vel_mode = 0;
+uint8_t legato_assist_mode = 0;
+int eeprom_legato_assist_mode = 0;
+uint8_t legato_assist_hold_ms = 40;
+int eeprom_legato_assist_hold_ms = 40;
+uint8_t legato_assist_breath_th = 10;
+int eeprom_legato_assist_breath_th = 10;
+uint8_t legato_release_policy = 0;
+int eeprom_legato_release_policy = 0;
+float legato_breath_th_engage = 0.0f;
+float legato_breath_th_release = 0.0f;
+bool deferred_noteoff_pending = false;
+uint8_t deferred_noteoff_note = 0;
+uint32_t deferred_noteoff_started_ms = 0;
 
 int eeprom_NNBModCal = 87;
 int eeprom_ampClipHighIdx = 64+5;

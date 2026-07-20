@@ -7,6 +7,29 @@
 #include <SD.h>
 #include "patches.h"
 
+#ifndef ENABLE_LINE_IN
+#define ENABLE_LINE_IN 0
+#endif
+
+#ifdef DEBUG_USB_SERIAL
+  #define Serial8 Serial
+#endif
+
+#ifdef DEBUG_MIDI_INPUT
+  #ifndef MIDI_DEBUG_LEVEL
+    #define MIDI_DEBUG_LEVEL 1
+  #endif
+  #ifndef MIDI_DEBUG_RATE_MS
+    #define MIDI_DEBUG_RATE_MS 1000
+  #endif
+  #ifndef MIDI_DEBUG_WARN_RATE_MS
+    #define MIDI_DEBUG_WARN_RATE_MS 1000
+  #endif
+  #ifndef MIDI_DEBUG_PORT_MASK
+    #define MIDI_DEBUG_PORT_MASK 0x07
+  #endif
+#endif
+
 // globals for midi
 #define CC_MODULATION_WHEEL 1
 #define CC_BREATH 2
@@ -134,7 +157,26 @@ extern float Octavef;
 extern uint8_t breath_cc;      // can be 1 to 11 (except 06) for cc01, cc02, etc. (default cc02)
 extern uint8_t breath_cc_last; // can be 1 to 11 (except 06) for cc01, cc02, etc. (default cc02)
 extern int eeprom_breath_cc;
+extern uint8_t note_vel_mode;  // 0=Legacy 1=BrOnly 2=Hybrid
+extern int eeprom_note_vel_mode;
+extern uint8_t legato_assist_mode;
+extern int eeprom_legato_assist_mode;
+extern uint8_t legato_assist_hold_ms;
+extern int eeprom_legato_assist_hold_ms;
+extern uint8_t legato_assist_breath_th;
+extern int eeprom_legato_assist_breath_th;
+extern uint8_t legato_release_policy;
+extern int eeprom_legato_release_policy;
+extern float legato_breath_th_engage;
+extern float legato_breath_th_release;
+extern bool deferred_noteoff_pending;
+extern uint8_t deferred_noteoff_note;
+extern uint32_t deferred_noteoff_started_ms;
 extern std::vector<int32_t> breath_cc_choices[];
+
+void updateLegatoThresholdCache();
+void clearDeferredLegatoNote();
+void evaluateDeferredLegatoRelease();
 
 extern int eeprom_NNBModCal;
 extern int eeprom_ampClipHighIdx;

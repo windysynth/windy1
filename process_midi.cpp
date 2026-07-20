@@ -61,6 +61,15 @@ void processNrpnMessage()
    default:
       break;
    }
+
+#ifdef DEBUG_MIDI_INPUT
+   snprintf(str_buf1, 64, "[MIDI NRPN] M:%u L:%u D:%u",
+            (unsigned int)usbMidiNrpnMsbOld,
+            (unsigned int)usbMidiNrpnLsbOld,
+            (unsigned int)usbMidiNrpnData);
+   Serial8.println(str_buf1);
+#endif
+
    patchToSynthVariables();
 }
 
