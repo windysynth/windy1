@@ -40,6 +40,7 @@ Windy1 is built around a Teensy 4.1 with PCM5102 I2S DAC output as the baseline,
 The firmware supports any standard I2S DAC (no codec control required). Two proven alternatives:
 
 **PCM5102 (Recommended Baseline)**
+
 - Widely available, low cost
 - I2S input, stereo analog outputs
 - 3.3V–5V operation
@@ -54,6 +55,7 @@ The firmware supports any standard I2S DAC (no codec control required). Two prov
 - MCLK is not used by the current Windy1 baseline with PCM5102 modules
 
 **UDA1334A (Drop-in Replacement)**
+
 - Texas Instruments stereo I2S DAC
 - Pin-compatible I2S interface with PCM5102
 - 2.7V–3.6V operation (verify datasheet for your module variant)
@@ -122,6 +124,27 @@ Pin 25 is no longer used for SGTL5000-style power-down handling.
   - Teensy GND -> ADC GND
   - Teensy 3.3V or module-appropriate supply -> ADC power
 - The optional ADC shares BCLK and LRCK with the DAC and adds only the ADC data line on pin 8
+
+#### PCM1808 Line-In Wiring
+
+For a PCM1808 breakout used as the optional ADC input path:
+
+- PCM1808 OUT -> Teensy pin 8
+- PCM1808 BCK -> Teensy pin 21
+- PCM1808 LRC -> Teensy pin 20
+- PCM1808 SCK -> Teensy pin 23 (required on modules that need master clock)
+- PCM1808 GND -> Teensy GND
+- PCM1808 LIN/RIN -> analog input source L/R
+
+Recommended mode straps on PCM1808 breakout boards:
+
+- `MD1 = LOW`
+- `MD0 = LOW`  (slave mode)
+- `FMY = LOW`  (I2S format)
+
+Notes:
+
+- Follow your module power requirements; many PCM1808 boards need both 5V analog and 3.3V digital domains (some breakouts regulate this internally).
 
 ### Display
 
@@ -326,11 +349,13 @@ Recommended starting points:
 
 1. Keep `LegatoA=Off` for controllers that already provide smooth legato transitions.
 2. For controllers with audible retrigger between slurred notes, start with:
-  - `LegatoA=On`
-  - `LegPol=BreathOnl`
-  - `BreathTh=10`
-  - `LegHold=40`
-3. If notes hang too long, try `LegPol=BrOrTime` and reduce `LegHold`.
+
+- `LegatoA=On`
+- `LegPol=BreathOnl`
+- `BreathTh=10`
+- `LegHold=40`
+
+1. If notes hang too long, try `LegPol=BrOrTime` and reduce `LegHold`.
 
 Debug validation tip:
 

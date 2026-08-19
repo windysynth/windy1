@@ -242,10 +242,18 @@ AudioFilterStateVariable filterPreMixHPR; //xy=2281.5,1967.224775314331
 AudioFilterStateVariable filterPreMixHPL; //xy=2284.5,1831.224775314331
 AudioFilterStateVariable filter_osc1b;   //xy=2291.4999961853027,499.2247009277344
 AudioInputI2S            i2s2;           //xy=2287.5,1895.224775314331
+#ifdef DEBUG_PCM1808_AUDIO_IN
+AudioAnalyzeRMS          rms_pcm1808L;   // debug raw PCM1808 left level
+AudioAnalyzeRMS          rms_pcm1808R;   // debug raw PCM1808 right level
+#endif
 AudioMixer4              mix_chorus_dryL; //xy=2369.5001220703125,1626.2245922088623
 AudioMixer4              mix_chorus_dryR; //xy=2370.5001220703125,1716.2245922088623
 AudioMixer4              mix_lineInL;    //xy=2485.49991607666,1872.2248802185059
 AudioMixer4              mix_lineInR;    //xy=2501.49991607666,1959.2248840332031
+#ifdef DEBUG_PCM1808_AUDIO_IN
+AudioAnalyzeRMS          rms_pcm1808MixL; // debug post-mix left level
+AudioAnalyzeRMS          rms_pcm1808MixR; // debug post-mix right level
+#endif
 AudioOutputI2S           i2s1;           //xy=2646.5,1913.224775314331
 
 AudioConnection          patchCord1(dc_sweepDepthFilter3, 0, sq_swpflt3, 0);
@@ -426,10 +434,18 @@ AudioConnection          patchCord175(i2s2, 0, mix_lineInL, 1);
 AudioConnection          patchCord176(i2s2, 0, mix_lineInR, 2);
 AudioConnection          patchCord177(i2s2, 1, mix_lineInR, 1);
 AudioConnection          patchCord178(i2s2, 1, mix_lineInL, 2);
+#ifdef DEBUG_PCM1808_AUDIO_IN
+AudioConnection          patchCord183(i2s2, 0, rms_pcm1808L, 0);
+AudioConnection          patchCord184(i2s2, 1, rms_pcm1808R, 0);
+#endif
 AudioConnection          patchCord179(mix_chorus_dryL, Int2FloatL);
 AudioConnection          patchCord180(mix_chorus_dryR, Int2FloatR);
 AudioConnection          patchCord181(mix_lineInL, 0, i2s1, 0);
 AudioConnection          patchCord182(mix_lineInR, 0, i2s1, 1);
+#ifdef DEBUG_PCM1808_AUDIO_IN
+AudioConnection          patchCord185(mix_lineInL, 0, rms_pcm1808MixL, 0);
+AudioConnection          patchCord186(mix_lineInR, 0, rms_pcm1808MixR, 0);
+#endif
 // GUItool: end automatically generated code
 
 //-------- paste above the Auto generated code from Audio System Design Tool  --------
@@ -689,6 +705,11 @@ void setup()
   AudioMemory(100); // TODO: how much AudioMemory do I need? (delay 2.9ms per block for 1270/2.9 = 438
   //------------ configure AudioMemory_F32 (for 32 bit float) ----------------1
   AudioMemory_F32(200);
+
+#ifdef DEBUG_PCM1808_AUDIO_IN
+  snprintf(str_buf1, 64, "PCM1808 debug enabled, Aux In=%u", (unsigned int)mix_linein);
+  Serial8.println(str_buf1);
+#endif
 
   //-------------- confiugre starting synth params ---------------
   AudioNoInterrupts();
@@ -1718,6 +1739,28 @@ void loop()
     }
     previousDebugPrintTime = millis();
   }
+
+#ifdef DEBUG_PCM1808_AUDIO_IN
+  static uint32_t previousPCM1808DebugTime = 0;
+  if (millis() - previousPCM1808DebugTime >= readRMSInterval)
+  {
+    previousPCM1808DebugTime = millis();
+    if (rms_pcm1808L.available() && rms_pcm1808R.available()
+        && rms_pcm1808MixL.available() && rms_pcm1808MixR.available())
+    {
+      snprintf(str_buf1, 64, "Aux=%03u rawL=%1.4f rawR=%1.4f",
+               (unsigned int)mix_linein, rms_pcm1808L.read(), rms_pcm1808R.read());
+      Serial8.println(str_buf1);
+      snprintf(str_buf1, 64, "mixL=%1.4f mixR=%1.4f",
+               rms_pcm1808MixL.read(), rms_pcm1808MixR.read());
+      Serial8.println(str_buf1);
+    }
+    else
+    {
+      Serial8.println("PCM1808 debug waiting for RMS samples");
+    }
+  }
+#endif
 
   //-------------------------------------------------------
   //  Read and process incomming Midi
